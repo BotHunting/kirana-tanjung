@@ -4,30 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV. KIRANA TANJUNG PELAKAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            width: 100%;
-            overflow: hidden; 
-            background-color: #f8fafc;
-        }
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none;
-            display: block;
-        }
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+      body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+      .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900">
 
-    <iframe 
-        src="https://script.google.com/macros/s/AKfycbxtPt0NEoAEMNqGY5kl5YOUuxpIiPKQiYQBPi9_XePnPBnSTvDTSM7qrJ6RDnTPhq0-/exec"
-        allow="geolocation; microphone; camera; midi; encrypted-media;">
-        Memuat Layanan....
-    </iframe>
+    <nav class="fixed w-full z-50 glass">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="text-xl font-bold text-blue-700">KIRANA TANJUNG</div>
+        <div class="hidden md:flex space-x-6 text-sm font-bold uppercase">
+          <a href="#web" class="hover:text-blue-600">Web Design</a>
+          <a href="#print" class="hover:text-blue-600">Percetakan</a>
+          <a href="#jasa" class="hover:text-blue-600">Biro Jasa</a>
+        </div>
+      </div>
+    </nav>
 
+    <section class="pt-32 pb-16 px-6 text-center">
+      <h1 class="text-4xl md:text-6xl font-extrabold mb-4">CV. <span class="text-blue-600">KIRANA TANJUNG PELAKAR</span></h1>
+      <p class="text-gray-500">Layanan profesional berbasis data untuk solusi bisnis Anda.</p>
+    </section>
+
+    <!-- Kontainer Utama -->
+    <div class="max-w-6xl mx-auto px-6 space-y-24 pb-20" id="main-content">
+      <div id="loading" class="text-center py-10 text-gray-500">
+          <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-2"></i>
+          <p>Memuat data layanan terbaru...</p>
+      </div>
+    </div>
+
+    <footer class="py-12 border-t text-center text-gray-400 text-xs">
+      <p>&copy; 2026 CV. KIRANA TANJUNG PELAKAR.</p>
+    </footer>
+
+    <script>
+      // Ganti URL di bawah ini dengan URL Web App Google Apps Script kamu yang terbaru
+      const apiUrl = "https://script.google.com/macros/s/AKfycbxtPt0NEoAEMNqGY5kl5YOUuxpIiPKQiYQBPi9_XePnPBnSTvDTSM7qrJ6RDnTPhq0-/exec";
+
+      async function loadData() {
+        try {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          
+          let htmlContent = '';
+
+          // 1. Render Section Desain
+          htmlContent += `
+          <section id="web">
+            <h2 class="text-3xl font-bold mb-8 flex items-center"><i class="fas fa-code mr-3 text-blue-600"></i> Portofolio Desain Web</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+          `;
+          data.publicDesain.forEach(item => {
+            htmlContent += `
+              <div class="bg-white p-4 rounded-3xl shadow-sm border hover:shadow-md transition">
+                <img src="${item.linkgambar || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800'}" class="w-full h-48 object-cover rounded-2xl mb-4 bg-gray-100">
+                <span class="text-xs font-bold text-blue-600 uppercase">${item.tag || 'WEB'}</span>
+                <h3 class="text-xl font-bold mt-1">${item.nama || ''}</h3>
+                <p class="text-gray-500 text-sm mt-2">${item.deskripsi || ''}</p>
+                <a href="https://wa.me/${item.whatsapp}" class="inline-block mt-4 text-sm font-bold text-blue-700 hover:underline">Tanya Detail →</a>
+              </div>
+            `;
+          });
+          htmlContent += `</div></section>`;
+
+          // 2. Render Section Percetakan
+          htmlContent += `
+          <section id="print">
+            <h2 class="text-3xl font-bold mb-8 flex items-center"><i class="fas fa-print mr-3 text-indigo-600"></i> Layanan Percetakan</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          `;
+          data.publicPercetakan.forEach(item => {
+            htmlContent += `
+              <div class="bg-white p-6 rounded-3xl border-t-4 border-indigo-500 shadow-sm">
+                <i class="fas ${item.ikon || 'fa-file-alt'} text-3xl text-indigo-500 mb-4"></i>
+                <h3 class="font-bold text-lg">${item.deskripsi || ''}</h3>
+                <div class="text-indigo-600 font-bold mt-2">Mulai ${item.harga || ''}</div>
+                <a href="https://wa.me/${item.whatsapp}" class="block mt-4 text-center bg-indigo-50 py-2 rounded-xl text-xs font-bold text-indigo-700">Pesan Sekarang</a>
+              </div>
+            `;
+          });
+          htmlContent += `</div></section>`;
+
+          // 3. Render Section Biro Jasa
+          htmlContent += `
+          <section id="jasa" class="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white">
+            <h2 class="text-3xl font-bold mb-8 text-center">Status Layanan Biro Jasa</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="border-b border-slate-700">
+                    <th class="pb-4 font-bold text-blue-400">Layanan</th>
+                    <th class="pb-4 font-bold text-blue-400">Nama/Unit</th>
+                    <th class="pb-4 font-bold text-blue-400">Status/Durasi</th>
+                    <th class="pb-4 font-bold"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+          `;
+          data.publicBiroJasa.forEach(item => {
+            htmlContent += `
+                  <tr>
+                    <td class="py-4">
+                      <div class="font-bold">${item.layanan || ''}</div>
+                      <div class="text-xs text-slate-500">${item.nomor_kendaraan || ''} ${item.merek || ''} ${item.type || ''}</div>
+                    </td>
+                    <td class="py-4">${item.nama || ''}</td>
+                    <td class="py-4">
+                      <span class="bg-slate-800 px-3 py-1 rounded-full text-xs">${item.durasi || ''}</span>
+                    </td>
+                    <td class="py-4 text-right">
+                      <a href="https://wa.me/${item.whatsapp}" class="text-blue-400 hover:text-white"><i class="fab fa-whatsapp"></i></a>
+                    </td>
+                  </tr>
+            `;
+          });
+          htmlContent += `</tbody></table></div></section>`;
+
+          // Masukkan kode ke container utama
+          document.getElementById('main-content').innerHTML = htmlContent;
+
+        } catch (error) {
+          console.error("Gagal memuat API:", error);
+          document.getElementById('main-content').innerHTML = '<p class="text-center text-red-500 font-bold py-10">Gagal memuat data dari database. Silakan coba beberapa saat lagi.</p>';
+        }
+      }
+
+      window.onload = loadData;
+    </script>
 </body>
 </html>
