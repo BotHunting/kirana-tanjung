@@ -1,6 +1,40 @@
 # CV. KIRANA TANJUNG PELAKAR - Product Requirement Document (PRD)
 
-**Versi Final v14.0**
+<p align="center">
+  <strong>Versi Final v14.0</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel" alt="Vercel">
+  <img src="https://img.shields.io/badge/Backend-Google%20Apps%20Script-blue?style=for-the-badge&logo=google-apps-script" alt="Google Apps Script">
+  <img src="https://img.shields.io/badge/Database-Google%20Sheets-green?style=for-the-badge&logo=google-sheets" alt="Google Sheets">
+  <img src="https://img.shields.io/badge/Tech-HTML5-orange?style=for-the-badge&logo=html5" alt="HTML5">
+  <img src="https://img.shields.io/badge/Tech-Tailwind%20CSS-blueviolet?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Tech-Font%20Awesome-blue?style=for-the-badge&logo=fontawesome" alt="Font Awesome">
+</p>
+
+---
+
+## 📜 Daftar Isi
+
+- [1. Pendahuluan & Latar Belakang Operasional](#-1-pendahuluan--latar-belakang-operasional)
+  - [1.1. Masalah dan Kebutuhan Bisnis](#11-masalah-dan-kebutuhan-bisnis)
+  - [1.2. Tujuan Sistem](#12-tujuan-sistem)
+- [2. Arsitektur Sistem & Skenario Decoupling](#-2-arsitektur-sistem--skenario-decoupling)
+- [3. Spesifikasi Kebutuhan Fungsional](#-3-spesifikasi-kebutuhan-fungsional)
+  - [3.1. Portal Publik (Client-Side Rendering)](#31-portal-publik-client-side-rendering)
+  - [3.2. Modul Pengelola Internal (Backend Engine & Operations)](#32-modul-pengelola-internal-backend-engine--operations)
+- [4. Kamus Data Sistem (Database Schema v14.0)](#-4-kamus-data-sistem-database-schema-v140)
+  - [4.1. Tabel: Desain](#41-tabel-desain)
+  - [4.2. Tabel: Percetakan](#42-tabel-percetakan)
+  - [4.3. Tabel: Biro Jasa](#43-tabel-biro-jasa)
+  - [4.4. Tabel: Users (Tabel Pengaman)](#44-tabel-users-tabel-pengaman)
+- [5. Mitigasi Batasan Sistem & Kebijakan Privasi](#-5-mitigasi-batasan-sistem--kebijakan-privasi)
+  - [5.1. Manajemen Batasan Kuota Google Sheets & GAS](#51-manajemen-batasan-kuota-google-sheets--gas)
+  - [5.2. Perlindungan Privasi Data Pelanggan](#52-perlindungan-privasi-data-pelanggan)
+- [6. Kebutuhan Non-Fungsional (Quality Attributes)](#-6-kebutuhan-non-fungsional-quality-attributes)
+  - [6.1. Aspek Keamanan Informasi (Security NFR)](#61-aspek-keamanan-informasi-security-nfr)
+  - [6.2. Aspek Performa Website (Performance NFR)](#62-aspek-performa-website-performance-nfr)
 
 ---
 
@@ -16,7 +50,7 @@
 
 ---
 
-## 1. Pendahuluan & Latar Belakang Operasional
+## 🎯 1. Pendahuluan & Latar Belakang Operasional
 
 ### 1.1. Masalah dan Kebutuhan Bisnis
 Sebagai perusahaan yang bergerak di bidang multi-layanan (Desain Web, Percetakan, dan Biro Jasa Administrasi Kendaraan), CV. KIRANA TANJUNG PELAKAR membutuhkan efisiensi pencatatan data yang terpusat. Sistem terdahulu yang mengandalkan tautan *Web App* bawaan Google Apps Script yang panjang memicu kendala transparansi di mata konsumen dan kerentanan keamanan akses multi-login pada peramban klien.
@@ -26,14 +60,14 @@ Sebagai perusahaan yang bergerak di bidang multi-layanan (Desain Web, Percetakan
 - **Otomatisasi Customer Service:** Memotong rantai birokrasi tanya-jawab status berkas dengan mengintegrasikan sistem pelacakan langsung ke API WhatsApp.
 - **Infrastruktur Bebas Biaya Berkelanjutan:** Memanfaatkan ekosistem *serverless API* gratis namun berkinerja tinggi untuk operasional skala UMKM.
 
-## 2. Arsitektur Sistem & Skenario Decoupling
+## 🏗️ 2. Arsitektur Sistem & Skenario Decoupling
 Sistem ini dibangun dengan arsitektur *Decoupled Jamstack* untuk menghindari batasan *Same-Origin Policy* (SOP) dan kegagalan kompilasi Just-In-Time (JIT) pada V8 Engine Google Chrome modern.
 1.  **Database Layer:** Google Sheets (Sebagai DBMS berbasis kolom terpusat).
 2.  **Backend / API Layer:** Google Apps Script (GAS) dengan fungsi penanganan data melalui mekanisme `doGet(e)` untuk operasi *Read* dan `doPost(e)` untuk operasi *Write* berbasis REST API murni untuk menyuplai berkas teks berformat JSON.
 3.  **Frontend Layer:** Aplikasi web responsif berbasis HTML5, utilitas CSS Tailwind CSS, dan pustaka ikon terintegrasi FontAwesome.
 4.  **Deployment & Hosting:** Diterbitkan secara optimal melalui platform cloud **Vercel** guna menjamin reliabilitas pemuatan halaman.
 
-## 3. Spesifikasi Kebutuhan Fungsional
+## 📋 3. Spesifikasi Kebutuhan Fungsional
 
 ### 3.1. Portal Publik (Client-Side Rendering)
 - **FR-PUB-001 (Sticky Global Navigation):** Komponen menu atas wajib mengunci posisi koordinat Y=0 (*fixed top*) menggunakan efek *backdrop blur* transparansi tinggi (`backdrop-filter: blur(12px)`). Menu wajib memetakan jangkar *scroll* halus ke tiga jangkar identitas: `#web`, `#print`, dan `#jasa`.
@@ -58,7 +92,7 @@ Sistem ini dibangun dengan arsitektur *Decoupled Jamstack* untuk menghindari bat
 - **FR-ADM-003 (Pencatatan Entri Baru `addDataToSheet`):** Logika penulisan data wajib menangkap objek waktu lokal server secara presisi untuk kolom *Timestamp*. Ditambahkan validasi pencegahan duplikasi data: sistem wajib mengecek apakah `nomor_kendaraan` yang diinput sudah ada pada antrean berkas aktif di sheet Biro Jasa untuk menghindari redundansi.
 - **FR-ADM-004 (Modifikasi Data Eksisting `updateDataInSheet`):** Logika wajib menerima parameter numerik indeks baris (`rowIndex`) dan menembak jangkauan koordinat cell menggunakan `.getRange()` untuk memperbarui nilai kolom tanpa menimpa data *Timestamp* awal.
 
-## 4. Kamus Data Sistem (Database Schema v14.0)
+## 🗃️ 4. Kamus Data Sistem (Database Schema v14.0)
 
 ### 4.1. Tabel: Desain
 | Nama Kolom | Tipe Data | Keterangan |
@@ -103,7 +137,7 @@ Sistem ini dibangun dengan arsitektur *Decoupled Jamstack* untuk menghindari bat
 | password | String | Kata sandi rahasia pengaman akses admin. |
 | nama | String | Nama lengkap identitas personel pengelola. |
 
-## 5. Mitigasi Batasan Sistem & Kebijakan Privasi
+## 🛡️ 5. Mitigasi Batasan Sistem & Kebijakan Privasi
 
 ### 5.1. Manajemen Batasan Kuota Google Sheets & GAS
 - **Limit Eksekusi API:** Karena Google menetapkan batas kuota harian untuk pembacaan dan penulisan API Apps Script, sistem pada Vercel dilarang melakukan pemanggilan *looping API* yang tidak perlu. Pemanggilan data bersifat tunggal saat memuat halaman pertama kali (*On-Load Fetching*).
@@ -112,7 +146,7 @@ Sistem ini dibangun dengan arsitektur *Decoupled Jamstack* untuk menghindari bat
 ### 5.2. Perlindungan Privasi Data Pelanggan
 Kolom `foto_stnk` menyimpan data kepemilikan unit yang bersifat sensitif. URL berkas digital wajib diunggah ke Google Drive korporat yang hak aksesnya dikunci khusus untuk admin penanggung jawab saja, dan struktur sub-folder penyimpanan disetel menggunakan opsi `noindex` untuk mencegah pemindaian aset gambar oleh robot perayap publik di internet.
 
-## 6. Kebutuhan Non-Fungsional (Quality Attributes)
+## ⚙️ 6. Kebutuhan Non-Fungsional (Quality Attributes)
 
 ### 6.1. Aspek Keamanan Informasi (Security NFR)
 - **Isolasi Token Proyek:** Berkas enkripsi lokal dari peranti *Command Line* Google Clasp (`.clasp.json`) wajib dimasukkan ke dalam aturan pemblokiran repositori berkas `.gitignore`.
@@ -123,4 +157,3 @@ Kolom `foto_stnk` menyimpan data kepemilikan unit yang bersifat sensitif. URL be
 
 ---
 *Dokumen Spesifikasi Kebutuhan Produk Resmi © 2026 CV. KIRANA TANJUNG PELAKAR. Seluruh hak cipta dilindungi undang-undang.*
-
