@@ -1,159 +1,167 @@
-# CV. KIRANA TANJUNG PELAKAR - Product Requirement Document (PRD)
+# Sistem Informasi CV. KIRANA TANJUNG PELAKAR
 
 <p align="center">
-  <strong>Versi Final v14.0</strong>
+  <strong>Sistem Informasi Manajemen Terpadu & Portal Publik untuk CV. Kirana Tanjung Pelakar.</strong>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel" alt="Vercel">
   <img src="https://img.shields.io/badge/Backend-Google%20Apps%20Script-blue?style=for-the-badge&logo=google-apps-script" alt="Google Apps Script">
   <img src="https://img.shields.io/badge/Database-Google%20Sheets-green?style=for-the-badge&logo=google-sheets" alt="Google Sheets">
-  <img src="https://img.shields.io/badge/Tech-HTML5-orange?style=for-the-badge&logo=html5" alt="HTML5">
-  <img src="https://img.shields.io/badge/Tech-Tailwind%20CSS-blueviolet?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/Tech-Font%20Awesome-blue?style=for-the-badge&logo=fontawesome" alt="Font Awesome">
+  <img src="https://img.shields.io/badge/UI-HTML5-orange?style=for-the-badge&logo=html5" alt="HTML5">
+  <img src="https://img.shields.io/badge/UI-Tailwind%20CSS-blueviolet?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/UI-Font%20Awesome-blue?style=for-the-badge&logo=fontawesome" alt="Font Awesome">
 </p>
 
 ---
 
 ## 📜 Daftar Isi
 
-- [1. Pendahuluan & Latar Belakang Operasional](#-1-pendahuluan--latar-belakang-operasional)
-  - [1.1. Masalah dan Kebutuhan Bisnis](#11-masalah-dan-kebutuhan-bisnis)
-  - [1.2. Tujuan Sistem](#12-tujuan-sistem)
-- [2. Arsitektur Sistem & Skenario Decoupling](#-2-arsitektur-sistem--skenario-decoupling)
-- [3. Spesifikasi Kebutuhan Fungsional](#-3-spesifikasi-kebutuhan-fungsional)
-  - [3.1. Portal Publik (Client-Side Rendering)](#31-portal-publik-client-side-rendering)
-  - [3.2. Modul Pengelola Internal (Backend Engine & Operations)](#32-modul-pengelola-internal-backend-engine--operations)
-- [4. Kamus Data Sistem (Database Schema v14.0)](#-4-kamus-data-sistem-database-schema-v140)
-  - [4.1. Tabel: Desain](#41-tabel-desain)
-  - [4.2. Tabel: Percetakan](#42-tabel-percetakan)
-  - [4.3. Tabel: Biro Jasa](#43-tabel-biro-jasa)
-  - [4.4. Tabel: Users (Tabel Pengaman)](#44-tabel-users-tabel-pengaman)
-- [5. Mitigasi Batasan Sistem & Kebijakan Privasi](#-5-mitigasi-batasan-sistem--kebijakan-privasi)
-  - [5.1. Manajemen Batasan Kuota Google Sheets & GAS](#51-manajemen-batasan-kuota-google-sheets--gas)
-  - [5.2. Perlindungan Privasi Data Pelanggan](#52-perlindungan-privasi-data-pelanggan)
-- [6. Kebutuhan Non-Fungsional (Quality Attributes)](#-6-kebutuhan-non-fungsional-quality-attributes)
-  - [6.1. Aspek Keamanan Informasi (Security NFR)](#61-aspek-keamanan-informasi-security-nfr)
-  - [6.2. Aspek Performa Website (Performance NFR)](#62-aspek-performa-website-performance-nfr)
+- [1. Latar Belakang](#-1-latar-belakang)
+- [2. Arsitektur Sistem](#-2-arsitektur-sistem)
+- [3. Fitur Utama](#-3-fitur-utama)
+- [4. Struktur Proyek & Keterangan File](#-4-struktur-proyek--keterangan-file)
+- [5. Skema Database (Google Sheets)](#-5-skema-database-google-sheets)
+- [6. Panduan Setup & Deployment](#-6-panduan-setup--deployment)
+- [7. Aspek Keamanan & Performa](#-7-aspek-keamanan--performa)
 
 ---
 
-## Metadata Dokumen
+## 🎯 1. Latar Belakang
 
-| Atribut               | Keterangan                                                              |
-| --------------------- | ----------------------------------------------------------------------- |
-| **Nama Produk:**      | Sistem Informasi Manajemen Terpadu & Portal Publik                      |
-| **Pemilik Dokumen:**  | Achmad Faris Zubaidi (Lead Developer & Systems Analyst)                   |
-| **Status Dokumen:**   | Production Ready / Approved                                             |
-| **Lingkungan Hosting:**| Vercel (Frontend Global) & Google Apps Script (Backend)                 |
-| **Versi Basis Data:** | v14.0 (Rinci: Sinkronisasi Endpoint Write-Operation & Keamanan)           |
+CV. KIRANA TANJUNG PELAKAR adalah perusahaan multi-layanan yang bergerak di bidang Desain, Percetakan, dan Biro Jasa Administrasi Kendaraan. Sistem ini dibangun untuk mengatasi beberapa tantangan:
 
----
+- **Sentralisasi Data:** Menggantikan pencatatan manual dengan database terpusat (Google Sheets) yang mudah dikelola.
+- **Profesionalisme & Keamanan:** Menyembunyikan URL teknis Google Apps Script di balik domain kustom yang di-hosting di Vercel, memberikan tampilan yang lebih profesional dan aman bagi pelanggan.
+- **Efisiensi Layanan:** Mengurangi interaksi manual dengan menyediakan portal publik di mana pelanggan dapat melacak status layanan (khususnya untuk biro jasa) secara mandiri.
+- **Biaya Rendah:** Memanfaatkan platform *serverless* gratis seperti Vercel, Google Apps Script, dan Google Sheets untuk menekan biaya operasional.
 
-## 🎯 1. Pendahuluan & Latar Belakang Operasional
+## 🏗️ 2. Arsitektur Sistem
 
-### 1.1. Masalah dan Kebutuhan Bisnis
-Sebagai perusahaan yang bergerak di bidang multi-layanan (Desain Web, Percetakan, dan Biro Jasa Administrasi Kendaraan), CV. KIRANA TANJUNG PELAKAR membutuhkan efisiensi pencatatan data yang terpusat. Sistem terdahulu yang mengandalkan tautan *Web App* bawaan Google Apps Script yang panjang memicu kendala transparansi di mata konsumen dan kerentanan keamanan akses multi-login pada peramban klien.
+Proyek ini menggunakan arsitektur **Decoupled (Jamstack)** untuk memisahkan antara tampilan (frontend) dan logika (backend).
 
-### 1.2. Tujuan Sistem
-- **Abstraksi & Masking URL:** Menyembunyikan tautan backend Google yang rumit di balik domain profesional Vercel secara permanen.
-- **Otomatisasi Customer Service:** Memotong rantai birokrasi tanya-jawab status berkas dengan mengintegrasikan sistem pelacakan langsung ke API WhatsApp.
-- **Infrastruktur Bebas Biaya Berkelanjutan:** Memanfaatkan ekosistem *serverless API* gratis namun berkinerja tinggi untuk operasional skala UMKM.
+1.  **Database Layer (Google Sheets):** Berfungsi sebagai database utama. Setiap layanan (Desain, Percetakan, Biro Jasa) memiliki *sheet*-nya sendiri untuk menyimpan data.
+2.  **Backend/API Layer (Google Apps Script):** Bertindak sebagai *serverless backend*. `Code.js` berisi semua logika untuk:
+    -   Menyajikan halaman HTML dinamis ke pengguna.
+    -   Menyediakan endpoint API untuk operasi `Create`, `Read`, `Update` (CRUD) data dari dan ke Google Sheets.
+    -   Menangani otentikasi admin.
+3.  **Frontend Layer (Vercel):** Sebuah file `index.html` statis yang di-hosting di Vercel. Tugas utamanya adalah menampilkan Google Apps Script Web App di dalam sebuah `<iframe>`. Teknik ini disebut *masking*, yang membuat aplikasi tampak berjalan di domain Vercel, bukan di domain `script.google.com`.
 
-## 🏗️ 2. Arsitektur Sistem & Skenario Decoupling
-Sistem ini dibangun dengan arsitektur *Decoupled Jamstack* untuk menghindari batasan *Same-Origin Policy* (SOP) dan kegagalan kompilasi Just-In-Time (JIT) pada V8 Engine Google Chrome modern.
-1.  **Database Layer:** Google Sheets (Sebagai DBMS berbasis kolom terpusat).
-2.  **Backend / API Layer:** Google Apps Script (GAS) dengan fungsi penanganan data melalui mekanisme `doGet(e)` untuk operasi *Read* dan `doPost(e)` untuk operasi *Write* berbasis REST API murni untuk menyuplai berkas teks berformat JSON.
-3.  **Frontend Layer:** Aplikasi web responsif berbasis HTML5, utilitas CSS Tailwind CSS, dan pustaka ikon terintegrasi FontAwesome.
-4.  **Deployment & Hosting:** Diterbitkan secara optimal melalui platform cloud **Vercel** guna menjamin reliabilitas pemuatan halaman.
+## ✨ 3. Fitur Utama
 
-## 📋 3. Spesifikasi Kebutuhan Fungsional
+### Portal Publik
+- **Navigasi Mudah:** Menu navigasi *sticky* yang memudahkan pengunjung untuk beralih antar-layanan.
+- **Portofolio Dinamis:** Menampilkan portofolio proyek desain yang datanya diambil langsung dari Google Sheets.
+- **Katalog Percetakan:** Grid responsif yang menampilkan daftar layanan percetakan beserta harganya.
+- **Pelacakan Status Biro Jasa:** Tabel yang menampilkan status pengerjaan berkas administrasi kendaraan secara *real-time*.
+- **Integrasi WhatsApp:** Tombol "Tanya Admin" yang secara otomatis membuat draf pesan WhatsApp berisi detail layanan yang ingin ditanyakan pelanggan.
 
-### 3.1. Portal Publik (Client-Side Rendering)
-- **FR-PUB-001 (Sticky Global Navigation):** Komponen menu atas wajib mengunci posisi koordinat Y=0 (*fixed top*) menggunakan efek *backdrop blur* transparansi tinggi (`backdrop-filter: blur(12px)`). Menu wajib memetakan jangkar *scroll* halus ke tiga jangkar identitas: `#web`, `#print`, dan `#jasa`.
-- **FR-PUB-002 (Portofolio Desain Web Dinamis):** Merender data objek dari array `publicDesain`. Jika properti berkas gambar kosong, sistem wajib menyediakan tautan gambar *fallback* otomatis dari repositori Unsplash gratis beresolusi minimal 800x480 piksel.
-- **FR-PUB-003 (Katalog Digital Percetakan):** Menyusun grid layout responsif (1 kolom pada perangkat seluler, 3 kolom pada layar desktop) untuk menampilkan informasi dari array `publicPercetakan`. Nilai harga wajib diformat secara elegan dengan imbuhan kata "Mulai".
-- **FR-PUB-004 (Tabel Manifest Status Pelacakan Biro Jasa):** Menampilkan matriks data berkas aktif. Kolom unit wajib menggabungkan string `merek` dan `type` secara presisi.
-- **FR-PUB-005 (Integrasi API WhatsApp Dinamis):** Tombol aksi WhatsApp pada modul Biro Jasa wajib menyusun draf pesan terenkripsi penuh menggunakan `encodeURIComponent()` dengan format berikut:
-  > *Halo admin CV. KIRANA TANJUNG, saya ingin menanyakan **Status Layanan Biro Jasa** berikut:*
-  >
-  > *Layanan: **[Nama Layanan]***
-  > *Atas Nama: **[Nama Konsumen]***
-  > *Kendaraan: **[Merek] [Type]***
-  > *Nomor Polisi: **[Nomor Kendaraan]***
-  > *Status Saat Ini: **[Durasi/Status]***
-  >
-  > *Mohon informasinya. Terima kasih!*
-- **FR-PUB-006 (Error Handling & Fallback UI):** Apabila pemanggilan data API Google Apps Script mengalami *timeout* atau gagal memuat data ke Vercel, halaman publik wajib menampilkan pesan eror *fallback* yang ramah berupa: `"Gagal memuat data dari database. Silakan coba lagi."` dan menyembunyikan elemen tabel yang kosong.
+### Dasbor Admin (Internal)
+- **Otentikasi Aman:** Halaman login untuk memastikan hanya admin yang dapat mengakses dasbor pengelolaan data.
+- **Manajemen Data (CRUD):** Admin dapat menambah, melihat, dan mengubah data untuk semua layanan langsung dari antarmuka web.
+- **Sinkronisasi Real-time:** Setiap perubahan yang dibuat di dasbor akan langsung tersimpan di Google Sheets.
 
-### 3.2. Modul Pengelola Internal (Backend Engine & Operations)
-- **FR-ADM-001 (Otentikasi API `checkLogin`):** Fungsi wajib memproses pencocokan linier string dari form Login Vercel menuju baris data pada sheet `Users` via instruksi `doPost`. Respon sukses wajib menyertakan enkripsi status sesi sementara pada *frontend client*.
-- **FR-ADM-002 (Sinkronisasi Endpoint Operasi Penulisan `doPost`):** Ekosistem API pada Apps Script wajib mengekspos rute parameter aksi (`action=insert` dan `action=update`) guna menerima payload JSON terstruktur dari Vercel, lalu meneruskannya secara aman ke fungsi internal `addDataToSheet` atau `updateDataInSheet`.
-- **FR-ADM-003 (Pencatatan Entri Baru `addDataToSheet`):** Logika penulisan data wajib menangkap objek waktu lokal server secara presisi untuk kolom *Timestamp*. Ditambahkan validasi pencegahan duplikasi data: sistem wajib mengecek apakah `nomor_kendaraan` yang diinput sudah ada pada antrean berkas aktif di sheet Biro Jasa untuk menghindari redundansi.
-- **FR-ADM-004 (Modifikasi Data Eksisting `updateDataInSheet`):** Logika wajib menerima parameter numerik indeks baris (`rowIndex`) dan menembak jangkauan koordinat cell menggunakan `.getRange()` untuk memperbarui nilai kolom tanpa menimpa data *Timestamp* awal.
+## 📂 4. Struktur Proyek & Keterangan File
 
-## 🗃️ 4. Kamus Data Sistem (Database Schema v14.0)
+```
+.
+├── script/
+│   └── Code.js         # Logika utama backend (Google Apps Script)
+├── .gitignore          # Mengabaikan file sensitif seperti .clasp.json
+├── appsscript.json     # Manifest untuk proyek Google Apps Script (jika menggunakan Clasp)
+├── index.html          # Halaman frontend utama yang di-hosting di Vercel
+└── README.md           # File ini
+```
 
-### 4.1. Tabel: Desain
-| Nama Kolom | Tipe Data | Keterangan |
-| :--- | :--- | :--- |
-| timestamp | Date / Time | Waktu input otomatis oleh sistem. |
-| nama | String | Nama identitas proyek pembuatan aplikasi/situs web. |
-| deskripsi | Text | Uraian lengkap mengenai cakupan teknologi proyek. |
-| linkgambar | String (URL) | Alamat berkas visualisasi proyek portofolio. |
-| tag | String | Kategori teknologi penanda (contoh: WEB, UI/UX). |
-| whatsapp | String (Numeric) | Nomor kontak admin pengurus pesanan desainer. |
-| status | String | Pengendali logika visibilitas data publik (Aktif/Arsip). |
+- **`index.html`**: Ini adalah "kulit" atau *wrapper* dari aplikasi. File ini di-deploy ke Vercel dan tugasnya hanya satu: memuat aplikasi Google Apps Script dalam sebuah `<iframe>` agar menutupi seluruh layar. Ini memberikan URL yang bersih dan profesional.
 
-### 4.2. Tabel: Percetakan
-| Nama Kolom | Tipe Data | Keterangan |
-| :--- | :--- | :--- |
-| timestamp | Date / Time | Waktu penambahan baris data. |
-| deskripsi | String | Nama komoditas produk cetak (contoh: Banner MMT). |
-| harga | String / Numeric | Batasan tarif minimal layanan cetak. |
-| ikon | String | Kelas penamaan ikon FontAwesome (contoh: `fa-print`). |
-| whatsapp | String (Numeric) | Nomor WhatsApp tujuan pemesanan cetak. |
-| status | String | Indikator ketersediaan operasional layanan. |
+- **`script/Code.js`**: "Otak" dari keseluruhan sistem. File ini berjalan di server Google.
+  - `doGet()`: Fungsi yang dipanggil saat Web App diakses. Fungsi ini mengambil data dari Google Sheets, memasukkannya ke dalam template HTML, dan menyajikannya sebagai halaman web.
+  - `checkLogin()`, `addDataToSheet()`, `updateDataInSheet()`, `getAllDataForDashboard()`: Fungsi-fungsi ini bertindak sebagai endpoint API. Mereka dipanggil dari sisi klien (JavaScript di dalam HTML) untuk melakukan otentikasi, menambah, dan memperbarui data.
 
-### 4.3. Tabel: Biro Jasa
-| Nama Kolom | Tipe Data | Keterangan |
-| :--- | :--- | :--- |
-| timestamp | Date / Time | Waktu transaksi pengerjaan berkas didaftarkan. |
-| layanan | String | Jenis pengurusan dokumen (contoh: Perpanjangan STNK). |
-| nama | String | Nama lengkap konsumen pemilik unit. |
-| merek | String | Merek pabrikan asal unit kendaraan bermotor. |
-| type | String | Tipe varian spesifik unit kendaraan bermotor. |
-| nomor_kendaraan | String | Nomor registrasi polisi (Nopol) kendaraan. |
-| deskripsi | Text | Catatan penjelas progres tambahan berkas. |
-| durasi | String | Status pelacakan posisi berkas saat ini secara real-time. |
-| whatsapp | String (Numeric) | Nomor kontak telepon pengurus/konsumen. |
-| aktif | String / Boolean | Penanda status keaktifan proses pengurusan berkas. |
-| foto_stnk | String (URL) | Tautan aset digital scan STNK. *Wajib diletakkan pada repositori terproteksi yang tidak diindeks publik oleh Google.* |
+- **File HTML di dalam Proyek Apps Script (Tidak terlihat di repo ini)**: Di dalam editor Google Apps Script, terdapat file-file HTML (misalnya `index.html`, `dashboard.html`, `styles.html`) yang digunakan oleh `Code.js` untuk membangun antarmuka pengguna.
+  - `include(filename)`: Fungsi di `Code.js` yang memungkinkan penyusunan file-file HTML ini menjadi satu halaman utuh, mirip seperti komponen.
 
-### 4.4. Tabel: Users (Tabel Pengaman)
-| Nama Kolom | Tipe Data | Keterangan |
-| :--- | :--- | :--- |
-| username | String | ID unik otentikasi masuk dasbor pengelola. |
-| password | String | Kata sandi rahasia pengaman akses admin. |
-| nama | String | Nama lengkap identitas personel pengelola. |
+- **`appsscript.json`**: File manifest yang berisi konfigurasi proyek Apps Script, seperti izin (scopes) yang diperlukan untuk mengakses Google Sheets. Biasanya dikelola oleh `clasp`.
 
-## 🛡️ 5. Mitigasi Batasan Sistem & Kebijakan Privasi
+## ️ 5. Skema Database (Google Sheets)
 
-### 5.1. Manajemen Batasan Kuota Google Sheets & GAS
-- **Limit Eksekusi API:** Karena Google menetapkan batas kuota harian untuk pembacaan dan penulisan API Apps Script, sistem pada Vercel dilarang melakukan pemanggilan *looping API* yang tidak perlu. Pemanggilan data bersifat tunggal saat memuat halaman pertama kali (*On-Load Fetching*).
-- **Rencana Pengarsipan Berkala:** Mengingat performa pembacaan baris Google Sheets melambat seiring bertambahnya volume data, baris transaksi Biro Jasa yang statusnya sudah dinyatakan selesai lebih dari 90 hari wajib dipindahkan ke berkas spreadsheet cadangan (*Cold Storage*) oleh admin secara berkala.
+Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sheet) yang digunakan.
 
-### 5.2. Perlindungan Privasi Data Pelanggan
-Kolom `foto_stnk` menyimpan data kepemilikan unit yang bersifat sensitif. URL berkas digital wajib diunggah ke Google Drive korporat yang hak aksesnya dikunci khusus untuk admin penanggung jawab saja, dan struktur sub-folder penyimpanan disetel menggunakan opsi `noindex` untuk mencegah pemindaian aset gambar oleh robot perayap publik di internet.
+### 5.1. Sheet: `Desain`
+| Nama Kolom | Keterangan |
+| :--- | :--- |
+| timestamp | Waktu input otomatis oleh sistem. |
+| nama | Nama proyek aplikasi/situs web. |
+| deskripsi | Uraian cakupan teknologi proyek. |
+| linkgambar | URL gambar portofolio. |
+| tag | Kategori teknologi (e.g., WEB, UI/UX). |
+| whatsapp | Nomor kontak admin. |
+| status | Visibilitas data (Aktif/Arsip). |
 
-## ⚙️ 6. Kebutuhan Non-Fungsional (Quality Attributes)
+### 5.2. Sheet: `Percetakan`
+| Nama Kolom | Keterangan |
+| :--- | :--- |
+| timestamp | Waktu penambahan data. |
+| deskripsi | Nama produk cetak (e.g., Banner MMT). |
+| harga | Tarif minimal layanan. |
+| ikon | Kelas ikon FontAwesome (e.g., `fa-print`). |
+| whatsapp | Nomor WhatsApp pemesanan. |
+| status | Ketersediaan layanan. |
 
-### 6.1. Aspek Keamanan Informasi (Security NFR)
-- **Isolasi Token Proyek:** Berkas enkripsi lokal dari peranti *Command Line* Google Clasp (`.clasp.json`) wajib dimasukkan ke dalam aturan pemblokiran repositori berkas `.gitignore`.
-- **Masking Transparansi Akun:** Sandi masuk pada `Sheet: Users` wajib disimpan dalam format aman atau teks tersembunyi, dan tidak boleh dimuat ke memori *local storage* browser klien setelah otentikasi berhasil ditutup.
+### 5.3. Sheet: `Biro Jasa`
+| Nama Kolom | Keterangan |
+| :--- | :--- |
+| timestamp | Waktu pendaftaran berkas. |
+| layanan | Jenis pengurusan (e.g., Perpanjangan STNK). |
+| nama | Nama lengkap konsumen. |
+| merek | Merek kendaraan. |
+| type | Tipe/varian kendaraan. |
+| nomor_kendaraan | Nomor polisi (Nopol) kendaraan. |
+| deskripsi | Catatan progres tambahan. |
+| durasi | Status pelacakan berkas saat ini. |
+| whatsapp | Nomor kontak pengurus/konsumen. |
+| aktif | Status keaktifan proses (Aktif/Selesai). |
+| foto_stnk | URL scan STNK (disimpan di Google Drive terproteksi). |
 
-### 6.2. Aspek Performa Website (Performance NFR)
-- **Kecepatan Pemuatan Halaman:** Seluruh pemanggilan fungsi HTTP REST API wajib dijalankan secara asinkron memanfaatkan konstruksi perintah `async/await`. Waktu render pertama ditargetkan ≤ 1.8 detik pada koneksi internet seluler standar 4G.
+### 5.4. Sheet: `Users`
+| Nama Kolom | Keterangan |
+| :--- | :--- |
+| username | ID untuk login ke dasbor admin. |
+| password | Kata sandi untuk login. |
+| nama | Nama lengkap personel admin. |
+
+## 🚀 6. Panduan Setup & Deployment
+
+1.  **Google Sheets:**
+    - Buat Google Sheet baru.
+    - Buat 4 sheet dengan nama: `Desain`, `Percetakan`, `Biro Jasa`, dan `Users`.
+    - Isi baris pertama (header) di setiap sheet sesuai dengan skema database di atas.
+
+2.  **Google Apps Script (GAS):**
+    - Buka Google Sheet Anda, lalu klik `Extensions > Apps Script`.
+    - Salin semua isi dari `script/Code.js` ke dalam file `Code.gs` di editor GAS.
+    - Buat file-file HTML yang diperlukan (misal: `index.html`, `dashboard.html`, dll.) di dalam editor GAS dan isi dengan kode frontend Anda.
+    - Klik `Deploy > New deployment`.
+    - Pilih tipe `Web app`.
+    - Pada bagian `Who has access`, pilih `Anyone`.
+    - Klik `Deploy`. Salin URL Web App yang diberikan.
+
+3.  **Vercel (Frontend):**
+    - Buka file `index.html` di repositori ini.
+    - Ganti URL `src` pada tag `<iframe>` dengan URL Web App yang Anda dapatkan dari langkah GAS.
+    - Deploy proyek ini ke Vercel. Anda bisa menghubungkan repositori GitHub Anda langsung ke Vercel untuk deployment otomatis.
+
+## 🛡️ 7. Aspek Keamanan & Performa
+
+- **Keamanan:**
+  - Akses ke dasbor admin dilindungi oleh sistem login yang memvalidasi ke sheet `Users`.
+  - Data sensitif seperti `foto_stnk` tidak diekspos secara publik. URL-nya harus mengarah ke file di Google Drive dengan akses terbatas.
+  - File konfigurasi `clasp` (`.clasp.json`) yang berisi token otorisasi harus selalu ada di `.gitignore` dan tidak boleh di-commit ke repositori.
+
+- **Performa:**
+  - Pemanggilan data dari frontend ke backend GAS dilakukan secara asinkron untuk tidak memblokir render halaman.
+  - Untuk menjaga performa Google Sheets, disarankan untuk mengarsipkan data lama (misalnya, transaksi biro jasa yang sudah selesai lebih dari 3 bulan) ke sheet atau file spreadsheet lain secara berkala.
 
 ---
 *Dokumen Spesifikasi Kebutuhan Produk Resmi © 2026 CV. KIRANA TANJUNG PELAKAR. Seluruh hak cipta dilindungi undang-undang.*
