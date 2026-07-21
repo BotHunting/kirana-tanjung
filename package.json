@@ -1,0 +1,28 @@
+{
+  "name": "kirana-tanjung",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">\r   <strong>Sistem Informasi Manajemen Terpadu & Portal Publik untuk CV. Kirana Tanjung Pelakar.</strong>\r </p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BotHunting/kirana-tanjung.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BotHunting/kirana-tanjung/issues"
+  },
+  "homepage": "https://github.com/BotHunting/kirana-tanjung#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/core": "^8.4.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.2"
+  }
+}
