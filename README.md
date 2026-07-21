@@ -63,28 +63,24 @@ Proyek ini menggunakan arsitektur **Decoupled (Jamstack)** untuk memisahkan anta
 
 ## 📂 4. Struktur Proyek & Keterangan File
 
-```
-.
-├── script/
-│   └── Code.js         # Logika utama backend (Google Apps Script)
-├── .gitignore          # Mengabaikan file sensitif seperti .clasp.json
-├── appsscript.json     # Manifest untuk proyek Google Apps Script (jika menggunakan Clasp)
-├── index.html          # Halaman frontend utama yang di-hosting di Vercel
-└── README.md           # File ini
-```
+Struktur repositori ini diatur sebagai berikut:
 
-- **`index.html`**: Ini adalah "kulit" atau *wrapper* dari aplikasi. File ini di-deploy ke Vercel dan tugasnya hanya satu: memuat aplikasi Google Apps Script dalam sebuah `<iframe>` agar menutupi seluruh layar. Ini memberikan URL yang bersih dan profesional.
+- **`/` (Root Direktori)**
+  - **`index.html`**: Halaman "kulit" yang di-deploy ke Vercel. Tugas utamanya adalah memuat aplikasi Google Apps Script dalam sebuah `<iframe>` untuk memberikan URL yang bersih dan profesional.
+  - **`README.md`**: File dokumentasi yang sedang Anda baca.
+  - **`.gitignore`**: (Direkomendasikan) File untuk menginstruksikan Git agar mengabaikan file sensitif, terutama `.clasp.json` yang berisi token otorisasi.
 
-- **`script/Code.js`**: "Otak" dari keseluruhan sistem. File ini berjalan di server Google.
-  - `doGet()`: Fungsi yang dipanggil saat Web App diakses. Fungsi ini mengambil data dari Google Sheets, memasukkannya ke dalam template HTML, dan menyajikannya sebagai halaman web.
-  - `checkLogin()`, `addDataToSheet()`, `updateDataInSheet()`, `getAllDataForDashboard()`: Fungsi-fungsi ini bertindak sebagai endpoint API. Mereka dipanggil dari sisi klien (JavaScript di dalam HTML) untuk melakukan otentikasi, menambah, dan memperbarui data.
+- **`/script/`**
+  - **`Code.js`**: "Otak" dari keseluruhan sistem yang berjalan di server Google. File ini berisi semua logika backend:
+    - `doGet()`: Menampilkan antarmuka web saat URL diakses.
+    - `checkLogin()`, `addDataToSheet()`, `updateDataInSheet()`, `getAllDataForDashboard()`: Fungsi-fungsi yang bertindak sebagai endpoint API untuk operasi CRUD dari frontend.
+    - `include()`: Fungsi utilitas untuk menggabungkan beberapa file HTML menjadi satu halaman.
 
-- **File HTML di dalam Proyek Apps Script (Tidak terlihat di repo ini)**: Di dalam editor Google Apps Script, terdapat file-file HTML (misalnya `index.html`, `dashboard.html`, `styles.html`) yang digunakan oleh `Code.js` untuk membangun antarmuka pengguna.
-  - `include(filename)`: Fungsi di `Code.js` yang memungkinkan penyusunan file-file HTML ini menjadi satu halaman utuh, mirip seperti komponen.
+- **File Internal Google Apps Script (Tidak ada di repositori ini)**
+  - Selain `Code.js`, proyek di dalam platform Google Apps Script juga berisi file-file HTML (misalnya `index.html`, `dashboard.html`, `styles.html`). File-file ini membangun antarmuka pengguna yang sebenarnya dan dipanggil oleh `Code.js` untuk ditampilkan kepada pengguna.
+  - **`appsscript.json`**: File manifest yang berisi konfigurasi proyek Apps Script (misalnya, izin API). File ini akan terlihat di repositori jika Anda menggunakan `clasp` untuk sinkronisasi.
 
-- **`appsscript.json`**: File manifest yang berisi konfigurasi proyek Apps Script, seperti izin (scopes) yang diperlukan untuk mengakses Google Sheets. Biasanya dikelola oleh `clasp`.
-
-## ️ 5. Skema Database (Google Sheets)
+## 🗃️ 5. Skema Database (Google Sheets)
 
 Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sheet) yang digunakan.
 
