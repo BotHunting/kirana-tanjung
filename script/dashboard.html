@@ -1,0 +1,227 @@
+<div class="max-w-4xl mx-auto space-y-10 pb-20">
+
+  <div class="flex p-1.5 bg-slate-100 rounded-2xl w-fit mx-auto mb-12 ring-1 ring-slate-200">
+    <button onclick="switchTab('formDesain', this)"
+      class="tab-btn active-tab-admin px-8 py-3 rounded-xl text-[10px] font-800 tracking-widest transition-all">DESAIN
+      WEB</button>
+    <button onclick="switchTab('formPrint', this)"
+      class="tab-btn px-8 py-3 rounded-xl text-[10px] font-800 tracking-widest transition-all">PERCETAKAN</button>
+    <button onclick="switchTab('formJasa', this)"
+      class="tab-btn px-8 py-3 rounded-xl text-[10px] font-800 tracking-widest transition-all">BIRO JASA</button>
+  </div>
+
+  <div id="formDesain" class="admin-form bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+    <h3 class="text-2xl font-800 mb-8 flex items-center tracking-tight text-slate-800"><i
+        class="fas fa-code mr-4 text-blue-600"></i> Tambah Portofolio Web</h3>
+    <form id="fDesain" onsubmit="handleForm(event, 'Desain', 'fDesain')" class="grid md:grid-cols-2 gap-6">
+      <div class="space-y-3">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Nama Project</label>
+        <input type="text" name="nama" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-slate-700 uppercase">
+      </div>
+      <div class="space-y-3">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Tag (Contoh: Website,
+          Sistem)</label>
+        <input type="text" name="tag" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-slate-700 uppercase">
+      </div>
+      <div class="md:col-span-2 space-y-3">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Link Gambar (URL)</label>
+        <input type="url" name="linkgambar" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-slate-700">
+      </div>
+      <div class="md:col-span-2 space-y-3">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Deskripsi Singkat</label>
+        <textarea name="deskripsi" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-slate-700 h-32 uppercase"></textarea>
+      </div>
+      <div class="space-y-3">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">No. Whatsapp Client</label>
+        <input type="text" name="whatsapp" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-slate-700">
+      </div>
+      <div class="space-y-3">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Status</label>
+        <select name="status" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white transition-all outline-none font-bold text-slate-700 cursor-pointer uppercase">
+          <option value="ON PROCCES">ON PROCCES</option>
+          <option value="SELESAI">SELESAI</option>
+          <option value="DITOLAK">DITOLAK</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition">SIMPAN
+          DATA</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="formPrint" class="admin-form hidden bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+    <h3 class="text-xl font-bold mb-6 flex items-center"><i class="fas fa-print mr-3 text-indigo-600"></i> Tambah Produk
+      Cetak</h3>
+    <form id="fPrint" onsubmit="handleForm(event, 'Percetakan', 'fPrint')" class="grid md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Nama Produk / Deskripsi</label>
+        <input type="text" name="deskripsi" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Harga (Mulai Rp...)</label>
+        <input type="text" name="harga" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Ikon FontAwesome (Contoh: fa-book)</label>
+        <input type="text" name="ikon" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">No. Whatsapp</label>
+        <input type="text" name="whatsapp" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Status</label>
+        <select name="status" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer font-bold uppercase">
+          <option value="ON PROCCES">ON PROCCES</option>
+          <option value="SELESAI">SELESAI</option>
+          <option value="DITOLAK">DITOLAK</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <button type="submit"
+          class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">SIMPAN
+          PRODUK</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="formJasa" class="admin-form hidden bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+    <h3 class="text-xl font-bold mb-6 flex items-center"><i class="fas fa-file-invoice mr-3 text-green-600"></i> Input
+      Kerja Biro Jasa</h3>
+    <form id="fJasa" onsubmit="handleForm(event, 'Biro Jasa', 'fJasa')" class="grid md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Jenis Layanan</label>
+        <select name="layanan" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 appearance-none cursor-pointer font-bold uppercase">
+          <option value="KIR">KIR</option>
+          <option value="SAMSAT">SAMSAT</option>
+          <option value="REKOM">REKOM</option>
+        </select>
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Nomor Uji</label>
+        <input type="text" name="nomor_kendaraan" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Nama Pemilik</label>
+        <input type="text" name="nama" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Merek</label>
+        <input type="text" name="merek" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Type</label>
+        <input type="text" name="type" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Status</label>
+        <select name="durasi" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 appearance-none cursor-pointer font-bold uppercase">
+          <option value="ON PROCCES">ON PROCCES</option>
+          <option value="SELESAI">SELESAI</option>
+          <option value="DITOLAK">DITOLAK</option>
+        </select>
+      </div>
+      <div class="md:col-span-2 space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Deskripsi Detail</label>
+        <input type="text" name="deskripsi" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 uppercase">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Masa Aktif</label>
+        <input type="date" name="aktif" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">No. Whatsapp Client (62...)</label>
+        <input type="text" name="whatsapp" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+      <div class="md:col-span-2 space-y-2">
+        <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Link Foto STNK (URL)</label>
+        <input type="url" name="foto_stnk" placeholder="https://..." required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 font-medium">
+      </div>
+      <div class="md:col-span-2">
+        <button type="submit"
+          class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-green-700 transition">SIMPAN
+          KERJAAN</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .active-tab-admin {
+    background: white;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    color: #2563eb;
+  }
+
+  .admin-form {
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.admin-form').forEach(f => f.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab-admin'));
+    btn.classList.add('active-tab-admin');
+  }
+
+  function handleForm(e, sheetName, formId) {
+    e.preventDefault();
+    const form = document.getElementById(formId);
+    const btn = e.submitter;
+    const originalText = btn.innerText;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> MENGIRIM...';
+
+    const formData = {};
+    new FormData(form).forEach((value, key) => formData[key] = value);
+
+    google.script.run.withSuccessHandler(function (res) {
+      if (res.success) {
+        form.reset();
+        showToast(res.message);
+        renderAdminTable(); // Refresh table data
+      } else { alert(res.message); }
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }).addDataToSheet(sheetName, formData);
+  }
+</script>
