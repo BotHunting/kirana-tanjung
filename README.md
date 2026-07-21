@@ -9,6 +9,7 @@
   <img src="https://img.shields.io/badge/Backend-Google%20Apps%20Script-blue?style=for-the-badge&logo=google-apps-script" alt="Google Apps Script">
   <img src="https://img.shields.io/badge/Database-Google%20Sheets-green?style=for-the-badge&logo=google-sheets" alt="Google Sheets">
   <img src="https://img.shields.io/badge/UI-HTML5-orange?style=for-the-badge&logo=html5" alt="HTML5">
+  <img src="https://img.shields.io/badge/Mobile-Capacitor-blue?style=for-the-badge&logo=capacitor" alt="Capacitor">
   <img src="https://img.shields.io/badge/UI-Tailwind%20CSS-blueviolet?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/UI-Font%20Awesome-blue?style=for-the-badge&logo=fontawesome" alt="Font Awesome">
 </p>
@@ -46,6 +47,7 @@ Proyek ini menggunakan arsitektur **Decoupled (Jamstack)** untuk memisahkan anta
     -   Menyediakan endpoint API untuk operasi `Create`, `Read`, `Update` (CRUD) data dari dan ke Google Sheets.
     -   Menangani otentikasi admin.
 3.  **Frontend Layer (Vercel):** Sebuah file `index.html` statis yang di-hosting di Vercel. Tugas utamanya adalah menampilkan Google Apps Script Web App di dalam sebuah `<iframe>`. Teknik ini disebut *masking*, yang membuat aplikasi tampak berjalan di domain Vercel, bukan di domain `script.google.com`.
+4.  **Mobile Layer (Capacitor):** Proyek web ini dibungkus (wrapped) menggunakan Capacitor untuk menghasilkan aplikasi Android native (APK) dari basis kode yang sama.
 
 ## ✨ 3. Fitur Utama
 
@@ -57,7 +59,7 @@ Proyek ini menggunakan arsitektur **Decoupled (Jamstack)** untuk memisahkan anta
 - **Integrasi WhatsApp:** Tombol "Tanya Admin" yang secara otomatis membuat draf pesan WhatsApp berisi detail layanan yang ingin ditanyakan pelanggan.
 
 ### Dasbor Admin (Internal)
-- **Otentikasi Aman:** Halaman login untuk memastikan hanya admin yang dapat mengakses dasbor pengelolaan data.
+- **Otentikasi Sederhana:** Halaman login untuk memastikan hanya admin yang dapat mengakses dasbor pengelolaan data dengan memvalidasi kredensial dari sheet `Users`.
 - **Manajemen Data (CRUD):** Admin dapat menambah, melihat, dan mengubah data untuk semua layanan langsung dari antarmuka web.
 - **Sinkronisasi Real-time:** Setiap perubahan yang dibuat di dasbor akan langsung tersimpan di Google Sheets.
 
@@ -68,6 +70,7 @@ Struktur repositori ini diatur sebagai berikut:
 - **`/` (Root Direktori)**
   - **`index.html`**: Halaman "kulit" yang di-deploy ke Vercel. Tugas utamanya adalah memuat aplikasi Google Apps Script dalam sebuah `<iframe>` untuk memberikan URL yang bersih dan profesional.
   - **`README.md`**: File dokumentasi yang sedang Anda baca.
+  - **`package.json`**: Mendefinisikan dependensi proyek, terutama untuk Capacitor.
   - **`.gitignore`**: (Direkomendasikan) File untuk menginstruksikan Git agar mengabaikan file sensitif, terutama `.clasp.json` yang berisi token otorisasi.
 
 - **`/script/`**
@@ -75,6 +78,9 @@ Struktur repositori ini diatur sebagai berikut:
     - `doGet()`: Menampilkan antarmuka web saat URL diakses.
     - `checkLogin()`, `addDataToSheet()`, `updateDataInSheet()`, `getAllDataForDashboard()`: Fungsi-fungsi yang bertindak sebagai endpoint API untuk operasi CRUD dari frontend.
     - `include()`: Fungsi utilitas untuk menggabungkan beberapa file HTML menjadi satu halaman.
+
+- **`/android/`**
+  - Direktori ini berisi proyek Android native yang dihasilkan oleh Capacitor. Direktori ini biasanya tidak di-commit ke repositori, tetapi dikelola secara lokal untuk membangun APK melalui Android Studio.
 
 - **File Internal Google Apps Script (Tidak ada di repositori ini)**
   - Selain `Code.js`, proyek di dalam platform Google Apps Script juga berisi file-file HTML (misalnya `index.html`, `dashboard.html`, `styles.html`). File-file ini membangun antarmuka pengguna yang sebenarnya dan dipanggil oleh `Code.js` untuk ditampilkan kepada pengguna.
@@ -148,10 +154,16 @@ Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sh
     - Ganti URL `src` pada tag `<iframe>` dengan URL Web App yang Anda dapatkan dari langkah GAS.
     - Deploy proyek ini ke Vercel. Anda bisa menghubungkan repositori GitHub Anda langsung ke Vercel untuk deployment otomatis.
 
+4.  **Mobile (Capacitor):**
+    - Jalankan `npm install` untuk menginstal dependensi Capacitor.
+    - Gunakan `npx cap sync android` untuk menyinkronkan perubahan dari folder web ke proyek Android.
+    - Gunakan `npx cap open android` untuk membuka proyek di Android Studio dan membangun APK.
+    - Untuk panduan lebih detail, lihat file `CONTRIBUTING.md`.
+
 ## 🛡️ 7. Aspek Keamanan & Performa
 
 - **Keamanan:**
-  - Akses ke dasbor admin dilindungi oleh sistem login yang memvalidasi ke sheet `Users`.
+  - Akses ke dasbor admin dilindungi oleh sistem login sederhana yang memvalidasi kredensial dari sheet `Users`.
   - Data sensitif seperti `foto_stnk` tidak diekspos secara publik. URL-nya harus mengarah ke file di Google Drive dengan akses terbatas.
   - File konfigurasi `clasp` (`.clasp.json`) yang berisi token otorisasi harus selalu ada di `.gitignore` dan tidak boleh di-commit ke repositori.
 
