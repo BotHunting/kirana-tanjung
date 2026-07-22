@@ -4,8 +4,32 @@
 <head>
   <base target="_top">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <?!= include('styles'); ?>
+  <style>
+    /* Optimization: Override Font Awesome's font-display to 'swap' to prevent render-blocking. */
+    @font-face {
+      font-family: 'Font Awesome 6 Free';
+      font-style: normal;
+      font-weight: 900;
+      font-display: swap;
+      src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2") format("woff2"), url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.ttf") format("truetype");
+    }
+    @font-face {
+      font-family: 'Font Awesome 6 Brands';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2") format("woff2"), url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.ttf") format("truetype");
+    }
+    @font-face {
+      font-family: 'Font Awesome 6 Free';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2") format("woff2"), url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.ttf") format("truetype");
+    }
+  </style>
   <style>
     :root { --primary: #2563eb; --accent: #7c3aed; }
     body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; background-color: #f8fafc; }
@@ -123,7 +147,12 @@
           <!-- Item 1: Web -->
           <div class="group bg-white rounded-[3rem] overflow-hidden card-modern flex flex-col h-full">
             <div class="relative h-72 overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
+              <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=75&w=400" 
+                   srcset="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=75&w=400 400w, https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=75&w=800 800w"
+                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                   loading="lazy"
+                   alt="Laptop dengan kode program untuk layanan Web & System"
+                   class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
               <div class="absolute top-6 left-6">
                 <span class="bg-blue-600 text-white text-[9px] font-800 px-4 py-2 rounded-full tracking-[0.2em] uppercase shadow-xl">Web & System</span>
               </div>
@@ -141,7 +170,12 @@
           <!-- Item 2: Print -->
           <div class="group bg-white rounded-[3rem] overflow-hidden card-modern flex flex-col h-full">
             <div class="relative h-72 overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
+              <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=75&w=400" 
+                   srcset="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=75&w=400 400w, https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=75&w=800 800w"
+                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                   loading="lazy"
+                   alt="Peralatan cetak untuk layanan Printing"
+                   class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
               <div class="absolute top-6 left-6">
                 <span class="bg-indigo-600 text-white text-[9px] font-800 px-4 py-2 rounded-full tracking-[0.2em] uppercase shadow-xl">Printing</span>
               </div>
@@ -159,7 +193,12 @@
           <!-- Item 3: Biro Jasa -->
           <div class="group bg-white rounded-[3rem] overflow-hidden card-modern flex flex-col h-full">
             <div class="relative h-72 overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
+              <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=75&w=400" 
+                   srcset="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=75&w=400 400w, https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=75&w=800 800w"
+                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                   loading="lazy"
+                   alt="Dokumen legal untuk layanan Biro Jasa"
+                   class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
               <div class="absolute top-6 left-6">
                 <span class="bg-emerald-600 text-white text-[9px] font-800 px-4 py-2 rounded-full tracking-[0.2em] uppercase shadow-xl">Biro Jasa</span>
               </div>
