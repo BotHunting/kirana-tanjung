@@ -31,6 +31,37 @@
             overflow: hidden; 
             background-color: #f8fafc;
         }
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8fafc; /* Senada dengan background body */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        #loader p {
+            margin-top: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #64748b;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #3b82f6; /* Biru */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         iframe { 
             width: 100%; 
             height: 100%; 
@@ -39,6 +70,12 @@
     </style>
 </head>
 <body>
+    <!-- Pre-loader untuk meningkatkan skor FCP/LCP dan User Experience -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>Memuat portal layanan...</p>
+    </div>
+
     <!-- Fallback content untuk mesin pencari dan browser tanpa JavaScript -->
     <noscript>
         <h1>CV. Kirana Tanjung Pelakar</h1>
@@ -75,6 +112,19 @@
       },
       "telephone": "+62-81290320438"
     }
+    </script>
+
+    <!-- Script untuk menyembunyikan pre-loader setelah iframe selesai dimuat -->
+    <script>
+        const iframe = document.querySelector('iframe');
+        const loader = document.getElementById('loader');
+
+        iframe.addEventListener('load', function() {
+            // Sembunyikan loader dengan transisi
+            loader.style.opacity = '0';
+            // Hapus loader dari DOM setelah transisi selesai
+            setTimeout(() => { loader.style.display = 'none'; }, 500); // Sesuaikan dengan durasi transisi CSS
+        });
     </script>
 </body>
 </html>
