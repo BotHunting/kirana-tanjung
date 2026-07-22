@@ -34,30 +34,61 @@
 
 <body class="mesh-bg text-slate-900">
 
-  <nav class="fixed w-full z-50 glass">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-2 cursor-pointer" onclick="showPublicView()">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 ring-2 ring-white/50">
-          <i class="fas fa-crown"></i>
+  <nav class="fixed w-full z-50 glass" id="mainNav">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex justify-between items-center py-4">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="showPublicView()">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 ring-2 ring-white/50">
+            <i class="fas fa-crown"></i>
+          </div>
+          <span class="text-xl font-800 tracking-tighter uppercase">KIRANA <span class="text-blue-600">TANJUNG</span></span>
         </div>
-        <span class="text-xl font-800 tracking-tighter uppercase">KIRANA <span class="text-blue-600">TANJUNG</span></span>
-      </div>
 
-      <div id="publicNav" class="hidden md:flex space-x-10 text-[11px] font-800 uppercase tracking-[0.15em] text-slate-500">
-        <a href="javascript:void(0)" onclick="navigateToSection('portfolio')" class="hover:text-blue-600 transition-all hover:tracking-[0.2em]">Portfolio</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('web')" class="hover:text-blue-600 transition-all hover:tracking-[0.2em]">Web Design</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('print')" class="hover:text-blue-600 transition-all hover:tracking-[0.2em]">Percetakan</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('jasa')" class="hover:text-blue-600 transition-all hover:tracking-[0.2em]">Biro Jasa</a>
-        <a id="navDashboard" href="javascript:void(0)" onclick="showDashboardView()" class="hidden hover:text-blue-600 transition-all hover:tracking-[0.2em] font-bold text-blue-600">Dashboard</a>
-      </div>
+        <!-- Desktop Nav & Auth -->
+        <div class="hidden md:flex items-center space-x-10">
+          <div class="flex space-x-8 text-[11px] font-800 uppercase tracking-[0.15em] text-slate-500">
+            <a href="javascript:void(0)" onclick="navigateToSection('portfolio')" class="hover:text-blue-600 transition-all">Portfolio</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('web')" class="hover:text-blue-600 transition-all">Web Design</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('print')" class="hover:text-blue-600 transition-all">Percetakan</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('jasa')" class="hover:text-blue-600 transition-all">Biro Jasa</a>
+            <a id="desktopNavDashboard" href="javascript:void(0)" onclick="showDashboardView()" class="hidden hover:text-blue-600 transition-all font-bold text-blue-600">Dashboard</a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button id="desktopBtnLoginTab" onclick="showLoginView()" class="bg-slate-900 text-white px-6 py-2.5 rounded-full text-xs font-bold hover:bg-blue-600 transition shadow-xl">
+              <i class="fas fa-user-lock mr-2"></i> LOGIN
+            </button>
+            <button id="desktopBtnLogout" onclick="logout()" class="hidden bg-red-50 text-red-600 px-6 py-2.5 rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition">
+              <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
+            </button>
+          </div>
+        </div>
 
-      <div class="flex items-center space-x-4">
-        <button id="btnLoginTab" onclick="showLoginView()" class="bg-slate-900 text-white px-6 py-2.5 rounded-full text-xs font-bold hover:bg-blue-600 transition shadow-xl">
-          <i class="fas fa-user-lock mr-2"></i> LOGIN
-        </button>
-        <button id="btnLogout" onclick="logout()" class="hidden bg-red-50 text-red-600 px-6 py-2.5 rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition">
-          <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
-        </button>
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden">
+          <button id="mobileMenuBtn" class="text-slate-800 hover:text-blue-600 focus:outline-none p-2">
+            <i id="mobileMenuIcon" class="fas fa-bars text-2xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white/90 backdrop-blur-lg border-t border-slate-200">
+      <div class="px-6 pt-4 pb-6 space-y-3">
+        <a href="javascript:void(0)" onclick="navigateToSection('portfolio', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Portfolio</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('web', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Web Design</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('print', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Percetakan</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('jasa', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Biro Jasa</a>
+        <a id="mobileNavDashboard" href="javascript:void(0)" onclick="showDashboardView(true)" class="hidden text-blue-600 font-bold hover:text-blue-700 transition-all py-2 text-sm">Dashboard</a>
+        <div class="border-t border-slate-200 pt-5 mt-3 space-y-4">
+          <button id="mobileBtnLoginTab" onclick="showLoginView(true)" class="w-full bg-slate-900 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-lg">
+            <i class="fas fa-user-lock mr-2"></i> LOGIN
+          </button>
+          <button id="mobileBtnLogout" onclick="logout(true)" class="hidden w-full bg-red-50 text-red-600 px-6 py-3 rounded-xl text-sm font-bold border border-red-100 hover:bg-red-100 transition">
+            <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
+          </button>
+        </div>
       </div>
     </div>
   </nav>
@@ -372,31 +403,48 @@
   </footer>
 
   <script>
-    function showLoginView() {
+    // --- Mobile Menu ---
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuIcon = document.getElementById('mobileMenuIcon');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.toggle('hidden');
+      mobileMenuIcon.className = isHidden ? 'fas fa-bars text-2xl' : 'fas fa-times text-2xl';
+    });
+
+    function closeMobileMenu() {
+      mobileMenu.classList.add('hidden');
+      mobileMenuIcon.className = 'fas fa-bars text-2xl';
+    }
+
+    // --- View Management ---
+    function showLoginView(fromMobile = false) {
+      if (fromMobile) closeMobileMenu();
       document.getElementById('publicView').classList.add('hidden-view');
       document.getElementById('dashboardView').classList.add('hidden-view');
       document.getElementById('loginView').classList.remove('hidden-view');
-      document.getElementById('publicNav').classList.add('hidden');
       window.scrollTo(0, 0);
     }
 
     function showPublicView() {
+      closeMobileMenu();
       document.getElementById('loginView').classList.add('hidden-view');
       document.getElementById('dashboardView').classList.add('hidden-view');
       document.getElementById('publicView').classList.remove('hidden-view');
-      document.getElementById('publicNav').classList.remove('hidden');
       window.scrollTo(0, 0);
     }
 
-    function showDashboardView() {
+    function showDashboardView(fromMobile = false) {
+      if (fromMobile) closeMobileMenu();
       document.getElementById('publicView').classList.add('hidden-view');
       document.getElementById('loginView').classList.add('hidden-view');
       document.getElementById('dashboardView').classList.remove('hidden-view');
-      document.getElementById('publicNav').classList.remove('hidden');
       window.scrollTo(0, 0);
     }
 
-    function navigateToSection(id) {
+    function navigateToSection(id, fromMobile = false) {
+      if (fromMobile) closeMobileMenu();
       showPublicView();
       // Beri sedikit jeda agar elemen publicView muncul dulu sebelum di-scroll
       setTimeout(() => {
@@ -404,29 +452,33 @@
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 50);
     }
-
+    
+    // --- Authentication ---
     function prosesLogin() {
       const user = document.getElementById('userInput').value;
       const pass = document.getElementById('passInput').value;
       const btn = document.getElementById('btnSubmitLogin');
       const err = document.getElementById('errorMsg');
 
-      if (!user || !pass) { err.innerText = "Isi username dan password!"; return; }
-      
+      if (!user || !pass) {
+        err.innerText = "Isi username dan password!";
+        return;
+      }
+
       err.innerText = "";
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> MEMPROSES...';
 
       google.script.run
         .withSuccessHandler(function(res) {
-        if (res && res.success) {
-          showDashboardView();
-          document.getElementById('navDashboard').classList.remove('hidden');
-          document.getElementById('btnLogout').classList.remove('hidden');
-          document.getElementById('btnLoginTab').classList.add('hidden');
-          document.getElementById('welcomeName').querySelector('span').innerText = "Halo, " + res.nama;
-          renderAdminTable();
-        } else {
+          if (res && res.success) {
+            showDashboardView();
+            // Update UI for both desktop and mobile
+            ['desktopNavDashboard', 'mobileNavDashboard', 'desktopBtnLogout', 'mobileBtnLogout'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+            ['desktopBtnLoginTab', 'mobileBtnLoginTab'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('welcomeName').querySelector('span').innerText = "Halo, " + res.nama;
+            renderAdminTable();
+          } else {
           err.innerText = res ? res.message : "Terjadi kesalahan pada server.";
           btn.disabled = false;
           btn.innerHTML = 'MASUK SEKARANG';
@@ -440,18 +492,22 @@
       .checkLogin(user, pass);
     }
 
-    function logout() {
+    function logout(fromMobile = false) {
+      if (fromMobile) closeMobileMenu();
       document.getElementById('userInput').value = "";
       document.getElementById('passInput').value = "";
       document.getElementById('dashboardView').classList.add('hidden-view');
       document.getElementById('loginView').classList.add('hidden-view');
-      document.getElementById('navDashboard').classList.add('hidden');
+      
+      // Update UI for both desktop and mobile
+      ['desktopNavDashboard', 'mobileNavDashboard', 'desktopBtnLogout', 'mobileBtnLogout'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      ['desktopBtnLoginTab', 'mobileBtnLoginTab'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+
       showPublicView();
-      document.getElementById('btnLogout').classList.add('hidden');
-      document.getElementById('btnLoginTab').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
+    
+    // --- UI Helpers ---
     function switchLogTab(id, btn) {
       document.querySelectorAll('.log-content').forEach(c => c.classList.add('hidden'));
       document.querySelectorAll('.log-tab-btn').forEach(b => b.classList.remove('active-log-tab'));
@@ -526,7 +582,17 @@
 
         // Render Biro Jasa
         let hJasa = '';
-        (data.biroJasa || []).sort((a, b) => b.row_index - a.row_index).forEach(item => {
+        (data.biroJasa || []).sort((a, b) => {
+          const dateA = a.aktif ? new Date(a.aktif) : null;
+          const dateB = b.aktif ? new Date(b.aktif) : null;
+
+          if (!dateA && !dateB) return 0; // Keduanya tidak punya tanggal, anggap sama
+          if (!dateA) return 1;  // a tidak punya tanggal, taruh di bawah
+          if (!dateB) return -1; // b tidak punya tanggal, taruh di bawah
+
+          // Urutkan berdasarkan tanggal terdekat (ascending)
+          return dateA - dateB;
+        }).forEach(item => {
           // Cari nomor WA dengan beberapa kemungkinan kunci (whatsapp, wa, no_whatsapp, dll)
           const waNum = item.whatsapp || item.wa || item.no_whatsapp || item.no_wa || '';
           
