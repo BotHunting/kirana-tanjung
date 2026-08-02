@@ -60,7 +60,9 @@ Proyek ini menggunakan arsitektur **Decoupled (Jamstack)** untuk memisahkan anta
 
 ### Dasbor Admin (Internal)
 - **Otentikasi Sederhana:** Halaman login untuk memastikan hanya admin yang dapat mengakses dasbor pengelolaan data dengan memvalidasi kredensial dari sheet `Users`.
-- **Manajemen Data (CRUD):** Admin dapat menambah, melihat, dan mengubah data untuk semua layanan langsung dari antarmuka web.
+- **Manajemen Data (CRUD):** Admin dapat menambah, melihat, dan mengubah data untuk semua layanan langsung dari antarmuka web yang responsif.
+- **UI Rendering Cerdas:** Kolom seperti "Ikon" dapat secara dinamis menampilkan gambar dari URL atau ikon dari FontAwesome, lengkap dengan *fallback* jika data tidak valid. Termasuk fitur pratinjau gambar (lightbox) saat gambar ikon diklik.
+- **Pratinjau & Cetak Surat Tugas:** Fitur untuk membuat "Surat Tugas Pengurusan" secara dinamis berdasarkan data konsumen dari tabel Biro Jasa, yang siap untuk dicetak atau disimpan sebagai PDF.
 - **Sinkronisasi Real-time:** Setiap perubahan yang dibuat di dasbor akan langsung tersimpan di Google Sheets.
 
 ## 📂 4. Struktur Proyek & Keterangan File
@@ -164,11 +166,13 @@ Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sh
 
 - **Keamanan:**
   - Akses ke dasbor admin dilindungi oleh sistem login sederhana yang memvalidasi kredensial dari sheet `Users`.
+  - **Sanitasi Output:** Data yang ditarik dari Google Sheets secara otomatis disanitasi sebelum dirender sebagai HTML. Ini mencegah karakter khusus (seperti `"` atau `<`) merusak struktur layout tabel.
   - Data sensitif seperti `foto_stnk` tidak diekspos secara publik. URL-nya harus mengarah ke file di Google Drive dengan akses terbatas.
   - File konfigurasi `clasp` (`.clasp.json`) yang berisi token otorisasi harus selalu ada di `.gitignore` dan tidak boleh di-commit ke repositori.
 
 - **Performa:**
   - Pemanggilan data dari frontend ke backend GAS dilakukan secara asinkron untuk tidak memblokir render halaman.
+  - **Refaktorisasi Modal:** Fitur pratinjau "Surat Tugas" tidak lagi menggunakan `<iframe>` yang berat. Sebagai gantinya, konten HTML dimuat dari backend dan disuntikkan langsung ke dalam `div`, menghasilkan waktu muat yang lebih cepat dan interaksi yang lebih lancar.
   - Untuk menjaga performa Google Sheets, disarankan untuk mengarsipkan data lama (misalnya, transaksi biro jasa yang sudah selesai lebih dari 3 bulan) ke sheet atau file spreadsheet lain secara berkala.
 
 ---
