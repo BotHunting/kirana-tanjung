@@ -122,3 +122,9 @@ function getAllDataForDashboard() {
     biroJasa: getSheetData(ss, "Biro Jasa")
   };
 }
+
+// Fungsi untuk memanggil & menyajikan file kuasa.html
+function getKuasaHtml() {
+  return HtmlService.createHtmlOutputFromFile('kuasa')
+    .getContent();
+}

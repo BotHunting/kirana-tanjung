@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; color: #1e293b; }
+    @media print {
+      .no-print { display: none !important; }
+      body { padding: 0; margin: 0; background: white; }
+      .print-area { border: none !important; shadow: none !important; padding: 0 !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto mb-4 flex justify-between items-center no-print">
+    <h2 class="text-lg font-bold text-slate-700">Pratinjau Surat Kuasa</h2>
+    <div class="flex gap-2">
+      <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm shadow-lg flex items-center gap-2 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Cetak / Simpan PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="print-area max-w-4xl mx-auto bg-white p-10 md:p-14 rounded-2xl shadow-xl border border-slate-200">
+    
+    <div class="border-b-2 border-slate-800 pb-4 mb-6">
+      <h1 class="text-xl font-extrabold text-slate-900 uppercase tracking-tight">CV. KIRANA TANJUNG PELAKAR</h1>
+      <p class="text-xs text-slate-600 font-medium">Konsultan Teknologi Informasi & Layanan Transportasi Terpadu</p>
+      <p class="text-xs text-slate-500">Alamat: Jl. Ky Syahlan 1 No. 9, Ds. Manyarejo, Kec. Manyar, Kab. Gresik</p>
+      <p class="text-xs text-slate-500">Telepon: 081290320438 | Email: bot.hunting101@gmail.com | Website: https://bot-hunting.vercel.app/</p>
+    </div>
+
+    <div class="text-center my-6">
+      <h2 class="text-lg font-black tracking-wider text-slate-900 border-b-2 border-slate-900 inline-block px-4 pb-0.5">SURAT TUGAS PENGURUSAN</h2>
+    </div>
+
+    <div class="text-xs leading-relaxed space-y-2 mb-4">
+      <p>Yang bertanda tangan di bawah ini:</p>
+      <table class="w-full text-xs ml-4">
+        <tr><td class="w-36 font-semibold py-0.5">Nama</td><td>: ADI JUNAIDI</td></tr>
+        <tr><td class="font-semibold py-0.5">Jabatan</td><td>: DIREKTUR</td></tr>
+        <tr><td class="font-semibold py-0.5">Instansi/Perusahaan</td><td>: CV. KIRANA TANJUNG PELAKAR</td></tr>
+        <tr><td class="font-semibold py-0.5">Alamat Kantor</td><td>: Jl. Ky Syahlan 1 No. 9, Ds. Manyarejo, Kec. Manyar, Kab. Gresik</td></tr>
+      </table>
+      <p class="pt-1">Dalam hal ini bertindak untuk dan atas nama <strong>CV. KIRANA TANJUNG PELAKAR</strong>.</p>
+    </div>
+
+    <div class="text-xs leading-relaxed mb-6">
+      <p class="mb-2">Dengan ini memberikan tugas untuk melakukan pengurusan Pengujian Kendaraan Bermotor terhadap kendaraan dengan identitas sebagai berikut:</p>
+      <div class="border border-slate-300 rounded-lg p-3 bg-slate-50/50">
+        <table class="w-full text-xs">
+          <tr><td class="w-36 font-bold py-1">Nama Pemilik</td><td>: <span id="skNamaPemilik" class="font-bold text-slate-900">-</span></td></tr>
+          <tr><td class="font-bold py-1">Nomor Uji</td><td>: <span id="skNoUji" class="font-semibold text-slate-800">-</span></td></tr>
+          <tr><td class="font-bold py-1">Merk / Type</td><td>: <span id="skMerkType" class="font-semibold text-slate-800">-</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <p class="text-xs text-justify leading-relaxed mb-6">
+      Staff yang ditugaskan berwenang untuk menandatangani berkas pendaftaran, melakukan pembayaran retribusi, mengikuti proses pengujian fisik, serta mengambil hasil uji berkala (Bukti Lulus Uji) di kantor Dinas Perhubungan. Demikian Surat Tugas ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.
+    </p>
+
+    <div class="flex justify-end items-end text-xs pt-4">
+      <div class="text-center w-56">
+        <p class="mb-2">Gresik, <span id="skTanggal"></span></p>
+        <p class="mb-3 font-semibold">Hormat kami,</p>
+        
+        <div class="my-1 flex items-center justify-center gap-2">
+          <div class="w-16 h-16 border-2 border-dashed border-rose-300 rounded flex items-center justify-center bg-rose-50 text-[9px] text-rose-500 font-bold">
+            E-MATERAI<br>10000
+          </div>
+        </div>
+
+        <p class="font-bold underline mt-4">ADI JUNAIDI</p>
+        <p class="text-[10px] text-slate-500">Direktur</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
