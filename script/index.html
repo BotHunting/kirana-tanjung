@@ -53,6 +53,11 @@
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Print-specific styles */
+    @media print {
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 
@@ -475,7 +480,7 @@
   <!-- Surat Kuasa Modal -->
   <div id="modalSuratKuasa" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
-      <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
+      <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center no-print">
         <h3 class="font-bold text-sm flex items-center gap-2">
           <i class="fas fa-file-contract text-indigo-400"></i> Pratinjau Surat Kuasa
         </h3>
@@ -780,7 +785,7 @@ Terima kasih.`;
             <td class="px-4 py-5 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-3">
                 <button 
-                  onclick='previewKuasa("${item.nama_pemilik || item.nama_konsumen || item.nama}", "${item.alamat_pemilik || '-'}", "${item.nopol || item.nomor_kendaraan}", "${item.no_uji || item.nomor_kendaraan || '-'}", "${item.merk_type || item.kendaraan || ((item.merek || '') + ' / ' + (item.type || '')) || '-'}")' 
+                  onclick='previewKuasa("${item.nama_pemilik || item.nama_konsumen || item.nama}", "${item.no_uji || item.nomor_kendaraan || '-'}", "${item.merk_type || item.kendaraan || ((item.merek || '') + ' / ' + (item.type || '')) || '-'}")' 
                   class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition flex items-center gap-1" 
                   title="Cetak Surat Kuasa">
                   <i class="fas fa-file-pdf"></i> Kuasa
@@ -880,7 +885,7 @@ Terima kasih.`;
       document.getElementById('imagePreviewImg').src = ''; // Clear src to stop loading/video
     }
 
-    function previewKuasa(nama, alamat, nopol, noUji, merkType) {
+    function previewKuasa(nama, noUji, merkType) {
       const modal = document.getElementById('modalSuratKuasa');
       const container = document.getElementById('containerKuasa');
       
@@ -900,8 +905,6 @@ Terima kasih.`;
           
           // Inject data kendaraan ke ID elemen yang ada di kuasa.html
           if (document.getElementById('skNamaPemilik')) document.getElementById('skNamaPemilik').innerText = nama || '-';
-          if (document.getElementById('skAlamatPemilik')) document.getElementById('skAlamatPemilik').innerText = alamat || '-';
-          if (document.getElementById('skNopol')) document.getElementById('skNopol').innerText = nopol || '-';
           if (document.getElementById('skNoUji')) document.getElementById('skNoUji').innerText = noUji || '-';
           if (document.getElementById('skMerkType')) document.getElementById('skMerkType').innerText = merkType || '-';
           
@@ -910,6 +913,10 @@ Terima kasih.`;
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('skTanggal').innerText = new Date().toLocaleDateString('id-ID', options);
           }
+        })
+        .withFailureHandler(function(error) {
+          console.error("Gagal memuat Surat Tugas:", error);
+          container.innerHTML = `<div class="p-8 text-center text-red-500"><p class="font-bold">Gagal memuat template.</p><p class="text-xs mt-2">${error.message}</p></div>`;
         })
         .getKuasaHtml();
     }
