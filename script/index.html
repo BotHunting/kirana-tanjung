@@ -35,7 +35,7 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; background-color: #f8fafc; }
     .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
     .hidden-view { display: none; }
-    .gradient-text { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .gradient-text { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
     .mesh-bg { 
       background-color: #f8fafc;
       background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%), 
@@ -43,7 +43,11 @@
     }
     .view-transition { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .active-log-tab { border-bottom: 2px solid #2563eb; color: #2563eb; }
+    .active-log-tab {
+      background-color: white;
+      color: #2563eb;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
     .modal-backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
     .card-modern { border: 1px solid rgba(226, 232, 240, 0.8); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     .card-modern:hover { transform: translateY(-8px); border-color: rgba(37, 99, 235, 0.3); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); }
@@ -235,7 +239,7 @@
               </thead>
               <tbody id="publicTbodyDesain" class="divide-y divide-slate-50 text-sm font-semibold text-slate-600">
                 <? for(var i=0; i < publicDesain.length; i++) { 
-                   var status = publicDesain[i].status || 'ON PROCCES';
+                   var status = publicDesain[i].status || 'ON PROCESS';
                 ?>
                 <tr class="hover:bg-blue-50/30 transition-colors">
                   <td class="px-10 py-6">
@@ -246,7 +250,7 @@
                   </td>
                   <td class="px-10 py-6 text-slate-400 font-medium italic"><?= publicDesain[i].deskripsi ?></td>
                   <td class="px-10 py-6">
-                    <span class="<?= status === 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : status === 'DITOLAK' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-blue-50 text-blue-600 border-blue-100' ?> px-5 py-2 rounded-xl text-[10px] font-800 border shadow-sm uppercase tracking-wider">
+                    <span class="<?= status === 'SELESAI' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : status === 'DITOLAK' ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-blue-50 text-blue-700 border-blue-100' ?> px-5 py-2 rounded-xl text-[10px] font-800 border shadow-sm uppercase tracking-wider">
                       <?= status ?>
                     </span>
                   </td>
@@ -261,83 +265,57 @@
       <section id="print">
         <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-indigo-600 pl-4">Katalog Layanan Percetakan</h2>
         <div class="mb-8 relative">
-          <input type="text" id="searchPrint" onkeyup="filterPublicTable('searchPrint', 'publicTbodyPrint')" placeholder="Cari produk percetakan..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition font-medium text-sm">
+          <input type="text" id="searchPrint" onkeyup="filterPublicTable('searchPrint', 'containerPercetakan')" placeholder="Cari produk percetakan..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition font-medium text-sm">
           <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
-        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden card-modern">
-          <div class="overflow-auto max-h-[520px]">
-            <table class="w-full text-left border-collapse">
-              <thead class="bg-slate-50/50 text-[10px] font-800 uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
-                <tr>
-                  <th class="px-8 py-6">Produk / Layanan</th>
-                  <th class="px-8 py-6">Estimasi Harga</th>
-                  <th class="px-8 py-6">Status</th>
-                  <th class="px-8 py-6 text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="publicTbodyPrint" class="divide-y divide-slate-50 text-sm font-semibold text-slate-600">
-                <? for(var i=0; i < publicPercetakan.length; i++) { 
-                    var item = publicPercetakan[i];
-                    var status = (item.status || 'ON PROCCES').toUpperCase();
+        <div id="containerPercetakan" class="flex overflow-x-auto space-x-6 pb-6 -mx-6 px-6" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9;">
+          <? for(var i=0; i < publicPercetakan.length; i++) { 
+              var item = publicPercetakan[i];
+              var status = (item.status || 'ON PROCESS').toUpperCase();
 
-                    // Skip items marked as 'DITOLAK' in the public catalog
-                    if (status === 'DITOLAK') continue;
+              if (status === 'DITOLAK') continue;
 
-                    // Format price to Rupiah, keeping text values like 'NEGO'
-                    var price = item.harga;
-                    var formattedPrice = '-';
-                    if (price) {
-                      var num = parseInt(String(price).replace(/\D/g, ''), 10);
-                      if (!isNaN(num) && num > 0) {
-                        formattedPrice = 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
-                      } else {
-                        formattedPrice = price; // Keep text value
-                      }
-                    }
+              var price = item.harga;
+              var formattedPrice = '-';
+              if (price) {
+                var num = parseInt(String(price).replace(/\D/g, ''), 10);
+                if (!isNaN(num) && num > 0) {
+                  formattedPrice = 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
+                } else {
+                  formattedPrice = price;
+                }
+              }
 
-                    // Icon logic
-                    var iconValue = item.ikon || '';
-                    var isImageIcon = /^(https?:\/\/|data:image)/i.test(iconValue);
-                ?>
-                <?
-                  var waNumRaw = item.whatsapp || '6281290320438';
-                  var cleanedWa = String(waNumRaw).replace(/\D/g, '');
-                  if (cleanedWa.startsWith('0')) {
-                    cleanedWa = '62' + cleanedWa.substring(1);
-                  } else if (cleanedWa.startsWith('8')) {
-                    cleanedWa = '62' + cleanedWa;
-                  }
-                  var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
-                ?>
-                <tr class="hover:bg-indigo-50/30 transition-colors">
-                  <td class="px-8 py-6 flex items-center space-x-4">
-                    <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 overflow-hidden shrink-0 <? if (isImageIcon) { ?>cursor-pointer hover:scale-110 transition-transform<? } ?>"
-                         <? if (isImageIcon) { ?>onclick="openImagePreview('<?= iconValue ?>', '<?= item.deskripsi ?>')"<? } ?>>
-                      <? if (isImageIcon) { ?>
-                        <img src="<?= iconValue ?>" alt="Ikon <?= item.deskripsi ?>" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none';">
-                      <? } else { ?>
-                        <i class="fas <?= iconValue || 'fa-tag' ?>"></i>
-                      <? } ?>
-                    </div>
-                    <div class="font-800 text-slate-800 uppercase tracking-tight"><?= item.deskripsi ?></div>
-                  </td>
-                  <td class="px-8 py-6 text-indigo-600 font-bold"><?= formattedPrice ?></td>
-                  <td class="px-8 py-6">
-                    <span class="bg-emerald-50 text-emerald-600 border-emerald-100 px-5 py-2 rounded-xl text-[10px] font-800 border shadow-sm uppercase tracking-wider">
-                      TERSEDIA
-                    </span>
-                  </td>
-                  <td class="px-8 py-6 text-center">
-                    <a href="https://wa.me/<?= cleanedWa ?>?text=<?= waMessage ?>" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-full text-[10px] font-bold hover:bg-green-600 transition shadow-lg shadow-green-100 flex items-center gap-1.5 justify-center">
-                      <i class="fab fa-whatsapp"></i>
-                      <span>ORDER</span>
-                    </a>
-                  </td>
-                </tr>
-                <? } ?>
-              </tbody>
-            </table>
+              var iconValue = item.ikon || '';
+              var isImageIcon = /^(https?:\/\/|data:image)/i.test(iconValue);
+
+              var waNumRaw = item.whatsapp || '6281290320438';
+              var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
+              var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
+          ?>
+          <div class="card-item group bg-white rounded-3xl shadow-lg border border-slate-100 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
+            <div class="h-40 bg-indigo-50 flex items-center justify-center text-indigo-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImageIcon) { ?>onclick="openImagePreview('<?= iconValue ?>', '<?= item.deskripsi ?>')"<? } ?>>
+              <? if (isImageIcon) { ?>
+                <img src="<?= iconValue ?>" alt="Ikon <?= item.deskripsi ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-image\'></i>';">
+              <? } else { ?>
+                <i class="fas <?= iconValue || 'fa-tag' ?>"></i>
+              <? } ?>
+            </div>
+            <div class="p-6 flex flex-col flex-grow">
+              <h4 class="font-800 text-slate-800 uppercase tracking-tight mb-2 flex-grow"><?= item.deskripsi ?></h4>
+              <p class="text-indigo-600 font-bold text-lg mb-4"><?= formattedPrice ?></p>
+              <div class="flex justify-between items-center mt-auto">
+                <span class="bg-emerald-50 text-emerald-700 border-emerald-100 px-4 py-1.5 rounded-lg text-[10px] font-800 border shadow-sm uppercase tracking-wider">
+                  TERSEDIA
+                </span>
+                <a href="https://wa.me/<?= cleanedWa ?>?text=<?= waMessage ?>" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-full text-[10px] font-bold hover:bg-green-600 transition shadow-lg shadow-green-100 flex items-center gap-1.5 justify-center">
+                  <i class="fab fa-whatsapp"></i>
+                  <span>ORDER</span>
+                </a>
+              </div>
+            </div>
           </div>
+          <? } ?>
         </div>
       </section>
 
@@ -361,8 +339,8 @@
               <tbody id="publicTbodyJasa" class="divide-y divide-slate-50 text-sm font-semibold text-slate-600">
                 <? for(var i=0; i < publicBiroJasa.length; i++) { 
                    var item = publicBiroJasa[i];
-                   var status = (item.durasi || 'ON PROCCES').toUpperCase();
-                   var statusClass = status === 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : status === 'DITOLAK' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-blue-50 text-blue-600 border-blue-100';
+                   var status = (item.durasi || 'ON PROCESS').toUpperCase();
+                   var statusClass = status === 'SELESAI' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : status === 'DITOLAK' ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-blue-50 text-blue-700 border-blue-100';
                 ?>
                 <?
                   var waMessageJasa = encodeURIComponent('Halo, saya ingin bertanya mengenai status layanan ' + item.layanan + ' untuk kendaraan ' + item.nomor_kendaraan + ' atas nama ' + item.nama + '.');
@@ -371,9 +349,9 @@
                 <tr class="hover:bg-blue-50/30 transition-colors">
                   <td class="px-8 py-6">
                     <div class="font-800 text-slate-800 uppercase tracking-tight"><?= item.layanan ?></div>
-                    <div class="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-widest"><?= item.nomor_kendaraan ?></div>
+                    <div class="nomor-kendaraan text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-widest" data-original="<?= item.nomor_kendaraan ?>"><?= item.nomor_kendaraan ?></div>
                   </td>
-                  <td class="px-8 py-6"><?= item.nama ?></td>
+                  <td class="px-8 py-6 nama-pemilik" data-original="<?= item.nama ?>"><?= item.nama ?></td>
                   <td class="px-8 py-6">
                     <span class="<?= statusClass ?> px-5 py-2 rounded-xl text-[10px] font-800 border shadow-sm uppercase tracking-wider">
                       <?= status ?>
@@ -440,10 +418,10 @@
       <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden mb-20">
         <div class="p-8 border-b bg-white flex flex-col md:flex-row justify-between items-center gap-4">
           <h3 class="font-800 text-slate-800 uppercase text-sm tracking-widest">Database Explorer</h3>
-          <div class="flex space-x-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            <button onclick="switchLogTab('logDesain', this)" class="log-tab-btn active-log-tab pb-1 transition">Desain</button>
-            <button onclick="switchLogTab('logPrint', this)" class="log-tab-btn pb-1 transition">Percetakan</button>
-            <button onclick="switchLogTab('logJasa', this)" class="log-tab-btn pb-1 transition">Biro Jasa</button>
+          <div class="flex p-1.5 bg-slate-100 rounded-2xl text-[10px] font-800 uppercase tracking-widest text-slate-500">
+            <button onclick="switchLogTab('logDesain', this)" class="log-tab-btn active-log-tab px-6 py-2 rounded-xl transition-all">Desain</button>
+            <button onclick="switchLogTab('logPrint', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Percetakan</button>
+            <button onclick="switchLogTab('logJasa', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Biro Jasa</button>
           </div>
         </div>
         
@@ -671,39 +649,77 @@
       setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
     }
 
+    function obfuscateNama(nama) {
+        if (!nama || typeof nama !== 'string' || nama.length < 4) return nama || '-';
+        return nama.substring(0, 3) + '***';
+    }
+
+    function obfuscateNomor(nomor) {
+        if (!nomor || typeof nomor !== 'string' || nomor.length < 4) return nomor || '-';
+        return nomor.substring(0, 2) + '***' + nomor.slice(-1);
+    }
+
     function filterPublicTable(inputId, tbodyId) {
       const input = document.getElementById(inputId);
       const filter = input.value.toUpperCase().trim();
-      const tbody = document.getElementById(tbodyId);
-      if (!tbody) return;
-      const rows = tbody.getElementsByTagName('tr');
+      const container = document.getElementById(tbodyId);
+      if (!container) return;
+
+      const isCardLayout = tbodyId === 'containerPercetakan';
+      const items = isCardLayout ? container.querySelectorAll('.card-item') : container.getElementsByTagName('tr');
       let foundCount = 0;
 
-      const existingNoResult = tbody.querySelector('.no-result-row');
+      const existingNoResult = container.querySelector('.no-result-row');
       if (existingNoResult) {
-        tbody.removeChild(existingNoResult);
+        existingNoResult.remove();
       }
 
-      for (let i = 0; i < rows.length; i++) {
-        if (rows[i].classList.contains('no-result-row')) continue;
+      for (const item of items) {
+        if (item.classList.contains('no-result-row')) continue;
 
-        const rowText = rows[i].textContent || rows[i].innerText;
-        if (rowText.toUpperCase().indexOf(filter) > -1) {
-          rows[i].style.display = '';
+        let textToSearch;
+        if (tbodyId === 'publicTbodyJasa') {
+          const namaCell = item.querySelector('.nama-pemilik');
+          const nomorCell = item.querySelector('.nomor-kendaraan');
+          const originalNama = namaCell ? namaCell.dataset.original : '';
+          const originalNomor = nomorCell ? nomorCell.dataset.original : '';
+          
+          textToSearch = (originalNama + ' ' + originalNomor).toUpperCase();
+
+          if (filter && filter === originalNomor.toUpperCase()) {
+            if (namaCell) namaCell.textContent = originalNama;
+            if (nomorCell) nomorCell.textContent = originalNomor;
+          } else {
+            if (namaCell) namaCell.textContent = obfuscateNama(originalNama);
+            if (nomorCell) nomorCell.textContent = obfuscateNomor(originalNomor);
+          }
+        } else {
+          textToSearch = (item.textContent || item.innerText).toUpperCase();
+        }
+
+        if (textToSearch.includes(filter)) {
+          item.style.display = isCardLayout ? 'flex' : '';
           foundCount++;
         } else {
-          rows[i].style.display = 'none';
+          item.style.display = 'none';
         }
       }
 
-      if (foundCount === 0 && rows.length > 0) {
-        const colCount = rows[0].getElementsByTagName('td').length;
-        const noResultRow = tbody.insertRow();
-        noResultRow.className = 'no-result-row';
-        const cell = noResultRow.insertCell();
-        cell.colSpan = colCount;
-        cell.className = 'text-center text-slate-400 py-10 italic';
-        cell.innerHTML = `Data tidak ditemukan untuk pencarian '${input.value}'.`;
+      if (foundCount === 0 && filter) {
+        if (isCardLayout) {
+          const noResultEl = document.createElement('div');
+          noResultEl.className = 'no-result-row w-full text-center text-slate-400 py-10 italic';
+          noResultEl.innerHTML = `Produk tidak ditemukan untuk pencarian '${input.value}'.`;
+          container.appendChild(noResultEl);
+        } else {
+          const colCount = container.querySelector('tr:first-child > td')?.length || 1;
+          const noResultRow = container.insertRow();
+          noResultRow.className = 'no-result-row';
+          const cell = noResultRow.insertCell();
+          cell.colSpan = colCount;
+          cell.className = 'text-center text-slate-400 py-10 italic';
+          cell.innerHTML = `Data tidak ditemukan untuk pencarian '${input.value}'.`;
+        }
       }
     }
 
@@ -727,7 +743,7 @@
               <td class="px-6 py-5 italic text-slate-400 max-w-sm break-words">${item.deskripsi || ''}</td>
               <td class="px-6 py-5 whitespace-nowrap">
                 <span class="${item.status === 'SELESAI' ? 'bg-green-50 text-green-700 border-green-100' : item.status === 'DITOLAK' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-blue-50 text-blue-700 border-blue-100'} px-3 py-1 rounded-full text-[9px] font-bold border italic tracking-wide">
-                  ${item.status || 'ON PROCCES'}
+                  ${item.status || 'ON PROCESS'}
                 </span>
               </td>
               <td class="px-6 py-5 text-center whitespace-nowrap">
@@ -759,7 +775,7 @@
           
           // Logika Status: 'Aktif' untuk layanan yang tersedia, 'Diarsipkan' untuk yang tidak.
           let statusText, statusClass;
-          const currentStatus = (item.status || 'ON PROCCES').toUpperCase();
+          const currentStatus = (item.status || 'ON PROCESS').toUpperCase();
           if (currentStatus === 'DITOLAK') {
             statusText = 'DIARSIPKAN';
             statusClass = 'bg-yellow-50 text-yellow-700 border-yellow-100';
@@ -824,12 +840,37 @@
           // Logika Status Otomatis berdasarkan Masa Aktif
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          const tglAktif = item.aktif ? new Date(item.aktif) : null;
-          let statusAuto = "-";
-          let statusAutoClass = "text-slate-400";
+          const tglAktif = item.aktif ? new Date(item.aktif + 'T00:00:00') : null;
+          
+          let statusAuto = "Aktif";
+          let statusAutoClass = "bg-emerald-50 text-emerald-600 border-emerald-100";
+          let rowHighlightClass = "";
+          let formattedDate = "-";
+
           if (tglAktif) {
-            statusAuto = tglAktif < today ? "Perpanjang" : "Aktif";
-            statusAutoClass = tglAktif < today ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
+            formattedDate = tglAktif.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            const diffTime = tglAktif.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+              statusAuto = "EXPIRED";
+              statusAutoClass = "bg-red-100 text-red-700 border-red-200 animate-pulse";
+              rowHighlightClass = "bg-red-50/50";
+            } else if (diffDays === 0) {
+              statusAuto = "HARI INI";
+              statusAutoClass = "bg-rose-50 text-rose-600 border-rose-100";
+              rowHighlightClass = "bg-rose-50/30";
+            } else if (diffDays <= 7) {
+              statusAuto = `H-${diffDays}`;
+              statusAutoClass = "bg-rose-50 text-rose-600 border-rose-100";
+              rowHighlightClass = "bg-rose-50/30";
+            } else if (diffDays <= 30) {
+              statusAuto = `H-${diffDays}`;
+              statusAutoClass = "bg-amber-50 text-amber-600 border-amber-100";
+            }
+          } else {
+            statusAuto = "-";
+            statusAutoClass = "bg-slate-50 text-slate-400 border-slate-100";
           }
 
           const message = `Halo Bapak/Ibu ${item.nama || ''},
@@ -846,7 +887,7 @@ Terima kasih.`;
           const waLink = `https://wa.me/${fixWA(waNum)}?text=${encodeURIComponent(message)}`;
 
           hJasa += `
-          <tr class="hover:bg-slate-50/50 transition">
+          <tr class="hover:bg-slate-50/50 transition ${rowHighlightClass}">
             <td class="px-4 py-5">
               <div class="font-bold text-slate-800 uppercase">${item.layanan || '-'}</div>
               <div class="text-[9px] font-bold text-blue-600 mt-0.5 uppercase tracking-widest">${item.nomor_kendaraan || '-'}</div>
@@ -858,7 +899,7 @@ Terima kasih.`;
             <td class="px-4 py-5 whitespace-nowrap">
               <span class="bg-green-50 text-green-700 px-4 py-1 rounded-full text-[9px] font-bold border border-green-100 italic tracking-wide">${item.durasi || 'Proses'}</span>
             </td>
-            <td class="px-4 py-5 text-slate-500 font-bold whitespace-nowrap">${item.aktif || '-'}</td>
+            <td class="px-4 py-5 text-slate-500 font-bold whitespace-nowrap">${formattedDate}</td>
             <td class="px-4 py-5 whitespace-nowrap">
               <span class="${statusAutoClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-tighter">${statusAuto}</span>
             </td>
@@ -921,8 +962,15 @@ Terima kasih.`;
         const value = item[key] || '';
         let inputField = '';
 
-        if ((key === 'durasi' || key === 'status')) {
-          const options = ["ON PROCCES", "SELESAI", "DITOLAK", "PERPANJANG"];
+        if (key === 'status' && sheetName === "Percetakan") {
+          const options = { "SELESAI": "TAMPILKAN DI KATALOG", "DITOLAK": "SEMBUNYIKAN (ARSIPKAN)" };
+          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          for (const optValue in options) {
+            inputField += `<option value="${optValue}" ${value === optValue ? 'selected' : ''}>${options[optValue]}</option>`;
+          }
+          inputField += `</select>`;
+        } else if ((key === 'status' && sheetName === "Desain") || (key === 'durasi' && sheetName === "Biro Jasa")) {
+          const options = ["ON PROCESS", "SELESAI", "DITOLAK"];
           inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
           options.forEach(opt => {
             inputField += `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`;
@@ -1057,6 +1105,54 @@ Terima kasih.`;
     // Auto refresh every 5 mins if active
     setInterval(() => { if(!document.getElementById('dashboardView').classList.contains('hidden-view')) renderAdminTable(); }, 300000);
 
+    // --- Auto-Scroll for Print Catalog (Seamless Marquee Loop) ---
+    document.addEventListener('DOMContentLoaded', function() {
+      const scrollContainer = document.getElementById('containerPercetakan');
+      const searchInput = document.getElementById('searchPrint');
+      
+      if (!scrollContainer || !searchInput || scrollContainer.children.length === 0) {
+        return;
+      }
+
+      // 1. Seamless Cloning: Duplicate items for an infinite loop effect.
+      const originalItems = Array.from(scrollContainer.children);
+      originalItems.forEach(item => {
+        const clone = item.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true'); // Hide clones from screen readers
+        scrollContainer.appendChild(clone);
+      });
+
+      let isPaused = false;
+      let animationFrameId;
+
+      function autoScroll() {
+        if (!isPaused && scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+          // 2. Smooth Infinite Scroll
+          scrollContainer.scrollLeft += 0.5; // Atur kecepatan di sini
+
+          // When the scroll reaches the start of the cloned items, reset it.
+          const originalContentWidth = scrollContainer.scrollWidth / 2;
+          if (scrollContainer.scrollLeft >= originalContentWidth) {
+            scrollContainer.scrollLeft -= originalContentWidth;
+          }
+        }
+        animationFrameId = requestAnimationFrame(autoScroll);
+      }
+
+      // 3. Interactive Pause
+      function startAutoScroll() { isPaused = false; }
+      function stopAutoScroll() { isPaused = true; }
+
+      scrollContainer.addEventListener('mouseenter', stopAutoScroll);
+      scrollContainer.addEventListener('touchstart', stopAutoScroll, { passive: true });
+      scrollContainer.addEventListener('mouseleave', startAutoScroll);
+      scrollContainer.addEventListener('touchend', startAutoScroll);
+      searchInput.addEventListener('focus', stopAutoScroll);
+      searchInput.addEventListener('blur', startAutoScroll);
+
+      animationFrameId = requestAnimationFrame(autoScroll);
+    });
+
     // --- Back to Top Button ---
     const backToTopBtn = document.getElementById('backToTopBtn');
     window.addEventListener('scroll', () => {
@@ -1069,6 +1165,22 @@ Terima kasih.`;
 
     // --- Dynamic Year for Footer ---
     document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    function initializeObfuscation() {
+        const rows = document.querySelectorAll('#publicTbodyJasa tr');
+        rows.forEach(row => {
+            if (row.classList.contains('no-result-row')) return;
+            const namaCell = row.querySelector('.nama-pemilik');
+            const nomorCell = row.querySelector('.nomor-kendaraan');
+            if (namaCell && namaCell.dataset.original) {
+                namaCell.textContent = obfuscateNama(namaCell.dataset.original);
+            }
+            if (nomorCell && nomorCell.dataset.original) {
+                nomorCell.textContent = obfuscateNomor(nomorCell.dataset.original);
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', initializeObfuscation);
   </script>
 </body>
 
