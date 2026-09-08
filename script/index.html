@@ -424,6 +424,11 @@
             <button onclick="switchLogTab('logJasa', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Biro Jasa</button>
           </div>
         </div>
+
+        <div class="p-6 bg-slate-50 border-b border-slate-100 relative">
+          <input type="text" id="searchAdmin" onkeyup="filterAdminTable()" placeholder="Cari data di tabel aktif..." autocomplete="off" class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-medium text-sm">
+          <i class="fas fa-search absolute left-10 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        </div>
         
         <div id="logDesain" class="log-content overflow-x-auto">
           <table class="w-full text-left">
@@ -461,21 +466,23 @@
   </div>
 
   <!-- Edit Modal -->
-  <div id="editModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
+  <div id="editModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6">
     <div class="absolute inset-0 modal-backdrop" onclick="closeEditModal()"></div>
-    <div class="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden">
-      <div class="p-8 border-b flex justify-between items-center bg-slate-50">
+    <div class="bg-white w-full max-w-xl max-h-[90vh] sm:max-h-[85vh] rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col">
+      <div class="p-5 sm:p-8 border-b flex justify-between items-center bg-slate-50 shrink-0">
         <h4 id="editTitle" class="font-bold text-slate-800 uppercase tracking-widest text-xs">Edit Data</h4>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+        <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 p-2 -mr-2"><i class="fas fa-times text-lg"></i></button>
       </div>
-      <form id="editForm" onsubmit="submitEdit(event)" class="p-8 space-y-4">
-        <input type="hidden" name="row_index" id="editRowIndex">
-        <input type="hidden" name="sheet_name" id="editSheetName">
-        <div id="editFields" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        <div class="pt-6">
-          <button type="submit" id="btnUpdate" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition">Simpan Perubahan</button>
-        </div>
-      </form>
+      <div class="overflow-y-auto flex-grow">
+        <form id="editForm" onsubmit="submitEdit(event)" class="p-5 sm:p-8 space-y-4">
+          <input type="hidden" name="row_index" id="editRowIndex">
+          <input type="hidden" name="sheet_name" id="editSheetName">
+          <div id="editFields" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          <div class="pt-4">
+            <button type="submit" id="btnUpdate" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -505,6 +512,27 @@
         </button>
       </div>
       <div id="containerKuasa" class="flex-1 bg-slate-100 p-4 overflow-auto">
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview STNK Modal -->
+  <div id="modalPreviewStnk" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center no-print">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fas fa-image text-indigo-400"></i> Pratinjau STNK
+        </h3>
+        <div class="flex items-center gap-3">
+          <a id="btnCetakStnk" href="#" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg">
+            <i class="fas fa-print"></i> Cetak
+          </a>
+          <button onclick="closeModalStnk()" class="text-slate-400 hover:text-white text-lg p-1 transition ml-2">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div id="containerStnk" class="flex-1 bg-slate-100 p-4 overflow-auto">
       </div>
     </div>
   </div>
@@ -640,6 +668,12 @@
       document.querySelectorAll('.log-tab-btn').forEach(b => b.classList.remove('active-log-tab'));
       document.getElementById(id).classList.remove('hidden');
       btn.classList.add('active-log-tab');
+      
+      const searchInput = document.getElementById('searchAdmin');
+      if (searchInput) {
+        searchInput.value = '';
+        filterAdminTable();
+      }
     }
 
     function showToast(msg) {
@@ -720,6 +754,53 @@
           cell.className = 'text-center text-slate-400 py-10 italic';
           cell.innerHTML = `Data tidak ditemukan untuk pencarian '${input.value}'.`;
         }
+      }
+    }
+
+    function filterAdminTable() {
+      const input = document.getElementById('searchAdmin');
+      if (!input) return;
+      const filter = input.value.toUpperCase().trim();
+      
+      let activeTbodyId = '';
+      if (!document.getElementById('logDesain').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyDesain';
+      } else if (!document.getElementById('logPrint').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyPrint';
+      } else if (!document.getElementById('logJasa').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyJasa';
+      }
+      
+      if (!activeTbodyId) return;
+      
+      const tbody = document.getElementById(activeTbodyId);
+      const trs = tbody.getElementsByTagName('tr');
+      let foundCount = 0;
+      
+      const existingNoResult = tbody.querySelector('.no-result-row');
+      if (existingNoResult) {
+        existingNoResult.remove();
+      }
+
+      for (let i = 0; i < trs.length; i++) {
+        if (trs[i].classList.contains('no-result-row')) continue;
+        const textToSearch = (trs[i].textContent || trs[i].innerText).toUpperCase();
+        if (textToSearch.includes(filter)) {
+          trs[i].style.display = '';
+          foundCount++;
+        } else {
+          trs[i].style.display = 'none';
+        }
+      }
+      
+      if (foundCount === 0 && filter) {
+        const colCount = tbody.parentElement.querySelector('thead tr > th')?.length || 1;
+        const noResultRow = tbody.insertRow();
+        noResultRow.className = 'no-result-row';
+        const cell = noResultRow.insertCell();
+        cell.colSpan = colCount;
+        cell.className = 'text-center text-slate-400 py-10 italic';
+        cell.innerHTML = `Data tidak ditemukan untuk pencarian '${input.value}'.`;
       }
     }
 
@@ -918,7 +999,7 @@ Terima kasih.`;
                   <i class="fas fa-file-pdf"></i> Kuasa
                 </button>
                 <button onclick='openEditModal("Biro Jasa", ${item.row_index})' class="text-green-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>                
-                <a href="${item.foto_stnk}" target="_blank" class="text-indigo-500 hover:scale-110 transition ${item.foto_stnk ? '' : 'hidden'}" title="Lihat STNK"><i class="fas fa-image text-lg"></i></a>
+                <button onclick="previewStnk('${item.foto_stnk}')" class="text-indigo-500 hover:scale-110 transition ${item.foto_stnk ? '' : 'hidden'}" title="Lihat STNK"><i class="fas fa-image text-lg"></i></button>
                 <a href="${waLink}" target="_blank" class="text-green-500 hover:scale-110 transition ${waNum ? '' : 'hidden'}" title="Kirim Pengingat via WA"><i class="fab fa-whatsapp text-lg"></i></a>
               </div>
             </td>
@@ -1058,6 +1139,32 @@ Terima kasih.`;
     function closeModalKuasa() {
       document.getElementById('modalSuratKuasa').classList.add('hidden');
       document.getElementById('containerKuasa').innerHTML = '';
+    }
+
+    function previewStnk(url) {
+      if (!url) return;
+      const modal = document.getElementById('modalPreviewStnk');
+      const container = document.getElementById('containerStnk');
+      const btnCetak = document.getElementById('btnCetakStnk');
+      
+      let previewUrl = url;
+      if (url.includes('drive.google.com/file/d/')) {
+        previewUrl = url.replace(/\/view.*$/, '/preview');
+      }
+
+      if (btnCetak) btnCetak.href = url;
+
+      container.innerHTML = `
+        <div class="w-full h-full flex flex-col">
+          <iframe src="${previewUrl}" class="w-full h-full rounded-xl border border-slate-300 shadow-sm" style="min-height: 60vh;"></iframe>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModalStnk() {
+      document.getElementById('modalPreviewStnk').classList.add('hidden');
+      document.getElementById('containerStnk').innerHTML = '';
     }
 
     function submitEdit(e) {
