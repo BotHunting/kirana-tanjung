@@ -1,6 +1,0 @@
-// Lead the build process by including the app module
-include ':app'
-
-// Delegate the discovery of Capacitor plugins to the specialized script
-// This is where the 'read_file' or JSON parsing logic is typically initialized
-apply from: 'capacitor.settings.gradle'

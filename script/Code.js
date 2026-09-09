@@ -26,6 +26,11 @@ function doGet(e) {
 function doPost(e) {
   try {
     const params = JSON.parse(e.postData.contents);
+    if (params.action === 'login') {
+      const result = checkLogin(params.username, params.password);
+      return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     if (params.action === 'updateStatus') {
       const res = updateDataInSheet(params.sheetName, params.rowIndex, { status: params.newStatus });
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);

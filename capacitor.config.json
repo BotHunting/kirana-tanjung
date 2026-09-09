@@ -1,6 +1,6 @@
 {
   "appId": "com.kiranatanjung.app",
   "appName": "Kirana Tanjung",
-  "webDir": ".",
+  "webDir": "www",
   "bundledWebRuntime": false
 }
