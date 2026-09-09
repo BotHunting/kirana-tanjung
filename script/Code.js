@@ -1,11 +1,47 @@
 function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  if (e.parameter.action === 'login') {
+    const result = checkLogin(e.parameter.username, e.parameter.password);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   
   // Handler untuk permintaan API JSON dari Flutter/Android
   if (e.parameter.action === 'getData') {
     const data = getAllDataForDashboard();
     return ContentService.createTextOutput(JSON.stringify(data))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (e.parameter.action === 'updateData') {
+    const result = updateDataInSheet(
+      e.parameter.sheetName,
+      e.parameter.rowIndex,
+      e.parameter
+    );
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (e.parameter.action === 'addData') {
+    const result = addDataToSheet(e.parameter.sheetName, e.parameter);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (e.parameter.action === 'deleteData') {
+    const result = deleteDataFromSheet(e.parameter.sheetName, e.parameter.rowIndex);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (e.parameter.action === 'kuasa') {
+    return HtmlService.createHtmlOutput(getKuasaHtml(
+      e.parameter.nama,
+      e.parameter.nomor_uji,
+      e.parameter.merk_type
+    )).setTitle('Surat Kuasa Kirana Tanjung');
   }
 
   // Ambil data publik untuk tampilan awal
@@ -35,6 +71,12 @@ function doPost(e) {
       const res = updateDataInSheet(params.sheetName, params.rowIndex, { status: params.newStatus });
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
     }
+    if (params.action === 'updateData') {
+      const res = updateDataInSheet(params.sheetName, params.rowIndex, params.formData || {});
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Action tidak dikenal." }))
+      .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({success: false, error: err.toString()}))
       .setMimeType(ContentService.MimeType.JSON);
@@ -44,10 +86,15 @@ function doPost(e) {
 function checkLogin(username, password) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const userSheet = ss.getSheetByName("Users");
+  if (!userSheet) {
+    return { success: false, message: "Sheet Users tidak ditemukan." };
+  }
   const userData = userSheet.getDataRange().getValues();
+  const inputUsername = String(username || '').trim();
+  const inputPassword = String(password || '');
   
   for (let i = 1; i < userData.length; i++) {
-    if (userData[i][0] == username && userData[i][1] == password) {
+    if (String(userData[i][0]).trim() === inputUsername && String(userData[i][1]) === inputPassword) {
       return {
         success: true,
         nama: userData[i][2],
@@ -91,6 +138,7 @@ function addDataToSheet(sheetName, formData) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
     const timestamp = new Date();
     
     let rowData = [];
@@ -100,12 +148,30 @@ function addDataToSheet(sheetName, formData) {
       rowData = [timestamp, formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status];
     } else if (sheetName === "Biro Jasa") {
       rowData = [timestamp, formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk];
+    } else {
+      throw new Error("Sheet tidak didukung: " + sheetName);
     }
     
     sheet.appendRow(rowData);
     return { success: true, message: "Data berhasil ditambahkan ke " + sheetName };
   } catch (e) {
     return { success: false, message: e.toString() };
+  }
+}
+
+function deleteDataFromSheet(sheetName, rowIndex) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
+    const row = parseInt(rowIndex);
+    if (!Number.isInteger(row) || row < 2 || row > sheet.getLastRow()) {
+      throw new Error("Nomor baris data tidak valid");
+    }
+    sheet.deleteRow(row);
+    return { success: true, message: "Data berhasil dihapus." };
+  } catch (e) {
+    console.error(e);
+    return { success: false, message: "Gagal menghapus data: " + e.toString() };
   }
 }
 
@@ -116,6 +182,9 @@ function updateDataInSheet(sheetName, rowIndex, formData) {
     const sheet = ss.getSheetByName(sheetName);
     if (!sheet) throw new Error("Sheet tidak ditemukan");
     const row = parseInt(rowIndex);
+    if (!Number.isInteger(row) || row < 2 || row > sheet.getLastRow()) {
+      throw new Error("Nomor baris data tidak valid");
+    }
 
     // Mapping kolom sesuai struktur (Kolom 1 adalah Timestamp, jangan diubah)
     let rowData = [];
@@ -128,6 +197,8 @@ function updateDataInSheet(sheetName, rowIndex, formData) {
     } else if (sheetName.toLowerCase() === "biro jasa") {
       rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk]];
       sheet.getRange(row, 2, 1, 10).setValues(rowData);
+    } else {
+      throw new Error("Sheet tidak didukung: " + sheetName);
     }
 
     return { success: true, message: "Data berhasil diperbarui!" };
@@ -152,7 +223,26 @@ function getAllDataForDashboard() {
 }
 
 // Fungsi untuk memanggil & menyajikan file kuasa.html
-function getKuasaHtml() {
-  return HtmlService.createHtmlOutputFromFile('kuasa')
-    .getContent();
+function getKuasaHtml(nama, nomorUji, merkType) {
+  let html = HtmlService.createHtmlOutputFromFile('kuasa').getContent();
+  html = html.replace(
+    '<span id="skNamaPemilik" class="font-bold text-slate-900">-</span>',
+    '<span id="skNamaPemilik" class="font-bold text-slate-900">' + escapeHtml(nama || '-') + '</span>'
+  );
+  html = html.replace(
+    '<span id="skNoUji" class="font-semibold text-slate-800">-</span>',
+    '<span id="skNoUji" class="font-semibold text-slate-800">' + escapeHtml(nomorUji || '-') + '</span>'
+  );
+  html = html.replace(
+    '<span id="skMerkType" class="font-semibold text-slate-800">-</span>',
+    '<span id="skMerkType" class="font-semibold text-slate-800">' + escapeHtml(merkType || '-') + '</span>'
+  );
+  html = html.replace('<span id="skTanggal"></span>', '<span id="skTanggal">' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMMM yyyy') + '</span>');
+  return html;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, function(character) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character];
+  });
 }

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(const KiranaTanjungApp());
@@ -25,16 +24,16 @@ class KiranaTanjungApp extends StatelessWidget {
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: Color(0xFFE6EBF2)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF1769FF), width: 1.5),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Color(0xFF1769FF), width: 2),
         ),
       ),
     );
@@ -57,7 +56,7 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   static const apiUrl =
-      'https://script.google.com/macros/s/AKfycbwfvy96z3RLxI3fcFZZP0OGe9H7dtbQP7dUc-B_jdXJgzXYRPuOSzJRTnBkXgrCDMIn/exec';
+      'https://script.google.com/macros/s/AKfycbzwJz5NMOBnkuT_LaQD82845M7hoWA7EiuezNEWUQ35Hibn-WF2UXv2HCFyh5GvOh03/exec';
   static const blue = Color(0xFF1769FF);
   static const ink = Color(0xFF172033);
 
@@ -93,9 +92,36 @@ class _HomeShellState extends State<HomeShell> {
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
       if (!mounted) return;
       setState(() {
-        data['desain'] = List<dynamic>.from(decoded['desain'] ?? []);
-        data['percetakan'] = List<dynamic>.from(decoded['percetakan'] ?? []);
-        data['biroJasa'] = List<dynamic>.from(decoded['biroJasa'] ?? []);
+        data['desain'] = _normaliseRows(decoded['desain'], const [
+          'timestamp',
+          'nama',
+          'deskripsi',
+          'linkgambar',
+          'tag',
+          'whatsapp',
+          'status',
+        ]);
+        data['percetakan'] = _normaliseRows(decoded['percetakan'], const [
+          'timestamp',
+          'deskripsi',
+          'harga',
+          'ikon',
+          'whatsapp',
+          'status',
+        ]);
+        data['biroJasa'] = _normaliseRows(decoded['biroJasa'], const [
+          'timestamp',
+          'layanan',
+          'nama',
+          'merek',
+          'type',
+          'nomor_kendaraan',
+          'deskripsi',
+          'durasi',
+          'whatsapp',
+          'aktif',
+          'foto_stnk',
+        ]);
         loading = false;
       });
     } catch (_) {
@@ -118,6 +144,48 @@ class _HomeShellState extends State<HomeShell> {
       selectedIndex = 4;
     });
     _showMessage('Selamat datang, ${result.name}');
+  }
+
+  Future<bool> _sendData(
+      String action, String sheetName, Map<String, String> values,
+      {int? rowIndex}) async {
+    try {
+      final parameters = <String, String>{
+        'action': action,
+        'sheetName': sheetName,
+        ...values,
+      };
+      if (rowIndex != null) parameters['rowIndex'] = '$rowIndex';
+      final response = await http
+          .get(Uri.parse(apiUrl).replace(queryParameters: parameters))
+          .timeout(const Duration(seconds: 20));
+      if (response.statusCode != 200) {
+        throw Exception('Server mengembalikan status ${response.statusCode}.');
+      }
+      final result = jsonDecode(response.body) as Map<String, dynamic>;
+      if (result['success'] == true) {
+        await fetchData();
+        _showMessage(result['message']?.toString() ?? 'Data diperbarui.');
+        return true;
+      }
+      _showMessage(result['message']?.toString() ?? 'Data gagal diperbarui.');
+    } catch (_) {
+      _showMessage('Gagal memperbarui data. Periksa koneksi internet.');
+    }
+    return false;
+  }
+
+  Future<bool> updateData(
+      String sheetName, int rowIndex, Map<String, String> values) {
+    return _sendData('updateData', sheetName, values, rowIndex: rowIndex);
+  }
+
+  Future<bool> addData(String sheetName, Map<String, String> values) {
+    return _sendData('addData', sheetName, values);
+  }
+
+  Future<bool> deleteData(String sheetName, int rowIndex) {
+    return _sendData('deleteData', sheetName, {}, rowIndex: rowIndex);
   }
 
   void logout() {
@@ -155,17 +223,20 @@ class _HomeShellState extends State<HomeShell> {
         onDestinationSelected: (index) => setState(() => selectedIndex = index),
         backgroundColor: Colors.white,
         indicatorColor: blue.withValues(alpha: 0.12),
-        labelTextStyle: WidgetStatePropertyAll(
-          GoogleFonts.plusJakartaSans(
-              fontSize: 10, fontWeight: FontWeight.w700),
-        ),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          return GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.w800
+                  : FontWeight.w600);
+        }),
         destinations: [
           const NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home),
               label: 'Beranda'),
           const NavigationDestination(
-              icon: Icon(Icons.language_outlined),
+              icon: Icon(Icons.public_outlined),
               selectedIcon: Icon(Icons.language),
               label: 'Web Design'),
           const NavigationDestination(
@@ -249,6 +320,10 @@ class _HomeShellState extends State<HomeShell> {
           desain: data['desain']!,
           percetakan: data['percetakan']!,
           biroJasa: data['biroJasa']!,
+          onEdit: (sheetName, item) => _showEditSheet(sheetName, item),
+          onAdd: _showAddSheet,
+          onDelete: _confirmDelete,
+          onPrintKuasa: _showKuasaPreview,
         );
       default:
         return _HomePage(
@@ -259,6 +334,110 @@ class _HomeShellState extends State<HomeShell> {
           userName: userName,
         );
     }
+  }
+
+  Future<void> _showEditSheet(String sheetName, dynamic item) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditDataSheet(
+        sheetName: sheetName,
+        item: item,
+        isNew: false,
+        onSave: (values) => updateData(
+          sheetName,
+          int.tryParse(_value(item, 'row_index')) ?? 0,
+          values,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddSheet(String sheetName) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditDataSheet(
+        sheetName: sheetName,
+        item: const <String, String>{},
+        isNew: true,
+        onSave: (values) => addData(sheetName, values),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(String sheetName, dynamic item) async {
+    final title = sheetName == 'Biro Jasa'
+        ? _value(item, 'nomor_kendaraan', fallback: 'data ini')
+        : _value(item, sheetName == 'Desain' ? 'nama' : 'deskripsi',
+            fallback: 'data ini');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hapus data?'),
+        content: Text('Data "$title" akan dihapus permanen dari Spreadsheet.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Batal')),
+          FilledButton.tonal(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Hapus')),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await deleteData(sheetName, int.tryParse(_value(item, 'row_index')) ?? 0);
+    }
+  }
+
+  Future<void> _showKuasaPreview(dynamic item) async {
+    final name = _value(item, 'nama', fallback: '-');
+    final number = _value(item, 'nomor_kendaraan', fallback: '-');
+    final vehicle =
+        '${_value(item, 'merek', fallback: '-')} / ${_value(item, 'type', fallback: '-')}';
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Surat Kuasa'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Pratinjau data kendaraan',
+                style: TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
+            const SizedBox(height: 16),
+            _InfoLine(label: 'Nama', value: name),
+            _InfoLine(label: 'Nomor Uji', value: number),
+            _InfoLine(label: 'Merk / Type', value: vehicle),
+            _InfoLine(
+                label: 'Tanggal',
+                value: _formatDate(DateTime.now().toIso8601String())),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Tutup')),
+          FilledButton.icon(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final uri = Uri.parse(apiUrl).replace(queryParameters: {
+                'action': 'kuasa',
+                'nama': name,
+                'nomor_uji': number,
+                'merk_type': vehicle,
+              });
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            },
+            icon: const Icon(Icons.print_outlined),
+            label: const Text('Buka untuk Cetak'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -316,7 +495,7 @@ class _HomePage extends StatelessWidget {
         _ServiceTile(
             icon: Icons.language,
             color: const Color(0xFF1769FF),
-            title: 'Web Design & System',
+            title: 'Digital Solution',
             description: 'Sistem digital yang rapi untuk operasional bisnis.',
             onTap: () => onNavigate(1)),
         _ServiceTile(
@@ -353,31 +532,38 @@ class _HeroPanel extends StatelessWidget {
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF12213C),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
+        gradient: const LinearGradient(
+          colors: [Color(0xFF12213C), Color(0xFF1E3A8A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
           BoxShadow(
-              color: Color(0x2412213C), blurRadius: 24, offset: Offset(0, 12))
+              color: const Color(0xFF1769FF).withValues(alpha: 0.2),
+              blurRadius: 24,
+              offset: const Offset(0, 12))
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(30)),
             child: Text('CV. KIRANA TANJUNG PELAKAR',
                 style: GoogleFonts.plusJakartaSans(
-                    color: const Color(0xFF9DBDFF),
+                    color: const Color(0xFF60A5FA),
                     fontSize: 9,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                     letterSpacing: 1.2)),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Text('Solusi digital & administrasi kendaraan.',
               style: GoogleFonts.plusJakartaSans(
+                  letterSpacing: -0.5,
                   color: Colors.white,
                   fontSize: 27,
                   height: 1.18,
@@ -408,7 +594,7 @@ class _WelcomeBanner extends StatelessWidget {
           style: const TextStyle(
               color: Color(0xFF667085),
               fontSize: 12,
-              fontWeight: FontWeight.w700)));
+              fontWeight: FontWeight.w800)));
 }
 
 class _StatTile extends StatelessWidget {
@@ -484,18 +670,22 @@ class _ServiceTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
           margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(color: const Color(0xFFE7EBF2))),
           child: Row(children: [
             Container(
-                width: 44,
-                height: 44,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(15)),
+                    boxShadow: [
+                      BoxShadow(
+                          color: color.withValues(alpha: 0.05), blurRadius: 10)
+                    ],
+                    borderRadius: BorderRadius.circular(18)),
                 child: Icon(icon, color: color)),
             const SizedBox(width: 14),
             Expanded(
@@ -503,12 +693,14 @@ class _ServiceTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                   Text(title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 13)),
+                      style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          color: const Color(0xFF172033))),
                   const SizedBox(height: 4),
                   Text(description,
-                      style: const TextStyle(
-                          color: Color(0xFF8993A4), fontSize: 11))
+                      style: GoogleFonts.plusJakartaSans(
+                          color: const Color(0xFF8993A4), fontSize: 11))
                 ])),
             const Icon(Icons.chevron_right_rounded, color: Color(0xFFB4BDCA))
           ])));
@@ -586,8 +778,8 @@ class _JasaPageState extends State<_JasaPage> {
   @override
   Widget build(BuildContext context) {
     final filtered = widget.items
-        .where((item) => _searches(item, query,
-            ['nama', 'nama_pemilik', 'nomor_kendaraan', 'no_uji', 'layanan']))
+        .where((item) =>
+            _searches(item, query, ['nama', 'nomor_kendaraan', 'layanan']))
         .toList();
     return _PageFrame(
         key: const ValueKey('jasa'),
@@ -599,25 +791,38 @@ class _JasaPageState extends State<_JasaPage> {
         child: filtered.isEmpty
             ? const _EmptyState(message: 'Data layanan tidak ditemukan.')
             : Column(
-                children: filtered
-                    .map((item) => _JasaCard(
-                        item: item, reveal: _matchesVehicle(item, query)))
-                    .toList()));
+                children:
+                    filtered.map((item) => _JasaCard(item: item)).toList()));
   }
 }
 
-class _AdminPage extends StatelessWidget {
+class _AdminPage extends StatefulWidget {
   const _AdminPage({
     required this.name,
     required this.desain,
     required this.percetakan,
     required this.biroJasa,
+    required this.onEdit,
+    required this.onAdd,
+    required this.onDelete,
+    required this.onPrintKuasa,
   });
 
   final String name;
   final List<dynamic> desain;
   final List<dynamic> percetakan;
   final List<dynamic> biroJasa;
+  final void Function(String sheetName, dynamic item) onEdit;
+  final void Function(String sheetName) onAdd;
+  final void Function(String sheetName, dynamic item) onDelete;
+  final void Function(dynamic item) onPrintKuasa;
+
+  @override
+  State<_AdminPage> createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<_AdminPage> {
+  String query = '';
 
   @override
   Widget build(BuildContext context) {
@@ -634,7 +839,7 @@ class _AdminPage extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.8)),
           const SizedBox(height: 7),
-          Text('Halo, $name',
+          Text('Halo, ${widget.name}',
               style: const TextStyle(
                   color: Color(0xFF172033),
                   fontSize: 27,
@@ -642,25 +847,63 @@ class _AdminPage extends StatelessWidget {
           const SizedBox(height: 7),
           const Text('Database Explorer',
               style: TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => widget.onAdd('Desain'),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Tambah Desain'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => widget.onAdd('Percetakan'),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Tambah Cetak'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => widget.onAdd('Biro Jasa'),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Tambah Biro Jasa'),
+            ),
+          ),
           const SizedBox(height: 20),
+          TextField(
+            onChanged: (value) => setState(() => query = value),
+            decoration: const InputDecoration(
+              hintText: 'Cari data di tab aktif...',
+              prefixIcon: Icon(Icons.search_rounded),
+              contentPadding: EdgeInsets.symmetric(vertical: 16),
+            ),
+          ),
+          const SizedBox(height: 14),
           Row(children: [
             Expanded(
                 child: _StatTile(
-                    value: '${desain.length}',
+                    value: '${widget.desain.length}',
                     label: 'Desain',
                     icon: Icons.language,
                     color: const Color(0xFF1769FF))),
             const SizedBox(width: 10),
             Expanded(
                 child: _StatTile(
-                    value: '${percetakan.length}',
+                    value: '${widget.percetakan.length}',
                     label: 'Cetak',
                     icon: Icons.print,
                     color: const Color(0xFF6556D9))),
             const SizedBox(width: 10),
             Expanded(
                 child: _StatTile(
-                    value: '${biroJasa.length}',
+                    value: '${widget.biroJasa.length}',
                     label: 'Jasa',
                     icon: Icons.directions_car,
                     color: const Color(0xFF0C9B77))),
@@ -681,13 +924,32 @@ class _AdminPage extends StatelessWidget {
             height: 360,
             child: TabBarView(children: [
               _AdminDataList(
-                  items: desain, titleKey: 'nama', statusKey: 'status'),
+                  items: widget.desain,
+                  titleKey: 'nama',
+                  statusKey: 'status',
+                  sheetName: 'Desain',
+                  onEdit: widget.onEdit,
+                  onDelete: widget.onDelete,
+                  onPrintKuasa: widget.onPrintKuasa,
+                  query: query),
               _AdminDataList(
-                  items: percetakan,
+                  items: widget.percetakan,
                   titleKey: 'deskripsi',
-                  statusKey: 'status'),
+                  statusKey: 'status',
+                  sheetName: 'Percetakan',
+                  onEdit: widget.onEdit,
+                  onDelete: widget.onDelete,
+                  onPrintKuasa: widget.onPrintKuasa,
+                  query: query),
               _AdminDataList(
-                  items: biroJasa, titleKey: 'no_uji', statusKey: 'durasi'),
+                  items: widget.biroJasa,
+                  titleKey: 'nomor_kendaraan',
+                  statusKey: 'durasi',
+                  sheetName: 'Biro Jasa',
+                  onEdit: widget.onEdit,
+                  onDelete: widget.onDelete,
+                  onPrintKuasa: widget.onPrintKuasa,
+                  query: query),
             ]),
           ),
         ],
@@ -698,45 +960,396 @@ class _AdminPage extends StatelessWidget {
 
 class _AdminDataList extends StatelessWidget {
   const _AdminDataList(
-      {required this.items, required this.titleKey, required this.statusKey});
+      {required this.items,
+      required this.titleKey,
+      required this.statusKey,
+      required this.sheetName,
+      required this.onEdit,
+      required this.onDelete,
+      required this.query,
+      required this.onPrintKuasa});
   final List<dynamic> items;
   final String titleKey;
   final String statusKey;
+  final String sheetName;
+  final void Function(String sheetName, dynamic item) onEdit;
+  final void Function(String sheetName, dynamic item) onDelete;
+  final String query;
+  final void Function(dynamic item) onPrintKuasa;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const _EmptyState(message: 'Belum ada data.');
+    final filteredItems = items.where((item) {
+      final fields = sheetName == 'Desain'
+          ? ['nama', 'deskripsi', 'tag', 'status']
+          : sheetName == 'Percetakan'
+              ? ['deskripsi', 'harga', 'status']
+              : [
+                  'layanan',
+                  'nama',
+                  'merek',
+                  'type',
+                  'nomor_kendaraan',
+                  'deskripsi',
+                  'durasi'
+                ];
+      return _searches(item, query, fields);
+    }).toList();
+    if (filteredItems.isEmpty) {
+      return const _EmptyState(message: 'Data tidak ditemukan.');
+    }
     return ListView.separated(
       padding: const EdgeInsets.only(top: 14),
-      itemCount: items.length,
+      itemCount: filteredItems.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, index) {
-        final item = items[index];
+        final item = filteredItems[index];
         return Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: const Color(0xFFE7EBF2))),
-          child: Row(children: [
-            Expanded(
-                child: Text(
-                    titleKey == 'no_uji'
-                        ? _jasaValue(item, 'nomor_kendaraan',
-                            fallback: 'Tanpa nomor')
-                        : _value(item, titleKey, fallback: 'Tanpa nama'),
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w800))),
-            _StatusChip(
-                label: statusKey == 'durasi'
-                    ? _jasaValue(item, 'durasi', fallback: 'ON PROCESS')
-                    : _value(item, statusKey, fallback: 'ON PROCESS'),
-                color: const Color(0xFF1769FF)),
-          ]),
+          child: sheetName == 'Biro Jasa'
+              ? _AdminJasaRow(
+                  item: item,
+                  onEdit: () => onEdit(sheetName, item),
+                  onDelete: () => onDelete(sheetName, item),
+                  onPrintKuasa: () => onPrintKuasa(item),
+                )
+              : Row(children: [
+                  Expanded(
+                      child: Text(
+                          _value(item, titleKey, fallback: 'Tanpa nama'),
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12, fontWeight: FontWeight.w800))),
+                  _StatusChip(
+                      label: _value(item, statusKey, fallback: 'ON PROCESS'),
+                      color: const Color(0xFF1769FF)),
+                  IconButton(
+                      tooltip: 'Edit data',
+                      onPressed: () => onEdit(sheetName, item),
+                      icon: const Icon(Icons.edit_outlined, size: 19),
+                      color: const Color(0xFF1769FF)),
+                  IconButton(
+                      tooltip: 'Hapus data',
+                      onPressed: () => onDelete(sheetName, item),
+                      icon: const Icon(Icons.delete_outline, size: 19),
+                      color: const Color(0xFFE5484D)),
+                ]),
         );
       },
     );
   }
+}
+
+class _AdminJasaRow extends StatelessWidget {
+  const _AdminJasaRow(
+      {required this.item,
+      required this.onEdit,
+      required this.onDelete,
+      required this.onPrintKuasa});
+  final dynamic item;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onPrintKuasa;
+
+  @override
+  Widget build(BuildContext context) {
+    final phone = _normalisePhone(_value(item, 'whatsapp'));
+    final message =
+        'Halo ${_value(item, 'nama')}, status layanan ${_value(item, 'layanan')} untuk kendaraan ${_value(item, 'nomor_kendaraan')}.';
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        const _IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
+        const SizedBox(width: 12),
+        Expanded(
+            child: Text(
+                '${_value(item, 'layanan', fallback: 'LAYANAN')} • ${_value(item, 'nomor_kendaraan', fallback: '-')}',
+                style: const TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w800))),
+        _StatusChip(
+            label: _value(item, 'durasi', fallback: 'ON PROCESS'),
+            color: const Color(0xFF1769FF)),
+      ]),
+      const SizedBox(height: 12),
+      _InfoLine(label: 'Nama', value: _value(item, 'nama')),
+      if (_value(item, 'merek').isNotEmpty)
+        _InfoLine(
+            label: 'Merk/Type',
+            value: '${_value(item, 'merek')} / ${_value(item, 'type')}'),
+      if (_value(item, 'aktif').isNotEmpty)
+        _InfoLine(
+            label: 'Masa Aktif', value: _formatDate(_value(item, 'aktif'))),
+      Wrap(spacing: 4, children: [
+        IconButton(
+            tooltip: 'Edit data',
+            onPressed: onEdit,
+            icon: const Icon(Icons.edit_outlined),
+            color: const Color(0xFF1769FF)),
+        IconButton(
+            tooltip: 'Hapus data',
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline),
+            color: const Color(0xFFF43F5E)),
+        IconButton(
+            tooltip: 'Cetak surat kuasa',
+            onPressed: onPrintKuasa,
+            icon: const Icon(Icons.description_outlined),
+            color: const Color(0xFF6556D9)),
+        if (_value(item, 'foto_stnk').isNotEmpty)
+          IconButton(
+              tooltip: 'Lihat STNK',
+              onPressed: () => _openUrl(_value(item, 'foto_stnk')),
+              icon: const Icon(Icons.image_outlined),
+              color: const Color(0xFF0C9B77)),
+        if (phone.isNotEmpty)
+          IconButton(
+              tooltip: 'WhatsApp',
+              onPressed: () => _openWhatsApp(phone, message),
+              icon: const Icon(Icons.chat_outlined),
+              color: const Color(0xFF16A34A)),
+      ]),
+    ]);
+  }
+}
+
+class _EditDataSheet extends StatefulWidget {
+  const _EditDataSheet(
+      {required this.sheetName,
+      required this.item,
+      required this.isNew,
+      required this.onSave});
+
+  final String sheetName;
+  final dynamic item;
+  final bool isNew;
+  final Future<bool> Function(Map<String, String> values) onSave;
+
+  @override
+  State<_EditDataSheet> createState() => _EditDataSheetState();
+}
+
+class _EditDataSheetState extends State<_EditDataSheet> {
+  late final Map<String, TextEditingController> controllers;
+  late final Map<String, String> selections;
+  bool saving = false;
+
+  List<String> get fields {
+    if (widget.sheetName == 'Desain') {
+      return ['nama', 'deskripsi', 'linkgambar', 'tag', 'whatsapp', 'status'];
+    }
+    if (widget.sheetName == 'Percetakan') {
+      return ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'];
+    }
+    return [
+      'layanan',
+      'nama',
+      'merek',
+      'type',
+      'nomor_kendaraan',
+      'deskripsi',
+      'durasi',
+      'whatsapp',
+      'aktif',
+      'foto_stnk',
+    ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controllers = {
+      for (final field in fields)
+        field: TextEditingController(text: _value(widget.item, field)),
+    };
+    selections = {
+      if (widget.sheetName == 'Desain')
+        'status': _choiceValue(_value(widget.item, 'status'),
+            ['ON PROCESS', 'SELESAI', 'DITOLAK'], 'ON PROCESS'),
+      if (widget.sheetName == 'Percetakan')
+        'status': _choiceValue(
+            _value(widget.item, 'status'), ['AKTIF', 'DIARSIPKAN'], 'AKTIF'),
+      if (widget.sheetName == 'Biro Jasa')
+        'layanan': _choiceValue(
+            _value(widget.item, 'layanan'), ['KIR', 'SAMSAT', 'REKOM'], 'KIR'),
+      if (widget.sheetName == 'Biro Jasa')
+        'durasi': _choiceValue(_value(widget.item, 'durasi'),
+            ['ON PROCESS', 'SELESAI', 'DITOLAK'], 'ON PROCESS'),
+    };
+  }
+
+  @override
+  void dispose() {
+    for (final controller in controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> save() async {
+    setState(() => saving = true);
+    final values = <String, String>{
+      for (final field in fields) field: controllers[field]!.text.trim(),
+    };
+    values.addAll(selections);
+    if (widget.sheetName == 'Percetakan' && values['status'] == 'AKTIF') {
+      values['status'] = 'SELESAI';
+    } else if (widget.sheetName == 'Percetakan' &&
+        values['status'] == 'DIARSIPKAN') {
+      values['status'] = 'DITOLAK';
+    }
+    final success = await widget.onSave(values);
+    if (!mounted) return;
+    if (success) Navigator.pop(context);
+    setState(() => saving = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.only(top: 70, bottom: bottomInset),
+      child: Material(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFD8DEE8),
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text('${widget.isNew ? 'Tambah' : 'Edit'} ${widget.sheetName}',
+                    style: GoogleFonts.plusJakartaSans(
+                        fontSize: 21, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 16),
+                ...fields.map((field) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildField(field),
+                    )),
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16))),
+                    onPressed: saving ? null : save,
+                    icon: saving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.save_outlined),
+                    label: Text(saving
+                        ? 'Menyimpan...'
+                        : widget.isNew
+                            ? 'Simpan Data'
+                            : 'Simpan Perubahan'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(String field) {
+    final choices = _choicesFor(field);
+    if (choices != null) {
+      return DropdownButtonFormField<String>(
+        initialValue: selections[field],
+        decoration: InputDecoration(labelText: _labelFor(field)),
+        items: choices
+            .map((choice) =>
+                DropdownMenuItem<String>(value: choice, child: Text(choice)))
+            .toList(),
+        onChanged: (value) {
+          if (value != null) setState(() => selections[field] = value);
+        },
+      );
+    }
+    if (field == 'aktif') {
+      return TextField(
+        controller: controllers[field],
+        readOnly: true,
+        onTap: _pickActiveDate,
+        decoration: InputDecoration(
+          labelText: 'Masa Aktif',
+          hintText: 'Pilih tanggal',
+          prefixIcon: const Icon(Icons.calendar_month_outlined),
+          suffixIcon: IconButton(
+              onPressed: _pickActiveDate,
+              icon: const Icon(Icons.edit_calendar_outlined)),
+        ),
+      );
+    }
+    return TextField(
+      controller: controllers[field],
+      maxLines: field == 'deskripsi' ? 3 : 1,
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration(labelText: _labelFor(field)),
+    );
+  }
+
+  List<String>? _choicesFor(String field) {
+    if (widget.sheetName == 'Desain' && field == 'status') {
+      return ['ON PROCESS', 'SELESAI', 'DITOLAK'];
+    }
+    if (widget.sheetName == 'Percetakan' && field == 'status') {
+      return ['AKTIF', 'DIARSIPKAN'];
+    }
+    if (widget.sheetName == 'Biro Jasa' && field == 'layanan') {
+      return ['KIR', 'SAMSAT', 'REKOM'];
+    }
+    if (widget.sheetName == 'Biro Jasa' && field == 'durasi') {
+      return ['ON PROCESS', 'SELESAI', 'DITOLAK'];
+    }
+    return null;
+  }
+
+  Future<void> _pickActiveDate() async {
+    final initial =
+        DateTime.tryParse(controllers['aktif']!.text) ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      helpText: 'Pilih masa aktif',
+    );
+    if (picked != null) {
+      controllers['aktif']!.text =
+          '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+    }
+  }
+}
+
+String _labelFor(String field) => field
+    .replaceAll('_', ' ')
+    .split(' ')
+    .map((word) =>
+        word.isEmpty ? word : '${word[0].toUpperCase()}${word.substring(1)}')
+    .join(' ');
+
+String _choiceValue(String current, List<String> choices, String fallback) {
+  final normalized = current.trim().toUpperCase();
+  return choices.contains(normalized) ? normalized : fallback;
 }
 
 class _PageFrame extends StatelessWidget {
@@ -770,15 +1383,16 @@ class _PageFrame extends StatelessWidget {
                 fontSize: 27,
                 fontWeight: FontWeight.w800)),
         const SizedBox(height: 7),
+        const SizedBox(height: 4),
         Text(subtitle,
             style: const TextStyle(
                 color: Color(0xFF8993A4), fontSize: 12, height: 1.5)),
-        const SizedBox(height: 20),
+        const SizedBox(height: 4),
         TextField(
             onChanged: onSearch,
             decoration: InputDecoration(
                 hintText: searchHint,
-                prefixIcon: const Icon(Icons.search_rounded),
+                prefixIcon: const Icon(Icons.search_rounded, size: 22),
                 contentPadding: const EdgeInsets.symmetric(vertical: 17))),
         const SizedBox(height: 18),
         child
@@ -788,6 +1402,7 @@ class _PageFrame extends StatelessWidget {
 class _ProjectCard extends StatelessWidget {
   const _ProjectCard({required this.item});
   final dynamic item;
+
   @override
   Widget build(BuildContext context) {
     final status = _value(item, 'status', fallback: 'ON PROCESS');
@@ -797,14 +1412,15 @@ class _ProjectCard extends StatelessWidget {
         const _IconBadge(icon: Icons.language, color: Color(0xFF1769FF)),
         const SizedBox(width: 12),
         Expanded(
-            child: Text(_value(item, 'nama', fallback: 'Project tanpa nama'),
-                style: const TextStyle(
-                    fontWeight: FontWeight.w800, fontSize: 14))),
+          child: Text(_value(item, 'nama', fallback: 'Project tanpa nama'),
+              style:
+                  const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+        ),
         _StatusChip(
             label: status,
             color: status.toUpperCase() == 'SELESAI'
                 ? const Color(0xFF0C9B77)
-                : const Color(0xFF1769FF))
+                : const Color(0xFF1769FF)),
       ]),
       const SizedBox(height: 13),
       Text(_value(item, 'deskripsi'),
@@ -817,8 +1433,8 @@ class _ProjectCard extends StatelessWidget {
                 color: Color(0xFF1769FF),
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                letterSpacing: 1))
-      ]
+                letterSpacing: 1)),
+      ],
     ]));
   }
 }
@@ -830,22 +1446,24 @@ class _PrintCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final phone =
         _normalisePhone(_value(item, 'whatsapp', fallback: '6281290320438'));
+    final iconValue = _value(item, 'ikon');
     return _SurfaceCard(
-        child: Row(children: [
-      const _IconBadge(icon: Icons.print, color: Color(0xFF6556D9)),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _CatalogIcon(value: iconValue),
       const SizedBox(width: 13),
       Expanded(
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(_value(item, 'deskripsi', fallback: 'Produk cetak'),
+        Text(_value(item, 'deskripsi', fallback: 'Produk cetak').trim(),
             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
         const SizedBox(height: 6),
         Text(_formatPrice(_value(item, 'harga')),
             style: const TextStyle(
                 color: Color(0xFF6556D9),
                 fontWeight: FontWeight.w800,
-                fontSize: 14))
+                fontSize: 14)),
       ])),
+      const SizedBox(width: 8),
       IconButton.filled(
           onPressed: () => _openWhatsApp(phone,
               'Halo, saya tertarik dengan layanan percetakan: ${_value(item, 'deskripsi')}'),
@@ -854,49 +1472,85 @@ class _PrintCard extends StatelessWidget {
   }
 }
 
-class _JasaCard extends StatelessWidget {
-  const _JasaCard({required this.item, required this.reveal});
-  final dynamic item;
-  final bool reveal;
+class _CatalogIcon extends StatelessWidget {
+  const _CatalogIcon({required this.value});
+  final String value;
+
   @override
   Widget build(BuildContext context) {
-    final expiry = _jasaValue(item, 'aktif');
-    final status = _serviceStatus(expiry, _jasaValue(item, 'durasi'));
-    final phone = _normalisePhone(_firstValue(
-        item, ['whatsapp', 'no_whatsapp', 'wa'],
-        fallback: '6281290320438'));
-    final name = _jasaValue(item, 'nama');
-    final vehicle = _jasaValue(item, 'nomor_kendaraan');
+    final isImage = RegExp(r'^(https?://|data:image)', caseSensitive: false)
+        .hasMatch(value.trim());
+    if (isImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          value,
+          width: 52,
+          height: 52,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const _IconBadge(
+              icon: Icons.broken_image_outlined, color: Color(0xFF6556D9)),
+        ),
+      );
+    }
+    final iconName =
+        value.trim().toLowerCase().replaceFirst(RegExp(r'^fa-'), '');
+    final icon = _fontAwesomeIcon(iconName);
+    return _IconBadge(icon: icon, color: const Color(0xFF6556D9));
+  }
+}
+
+IconData _fontAwesomeIcon(String value) {
+  switch (value) {
+    case 'print':
+      return Icons.print;
+    case 'image':
+      return Icons.image_outlined;
+    case 'tag':
+      return Icons.sell_outlined;
+    case 'file-pdf':
+      return Icons.picture_as_pdf_outlined;
+    case 'id-card':
+      return Icons.badge_outlined;
+    case 'book':
+      return Icons.menu_book_outlined;
+    case 'camera':
+      return Icons.camera_alt_outlined;
+    case 'shopping-cart':
+      return Icons.shopping_cart_outlined;
+    case 'star':
+      return Icons.star_border_rounded;
+    case 'heart':
+      return Icons.favorite_border_rounded;
+    case 'user':
+      return Icons.person_outline_rounded;
+    case 'envelope':
+      return Icons.mail_outline_rounded;
+    case 'map-marker':
+      return Icons.location_on_outlined;
+    default:
+      return Icons.local_offer_outlined;
+  }
+}
+
+class _JasaCard extends StatelessWidget {
+  const _JasaCard({required this.item});
+  final dynamic item;
+  @override
+  Widget build(BuildContext context) {
+    final vehicle = _value(item, 'nomor_kendaraan');
+    final status =
+        _serviceStatus(_value(item, 'aktif'), _value(item, 'durasi'));
     return _SurfaceCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const _IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
-        const SizedBox(width: 12),
-        Expanded(
-            child: Text(
-                '${_jasaValue(item, 'layanan', fallback: 'LAYANAN')}  •  ${reveal ? vehicle : _mask(vehicle)}',
-                style: const TextStyle(
-                    fontWeight: FontWeight.w800, fontSize: 13))),
-        _StatusChip(label: status.label, color: status.color)
-      ]),
-      const SizedBox(height: 15),
-      _InfoLine(label: 'Pemilik', value: reveal ? name : _mask(name)),
-      _InfoLine(
-          label: 'Kendaraan',
-          value: '${_jasaValue(item, 'merek')} / ${_jasaValue(item, 'type')}'),
-      _InfoLine(
-          label: 'Proses',
-          value: _jasaValue(item, 'durasi', fallback: 'ON PROCESS')),
-      if (expiry.isNotEmpty)
-        _InfoLine(label: 'Masa aktif', value: _formatDate(expiry)),
-      const SizedBox(height: 12),
-      Align(
-          alignment: Alignment.centerRight,
-          child: OutlinedButton.icon(
-              onPressed: () => _openWhatsApp(phone,
-                  'Halo, saya ingin bertanya mengenai status layanan ${_jasaValue(item, 'layanan')} untuk kendaraan $vehicle atas nama $name.'),
-              icon: const Icon(Icons.chat_outlined, size: 16),
-              label: const Text('Tanya via WhatsApp')))
+        child: Row(children: [
+      const _IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
+      const SizedBox(width: 12),
+      Expanded(
+          child: Text(
+              '${_value(item, 'layanan', fallback: 'LAYANAN')}  •  ${_mask(vehicle)}',
+              style:
+                  const TextStyle(fontWeight: FontWeight.w800, fontSize: 13))),
+      _StatusChip(label: status.label, color: status.color)
     ]));
   }
 }
@@ -904,6 +1558,7 @@ class _JasaCard extends StatelessWidget {
 class _SurfaceCard extends StatelessWidget {
   const _SurfaceCard({required this.child});
   final Widget child;
+
   @override
   Widget build(BuildContext context) => Container(
       margin: const EdgeInsets.only(bottom: 11),
@@ -919,6 +1574,7 @@ class _IconBadge extends StatelessWidget {
   const _IconBadge({required this.icon, required this.color});
   final IconData icon;
   final Color color;
+
   @override
   Widget build(BuildContext context) => Container(
       width: 42,
@@ -933,6 +1589,7 @@ class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.label, required this.color});
   final String label;
   final Color color;
+
   @override
   Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
@@ -948,6 +1605,7 @@ class _InfoLine extends StatelessWidget {
   const _InfoLine({required this.label, required this.value});
   final String label;
   final String value;
+
   @override
   Widget build(BuildContext context) => Padding(
       padding: const EdgeInsets.only(bottom: 7),
@@ -1037,15 +1695,16 @@ class _LoginPageState extends State<LoginPage> {
       error = null;
     });
     try {
-      final response = await http
-          .post(Uri.parse(widget.apiUrl),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({
-                'action': 'login',
-                'username': usernameController.text.trim(),
-                'password': passwordController.text
-              }))
-          .timeout(const Duration(seconds: 20));
+      final loginUri = Uri.parse(widget.apiUrl).replace(queryParameters: {
+        'action': 'login',
+        'username': usernameController.text.trim(),
+        'password': passwordController.text,
+      });
+      final response =
+          await http.get(loginUri).timeout(const Duration(seconds: 20));
+      if (response.statusCode != 200) {
+        throw Exception('Server mengembalikan status ${response.statusCode}.');
+      }
       final result = jsonDecode(response.body) as Map<String, dynamic>;
       if (!mounted) return;
       if (result['success'] == true) {
@@ -1135,31 +1794,14 @@ String _value(dynamic item, String key, {String fallback = ''}) {
   return fallback;
 }
 
-String _firstValue(dynamic item, List<String> keys, {String fallback = ''}) {
-  for (final key in keys) {
-    final value = _value(item, key);
-    if (value.isNotEmpty) return value;
-  }
-  return fallback;
-}
-
-String _jasaValue(dynamic item, String key, {String fallback = ''}) {
-  final aliases = <String, List<String>>{
-    'nama': ['nama', 'nama_pemilik', 'nama_konsumen'],
-    'nomor_kendaraan': ['nomor_kendaraan', 'no_uji', 'nomor_uji'],
-    'layanan': ['layanan', 'jenis_layanan'],
-    'merek': ['merek', 'merk'],
-    'type': ['type', 'tipe'],
-    'durasi': ['durasi', 'status', 'progres'],
-    'aktif': ['aktif', 'masa_aktif', 'tanggal_aktif', 'tgl_aktif'],
-  };
-  return _firstValue(item, aliases[key] ?? [key], fallback: fallback);
-}
-
-bool _matchesVehicle(dynamic item, String query) {
-  final normalizedQuery = query.trim().toLowerCase();
-  return normalizedQuery.isNotEmpty &&
-      normalizedQuery == _jasaValue(item, 'nomor_kendaraan').toLowerCase();
+List<dynamic> _normaliseRows(dynamic rawRows, List<String> fields) {
+  if (rawRows is! List) return <dynamic>[];
+  return rawRows.whereType<Map>().map((row) {
+    return <String, dynamic>{
+      'row_index': row['row_index']?.toString() ?? '',
+      for (final field in fields) field: row[field]?.toString() ?? '',
+    };
+  }).toList();
 }
 
 String _mask(String value) {
@@ -1170,14 +1812,31 @@ String _mask(String value) {
 String _formatPrice(String value) {
   if (value.isEmpty) return '-';
   final number = int.tryParse(value.replaceAll(RegExp(r'\D'), ''));
-  return number == null || number == 0
-      ? value
-      : 'Rp ${NumberFormat('#,###', 'id_ID').format(number)}';
+  if (number == null || number == 0) return value;
+  final formatted = number
+      .toString()
+      .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => '.');
+  return 'Rp $formatted';
 }
 
 String _formatDate(String value) {
   final date = DateTime.tryParse(value);
-  return date == null ? value : DateFormat('dd MMM yyyy', 'id_ID').format(date);
+  if (date == null) return value;
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mei',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des',
+  ];
+  return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
 }
 
 String _normalisePhone(String value) {
@@ -1191,6 +1850,12 @@ Future<void> _openWhatsApp(String phone, String message) async {
   if (phone.isEmpty) return;
   final uri =
       Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
+}
+
+Future<void> _openUrl(String value) async {
+  final uri = Uri.tryParse(value);
+  if (uri == null || !uri.hasScheme) return;
   await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
