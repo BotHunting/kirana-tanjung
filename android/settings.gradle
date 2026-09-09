@@ -1,8 +1,6 @@
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
-}
+// Lead the build process by including the app module
 include ':app'
-include ':capacitor-cordova-android-plugins'
-project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
+// Delegate the discovery of Capacitor plugins to the specialized script
+// This is where the 'read_file' or JSON parsing logic is typically initialized
 apply from: 'capacitor.settings.gradle'
