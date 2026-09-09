@@ -1,6 +1,13 @@
 function doGet(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   
+  // Handler untuk permintaan API JSON dari Flutter/Android
+  if (e.parameter.action === 'getData') {
+    const data = getAllDataForDashboard();
+    return ContentService.createTextOutput(JSON.stringify(data))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Ambil data publik untuk tampilan awal
   const template = HtmlService.createTemplateFromFile('index');
   template.publicDesain = getSheetData(ss, "Desain");
@@ -11,6 +18,22 @@ function doGet(e) {
     .setTitle('CV. KIRANA TANJUNG PELAKAR')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/**
+ * Menangani update status atau data dari aplikasi Android
+ */
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    if (params.action === 'updateStatus') {
+      const res = updateDataInSheet(params.sheetName, params.rowIndex, { status: params.newStatus });
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function checkLogin(username, password) {
