@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart'; // Added for efficient image loading
 import 'package:url_launcher/url_launcher.dart';
+import 'kuasa.dart';
+import 'design.dart';
+import 'percetakan.dart';
 
 void main() => runApp(const KiranaTanjungApp());
 
@@ -72,6 +75,8 @@ class _HomeShellState extends State<HomeShell> {
   String? errorMessage;
   bool loggedIn = false;
   String? userName;
+  String _webSearchQuery = '';
+  String _searchCetakQuery = '';
 
   @override
   void initState() {
@@ -285,9 +290,26 @@ class _HomeShellState extends State<HomeShell> {
   Widget _buildSelectedPage() {
     switch (selectedIndex) {
       case 1:
-        return _WebPage(items: data['desain']!);
+        return WebDesignView(
+          items: data['desain']!.cast<Map<String, dynamic>>(),
+          searchQuery: _webSearchQuery,
+          onSearchChanged: (val) => setState(() => _webSearchQuery = val),
+          catalogIconBuilder: (val) => _CatalogIcon(value: val),
+        );
       case 2:
-        return _PrintPage(items: data['percetakan']!);
+        return PercetakanView(
+          items: data['percetakan']!.cast<Map<String, dynamic>>(),
+          searchQuery: _searchCetakQuery,
+          onSearchChanged: (val) => setState(() => _searchCetakQuery = val),
+          catalogIconBuilder: (val) => _CatalogIcon(value: val),
+          onChatPressed: (item) {
+            final phone = _normalisePhone(
+                _value(item, 'whatsapp', fallback: '6281290320438'));
+            final desc = _value(item, 'deskripsi', fallback: 'Produk cetak');
+            _openWhatsApp(
+                phone, 'Halo, saya tertarik dengan layanan percetakan: $desc');
+          },
+        );
       case 3:
         return _JasaPage(items: data['biroJasa']!);
       case 4:
@@ -398,15 +420,13 @@ class _HomeShellState extends State<HomeShell> {
               onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Tutup')),
           FilledButton.icon(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              final uri = Uri.parse(apiUrl).replace(queryParameters: {
-                'action': 'kuasa',
-                'nama': name,
-                'nomor_uji': number,
-                'merk_type': vehicle,
-              });
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            onPressed: () {
+              Navigator.pop(context); // Tutup modal ringkasan
+              showDialog(
+                context: context,
+                builder: (context) =>
+                    ModalKuasaViewer(item: item as Map<String, dynamic>),
+              );
             },
             icon: const Icon(Icons.print_outlined),
             label: const Text('Buka untuk Cetak'),
@@ -680,69 +700,6 @@ class _ServiceTile extends StatelessWidget {
                 ])),
             const Icon(Icons.chevron_right_rounded, color: Color(0xFFB4BDCA))
           ])));
-}
-
-class _WebPage extends StatefulWidget {
-  const _WebPage({required this.items});
-  final List<dynamic> items;
-  @override
-  State<_WebPage> createState() => _WebPageState();
-}
-
-class _WebPageState extends State<_WebPage> {
-  String query = '';
-  @override
-  Widget build(BuildContext context) {
-    final filtered = widget.items
-        .where((item) => _searches(item, query, ['nama', 'tag', 'deskripsi']))
-        .toList();
-    return _PageFrame(
-        key: const ValueKey('web'),
-        eyebrow: 'PORTFOLIO',
-        title: 'Web Design & System',
-        subtitle: 'Status project dan solusi digital yang kami kerjakan.',
-        searchHint: 'Cari project atau deskripsi',
-        onSearch: (value) => setState(() => query = value),
-        itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
-        itemBuilder: (context, index) {
-          return filtered.isEmpty
-              ? const _EmptyState(message: 'Project tidak ditemukan.')
-              : _ProjectCard(item: filtered[index]);
-        });
-  }
-}
-
-class _PrintPage extends StatefulWidget {
-  const _PrintPage({required this.items});
-  final List<dynamic> items;
-  @override
-  State<_PrintPage> createState() => _PrintPageState();
-}
-
-class _PrintPageState extends State<_PrintPage> {
-  String query = '';
-  @override
-  Widget build(BuildContext context) {
-    final filtered = widget.items
-        .where((item) =>
-            _value(item, 'status').toUpperCase() != 'DITOLAK' &&
-            _searches(item, query, ['deskripsi', 'harga']))
-        .toList();
-    return _PageFrame(
-      key: const ValueKey('print'),
-      eyebrow: 'KATALOG LAYANAN',
-      title: 'Percetakan',
-      subtitle: 'Produk cetak untuk kebutuhan bisnis dan identitas Anda.',
-      searchHint: 'Cari produk percetakan',
-      onSearch: (value) => setState(() => query = value),
-      itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
-      itemBuilder: (context, index) {
-        return filtered.isEmpty
-            ? const _EmptyState(message: 'Produk tidak ditemukan.')
-            : _PrintCard(item: filtered[index]);
-      },
-    );
-  }
 }
 
 class _JasaPage extends StatefulWidget {
