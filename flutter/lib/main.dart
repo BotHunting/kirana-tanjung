@@ -1424,44 +1424,6 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
-class _PrintCard extends StatelessWidget {
-  const _PrintCard({required this.item});
-  final dynamic item;
-  @override
-  Widget build(BuildContext context) {
-    final phone =
-        _normalisePhone(_value(item, 'whatsapp', fallback: '6281290320438'));
-    final iconValue = _value(item, 'ikon');
-    return _SurfaceCard(
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _CatalogIcon(
-        value: iconValue,
-        status: _value(item, 'status'),
-        size: 52,
-        enableZoom: true,
-      ),
-      const SizedBox(width: 13),
-      Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(_value(item, 'deskripsi', fallback: 'Produk cetak').trim(),
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-        const SizedBox(height: 6),
-        Text(_formatPrice(_value(item, 'harga')),
-            style: const TextStyle(
-                color: Color(0xFF6556D9),
-                fontWeight: FontWeight.w800,
-                fontSize: 14)),
-      ])),
-      const SizedBox(width: 8),
-      IconButton.filled(
-          onPressed: () => _openWhatsApp(phone,
-              'Halo, saya tertarik dengan layanan percetakan: ${_value(item, 'deskripsi')}'),
-          icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18))
-    ]));
-  }
-}
-
 class _CatalogIcon extends StatelessWidget {
   const _CatalogIcon({
     required this.value,
@@ -1927,16 +1889,6 @@ List<dynamic> _normaliseRows(dynamic rawRows, List<String> fields) {
 String _mask(String value) {
   if (value.length < 4) return value.isEmpty ? '-' : value;
   return '${value.substring(0, 2)}***${value.substring(value.length - 1)}';
-}
-
-String _formatPrice(String value) {
-  if (value.isEmpty) return '-';
-  final number = int.tryParse(value.replaceAll(RegExp(r'\D'), ''));
-  if (number == null || number == 0) return value;
-  final formatted = number
-      .toString()
-      .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => '.');
-  return 'Rp $formatted';
 }
 
 String _formatDate(String value) {

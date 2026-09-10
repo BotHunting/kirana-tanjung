@@ -76,10 +76,9 @@ class WebDesignView extends StatelessWidget {
                       filled: true,
                       fillColor: Colors.white,
                       contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                      border: _createRoundedBorder(),
-                      enabledBorder: _createRoundedBorder(),
-                      focusedBorder:
-                          _createRoundedBorder(color: const Color(0xFF1769FF)),
+                      border: _buildCustomOutlineBorder(),
+                      enabledBorder: _buildCustomOutlineBorder(),
+                      focusedBorder: _buildCustomOutlineBorder(isActive: true),
                     ),
                   ),
                 ],
@@ -118,11 +117,11 @@ class WebDesignView extends StatelessWidget {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFF1F5F9)),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.02),
+                                color: Color(0x05000000),
                                 blurRadius: 8,
-                                offset: const Offset(0, 2),
+                                offset: Offset(0, 2),
                               ),
                             ],
                           ),
@@ -180,11 +179,13 @@ class WebDesignView extends StatelessWidget {
     );
   }
 
-  OutlineInputBorder _createRoundedBorder(
-      {Color color = const Color(0xFFE2E8F0)}) {
+  OutlineInputBorder _buildCustomOutlineBorder({bool isActive = false}) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(24),
-      borderSide: BorderSide(color: color, width: 1.0),
+      borderRadius: BorderRadius.circular(22),
+      borderSide: BorderSide(
+        color: isActive ? const Color(0xFF1769FF) : const Color(0xFFE2E8F0),
+        width: isActive ? 1.6 : 1.0,
+      ),
     );
   }
 }

@@ -78,14 +78,9 @@ class PercetakanView extends StatelessWidget {
                       filled: true,
                       fillColor: Colors.white,
                       contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
+                      border: _inputEdge(),
+                      enabledBorder: _inputEdge(),
+                      focusedBorder: _inputEdge(highlight: true),
                     ),
                   ),
                 ],
@@ -181,6 +176,16 @@ class PercetakanView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  OutlineInputBorder _inputEdge({bool highlight = false}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(24),
+      borderSide: BorderSide(
+        color: highlight ? const Color(0xFF1769FF) : const Color(0xFFE2E8F0),
+        width: highlight ? 1.5 : 1.0,
       ),
     );
   }

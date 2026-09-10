@@ -1,0 +1,234 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class BiroJasaView extends StatelessWidget {
+  const BiroJasaView({
+    super.key,
+    required this.items,
+    required this.searchQuery,
+    required this.onSearchChanged,
+    required this.onShowKuasa,
+  });
+
+  final List<Map<String, dynamic>> items;
+  final String searchQuery;
+  final ValueChanged<String> onSearchChanged;
+  final void Function(Map<String, dynamic> item) onShowKuasa;
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredItems = items.where((item) {
+      final nama = (item['nama'] ?? '').toString().toLowerCase();
+      final nomorUji = (item['nomor_kendaraan'] ?? '').toString().toLowerCase();
+      final merk =
+          (item['merek'] ?? item['type'] ?? '').toString().toLowerCase();
+      final q = searchQuery.toLowerCase().trim();
+      return nama.contains(q) || nomorUji.contains(q) || merk.contains(q);
+    }).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'STATUS BERKAS & LAYANAN',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1769FF),
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Biro Jasa Transportasi',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pantau progres pengurusan KIR, SAMSAT, dan Rekomendasi.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    onChanged: onSearchChanged,
+                    decoration: InputDecoration(
+                      hintText: 'Cari nama pemilik, no. uji, atau merk...',
+                      hintStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                      prefixIcon:
+                          const Icon(Icons.search, color: Color(0xFF64748B)),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: filteredItems.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Tidak ada data biro jasa ditemukan',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      itemCount: filteredItems.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        final nama = (item['nama'] ?? 'Tanpa Nama').toString();
+                        final nomorUji =
+                            (item['nomor_kendaraan'] ?? '-').toString();
+                        final merk =
+                            '${item['merek'] ?? '-'} / ${item['type'] ?? '-'}';
+                        final masaAktif = (item['aktif'] ?? '-').toString();
+                        final status =
+                            (item['durasi'] ?? 'ON PROCESS').toString();
+                        final isSelesai =
+                            status.toUpperCase().contains('SELESAI');
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFF1F5F9)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF6FF),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                        Icons.directions_car_outlined,
+                                        color: Color(0xFF1769FF),
+                                        size: 20),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(nama,
+                                            style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color:
+                                                    const Color(0xFF0F172A))),
+                                        Text('No. Uji: $nomorUji',
+                                            style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    const Color(0xFF1769FF))),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isSelesai
+                                          ? const Color(0xFFDCFCE7)
+                                          : const Color(0xFFDBEAFE),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(status,
+                                        style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: isSelesai
+                                                ? const Color(0xFF15803D)
+                                                : const Color(0xFF1D4ED8))),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              const Divider(
+                                  height: 1, color: Color(0xFFF1F5F9)),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Merk / Type: $merk',
+                                          style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 11,
+                                              color: const Color(0xFF64748B))),
+                                      const SizedBox(height: 2),
+                                      Text('Masa Aktif: $masaAktif',
+                                          style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 11,
+                                              color: const Color(0xFF64748B))),
+                                    ],
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Cetak Surat Kuasa',
+                                    onPressed: () => onShowKuasa(item),
+                                    icon: const Icon(Icons.description_outlined,
+                                        color: Color(0xFF1769FF)),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
