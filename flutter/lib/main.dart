@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Required for compute()
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:cached_network_image/cached_network_image.dart'; // Added for efficient image loading
 import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(const KiranaTanjungApp());
@@ -89,39 +91,13 @@ class _HomeShellState extends State<HomeShell> {
       if (response.statusCode != 200) {
         throw Exception('Server mengembalikan status ${response.statusCode}.');
       }
-      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      // Offload both parsing and normalization to the background isolate
+      final processedData = await compute(_parseAndNormalize, response.body);
       if (!mounted) return;
       setState(() {
-        data['desain'] = _normaliseRows(decoded['desain'], const [
-          'timestamp',
-          'nama',
-          'deskripsi',
-          'linkgambar',
-          'tag',
-          'whatsapp',
-          'status',
-        ]);
-        data['percetakan'] = _normaliseRows(decoded['percetakan'], const [
-          'timestamp',
-          'deskripsi',
-          'harga',
-          'ikon',
-          'whatsapp',
-          'status',
-        ]);
-        data['biroJasa'] = _normaliseRows(decoded['biroJasa'], const [
-          'timestamp',
-          'layanan',
-          'nama',
-          'merek',
-          'type',
-          'nomor_kendaraan',
-          'deskripsi',
-          'durasi',
-          'whatsapp',
-          'aktif',
-          'foto_stnk',
-        ]);
+        data['desain'] = processedData['desain']!;
+        data['percetakan'] = processedData['percetakan']!;
+        data['biroJasa'] = processedData['biroJasa']!;
         loading = false;
       });
     } catch (_) {
@@ -162,7 +138,7 @@ class _HomeShellState extends State<HomeShell> {
       if (response.statusCode != 200) {
         throw Exception('Server mengembalikan status ${response.statusCode}.');
       }
-      final result = jsonDecode(response.body) as Map<String, dynamic>;
+      final result = await compute(_parseJson, response.body);
       if (result['success'] == true) {
         await fetchData();
         _showMessage(result['message']?.toString() ?? 'Data diperbarui.');
@@ -727,11 +703,12 @@ class _WebPageState extends State<_WebPage> {
         subtitle: 'Status project dan solusi digital yang kami kerjakan.',
         searchHint: 'Cari project atau deskripsi',
         onSearch: (value) => setState(() => query = value),
-        child: filtered.isEmpty
-            ? const _EmptyState(message: 'Project tidak ditemukan.')
-            : Column(
-                children:
-                    filtered.map((item) => _ProjectCard(item: item)).toList()));
+        itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
+        itemBuilder: (context, index) {
+          return filtered.isEmpty
+              ? const _EmptyState(message: 'Project tidak ditemukan.')
+              : _ProjectCard(item: filtered[index]);
+        });
   }
 }
 
@@ -752,17 +729,19 @@ class _PrintPageState extends State<_PrintPage> {
             _searches(item, query, ['deskripsi', 'harga']))
         .toList();
     return _PageFrame(
-        key: const ValueKey('print'),
-        eyebrow: 'KATALOG LAYANAN',
-        title: 'Percetakan',
-        subtitle: 'Produk cetak untuk kebutuhan bisnis dan identitas Anda.',
-        searchHint: 'Cari produk percetakan',
-        onSearch: (value) => setState(() => query = value),
-        child: filtered.isEmpty
+      key: const ValueKey('print'),
+      eyebrow: 'KATALOG LAYANAN',
+      title: 'Percetakan',
+      subtitle: 'Produk cetak untuk kebutuhan bisnis dan identitas Anda.',
+      searchHint: 'Cari produk percetakan',
+      onSearch: (value) => setState(() => query = value),
+      itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
+      itemBuilder: (context, index) {
+        return filtered.isEmpty
             ? const _EmptyState(message: 'Produk tidak ditemukan.')
-            : Column(
-                children:
-                    filtered.map((item) => _PrintCard(item: item)).toList()));
+            : _PrintCard(item: filtered[index]);
+      },
+    );
   }
 }
 
@@ -782,17 +761,19 @@ class _JasaPageState extends State<_JasaPage> {
             _searches(item, query, ['nama', 'nomor_kendaraan', 'layanan']))
         .toList();
     return _PageFrame(
-        key: const ValueKey('jasa'),
-        eyebrow: 'STATUS LAYANAN',
-        title: 'Biro Jasa Kendaraan',
-        subtitle: 'Pantau proses KIR, SAMSAT, dan rekomendasi kendaraan.',
-        searchHint: 'Cari nama atau nomor kendaraan',
-        onSearch: (value) => setState(() => query = value),
-        child: filtered.isEmpty
+      key: const ValueKey('jasa'),
+      eyebrow: 'STATUS LAYANAN',
+      title: 'Biro Jasa Kendaraan',
+      subtitle: 'Pantau proses KIR, SAMSAT, dan rekomendasi kendaraan.',
+      searchHint: 'Cari nama atau nomor kendaraan',
+      onSearch: (value) => setState(() => query = value),
+      itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
+      itemBuilder: (context, index) {
+        return filtered.isEmpty
             ? const _EmptyState(message: 'Data layanan tidak ditemukan.')
-            : Column(
-                children:
-                    filtered.map((item) => _JasaCard(item: item)).toList()));
+            : _JasaCard(item: filtered[index]);
+      },
+    );
   }
 }
 
@@ -1019,6 +1000,31 @@ class _AdminDataList extends StatelessWidget {
                   onPrintKuasa: () => onPrintKuasa(item),
                 )
               : Row(children: [
+                  if (sheetName == 'Percetakan') ...[
+                    SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: _CatalogIcon(
+                        value: _value(item, 'ikon'),
+                        status: _value(item, statusKey),
+                        size: 42,
+                        enableZoom: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ] else if (sheetName == 'Desain') ...[
+                    SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: _CatalogIcon(
+                        value: _value(item, 'linkgambar'),
+                        status: _value(item, statusKey),
+                        size: 42,
+                        enableZoom: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Expanded(
                       child: Text(
                           _value(item, titleKey, fallback: 'Tanpa nama'),
@@ -1354,49 +1360,71 @@ String _choiceValue(String current, List<String> choices, String fallback) {
 
 class _PageFrame extends StatelessWidget {
   const _PageFrame(
-      {super.key,
+      {super.key, // Changed to accept itemCount and itemBuilder
       required this.eyebrow,
       required this.title,
       required this.subtitle,
       required this.searchHint,
       required this.onSearch,
-      required this.child});
+      required this.itemCount,
+      required this.itemBuilder});
   final String eyebrow;
   final String title;
   final String subtitle;
   final String searchHint;
   final ValueChanged<String> onSearch;
-  final Widget child;
+  final int itemCount; // New
+  final IndexedWidgetBuilder itemBuilder; // New
+
   @override
-  Widget build(BuildContext context) =>
-      ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 30), children: [
-        Text(eyebrow,
-            style: const TextStyle(
-                color: Color(0xFF1769FF),
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.8)),
-        const SizedBox(height: 7),
-        Text(title,
-            style: const TextStyle(
-                color: Color(0xFF172033),
-                fontSize: 27,
-                fontWeight: FontWeight.w800)),
-        const SizedBox(height: 7),
-        const SizedBox(height: 4),
-        Text(subtitle,
-            style: const TextStyle(
-                color: Color(0xFF8993A4), fontSize: 12, height: 1.5)),
-        const SizedBox(height: 4),
-        TextField(
-            onChanged: onSearch,
-            decoration: InputDecoration(
-                hintText: searchHint,
-                prefixIcon: const Icon(Icons.search_rounded, size: 22),
-                contentPadding: const EdgeInsets.symmetric(vertical: 17))),
-        const SizedBox(height: 18),
-        child
-      ]);
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Text(eyebrow,
+                style: const TextStyle(
+                    color: Color(0xFF1769FF),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.8)),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 7)),
+          SliverToBoxAdapter(
+            child: Text(title,
+                style: const TextStyle(
+                    color: Color(0xFF172033),
+                    fontSize: 27,
+                    fontWeight: FontWeight.w800)),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 7)),
+          const SliverToBoxAdapter(child: SizedBox(height: 4)),
+          SliverToBoxAdapter(
+            child: Text(subtitle,
+                style: const TextStyle(
+                    color: Color(0xFF8993A4), fontSize: 12, height: 1.5)),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 4)),
+          SliverToBoxAdapter(
+            child: TextField(
+                onChanged: onSearch,
+                decoration: InputDecoration(
+                    hintText: searchHint,
+                    prefixIcon: const Icon(Icons.search_rounded, size: 22),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 17))),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 18)),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              itemBuilder,
+              childCount: itemCount,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ProjectCard extends StatelessWidget {
@@ -1449,7 +1477,12 @@ class _PrintCard extends StatelessWidget {
     final iconValue = _value(item, 'ikon');
     return _SurfaceCard(
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _CatalogIcon(value: iconValue),
+      _CatalogIcon(
+        value: iconValue,
+        status: _value(item, 'status'),
+        size: 52,
+        enableZoom: true,
+      ),
       const SizedBox(width: 13),
       Expanded(
           child:
@@ -1473,31 +1506,160 @@ class _PrintCard extends StatelessWidget {
 }
 
 class _CatalogIcon extends StatelessWidget {
-  const _CatalogIcon({required this.value});
+  const _CatalogIcon({
+    required this.value,
+    this.status,
+    this.enableZoom = false,
+    this.size = 52.0, // Parameter ukuran yang fleksibel
+  });
+
   final String value;
+  final String? status;
+  final bool enableZoom;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    final isImage = RegExp(r'^(https?://|data:image)', caseSensitive: false)
-        .hasMatch(value.trim());
-    if (isImage) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Image.network(
-          value,
-          width: 52,
-          height: 52,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const _IconBadge(
-              icon: Icons.broken_image_outlined, color: Color(0xFF6556D9)),
-        ),
-      );
+    // 1. Rewrite URL using helper for Google Drive optimization
+    String url = _formatImageUrl(value);
+    if (url.isEmpty) {
+      return _IconBadge(
+          icon: Icons.help_outline, color: Colors.grey, size: size);
     }
-    final iconName =
-        value.trim().toLowerCase().replaceFirst(RegExp(r'^fa-'), '');
-    final icon = _fontAwesomeIcon(iconName);
-    return _IconBadge(icon: icon, color: const Color(0xFF6556D9));
+
+    // 2. Fix protocol-relative URLs (e.g. //example.com)
+    if (url.startsWith('//')) url = 'https:$url';
+
+    // Browser-like headers to bypass User-Agent blocking from servers like WordPress
+    const requestHeaders = {
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept':
+          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+    };
+
+    // Broad detection for URLs, Data URIs, and common image/media extensions
+    final isImage = RegExp(
+      r'(^https?://)|' // Network protocols
+      r'(^data:image/)|' // Base64 images
+      r'(\.(png|jpe?g|gif|webp|bmp|svg|webm|heic|avif)(\?.*)?$)', // Common extensions with optional query params
+      caseSensitive: false,
+    ).hasMatch(url);
+
+    Color borderColor = Colors.transparent;
+    if (status != null) {
+      final s = status!.toUpperCase();
+      if (s == 'SELESAI' || s == 'AKTIF') {
+        borderColor = const Color(0xFF0C9B77);
+      }
+      if (s == 'ON PROCESS') {
+        borderColor = const Color(0xFF1769FF);
+      }
+      if (s == 'DITOLAK' || s == 'DIARSIPKAN') {
+        borderColor = const Color(0xFFE5484D);
+      }
+    }
+
+    Widget content;
+    if (isImage && url.startsWith('http')) {
+      // Bypass CachedNetworkImage on Web to avoid CORS XHR blocks
+      if (kIsWeb) {
+        content = GestureDetector(
+          onTap: enableZoom ? () => _showZoomDialog(context, url) : null,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.network(
+              url,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              headers: requestHeaders,
+              errorBuilder: (context, error, stackTrace) => _IconBadge(
+                  icon: Icons.broken_image_outlined,
+                  color: const Color(0xFF6556D9),
+                  size: size * 0.4),
+            ),
+          ),
+        );
+      } else {
+        content = GestureDetector(
+          onTap: enableZoom ? () => _showZoomDialog(context, url) : null,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: CachedNetworkImage(
+              imageUrl: url,
+              width: size,
+              height: size,
+              memCacheWidth: (size * 3).toInt(), // Optimasi memori dinamis
+              httpHeaders: requestHeaders,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+              errorWidget: (context, url, error) => _IconBadge(
+                  icon: Icons.broken_image_outlined,
+                  color: const Color(0xFF6556D9),
+                  size: size),
+            ),
+          ),
+        );
+      }
+    } else {
+      final iconName = url.toLowerCase().replaceFirst(RegExp(r'^fa-'), '');
+      content = _IconBadge(
+          icon: _fontAwesomeIcon(iconName),
+          color: const Color(0xFF6556D9),
+          size: size);
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor, width: 2),
+      ),
+      padding: const EdgeInsets.all(2),
+      child: content,
+    );
   }
+
+  void _showZoomDialog(BuildContext context, String url) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            InteractiveViewer(
+              clipBehavior: Clip.none,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(url, fit: BoxFit.contain),
+              ),
+            ),
+            IconButton.filled(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close),
+              style: IconButton.styleFrom(backgroundColor: Colors.black54),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Utility to convert Google Drive URLs to reliable thumbnail endpoints
+String _formatImageUrl(String url) {
+  final trimmed = url.trim();
+  if (trimmed.isEmpty) return '';
+  final regExp = RegExp(r'(?:id=|\/d\/|\/file\/d\/)([\w-]+)');
+  final match = regExp.firstMatch(trimmed);
+  if (match != null) {
+    // Using sz=w500 for optimized quality and bypass CORS/Direct load issues
+    return 'https://drive.google.com/thumbnail?id=${match.group(1)}&sz=w500';
+  }
+  return trimmed;
 }
 
 IconData _fontAwesomeIcon(String value) {
@@ -1571,18 +1733,19 @@ class _SurfaceCard extends StatelessWidget {
 }
 
 class _IconBadge extends StatelessWidget {
-  const _IconBadge({required this.icon, required this.color});
+  const _IconBadge({required this.icon, required this.color, this.size = 42.0});
   final IconData icon;
   final Color color;
+  final double size;
 
   @override
   Widget build(BuildContext context) => Container(
-      width: 42,
-      height: 42,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(14)),
-      child: Icon(icon, color: color, size: 20));
+          borderRadius: BorderRadius.circular(size * 0.33)),
+      child: Icon(icon, color: color, size: size * 0.48));
 }
 
 class _StatusChip extends StatelessWidget {
@@ -1705,7 +1868,7 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode != 200) {
         throw Exception('Server mengembalikan status ${response.statusCode}.');
       }
-      final result = jsonDecode(response.body) as Map<String, dynamic>;
+      final result = await compute(_parseJson, response.body);
       if (!mounted) return;
       if (result['success'] == true) {
         Navigator.pop(
@@ -1871,4 +2034,46 @@ Future<void> _openUrl(String value) async {
   if (days < 0) return (label: 'EXPIRED', color: const Color(0xFFE5484D));
   if (days <= 30) return (label: 'H-$days', color: const Color(0xFFE59B20));
   return (label: 'AKTIF', color: const Color(0xFF0C9B77));
+}
+
+/// Top-level function for background JSON parsing using Isolates via compute()
+Map<String, dynamic> _parseJson(String text) {
+  return jsonDecode(text) as Map<String, dynamic>;
+}
+
+/// Comprehensive isolate processing: decodes AND normalizes to keep UI thread idle
+Map<String, List<dynamic>> _parseAndNormalize(String text) {
+  final decoded = jsonDecode(text) as Map<String, dynamic>;
+  return {
+    'desain': _normaliseRows(decoded['desain'], const [
+      'timestamp',
+      'nama',
+      'deskripsi',
+      'linkgambar',
+      'tag',
+      'whatsapp',
+      'status',
+    ]),
+    'percetakan': _normaliseRows(decoded['percetakan'], const [
+      'timestamp',
+      'deskripsi',
+      'harga',
+      'ikon',
+      'whatsapp',
+      'status',
+    ]),
+    'biroJasa': _normaliseRows(decoded['biroJasa'], const [
+      'timestamp',
+      'layanan',
+      'nama',
+      'merek',
+      'type',
+      'nomor_kendaraan',
+      'deskripsi',
+      'durasi',
+      'whatsapp',
+      'aktif',
+      'foto_stnk',
+    ]),
+  };
 }
