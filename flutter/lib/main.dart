@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'kuasa.dart';
 import 'design.dart';
 import 'percetakan.dart';
+import 'dashboard.dart';
 
 void main() => runApp(const KiranaTanjungApp());
 
@@ -294,26 +295,26 @@ class _HomeShellState extends State<HomeShell> {
           items: data['desain']!.cast<Map<String, dynamic>>(),
           searchQuery: _webSearchQuery,
           onSearchChanged: (val) => setState(() => _webSearchQuery = val),
-          catalogIconBuilder: (val) => _CatalogIcon(value: val),
+          catalogIconBuilder: (val) => CatalogIcon(value: val),
         );
       case 2:
         return PercetakanView(
           items: data['percetakan']!.cast<Map<String, dynamic>>(),
           searchQuery: _searchCetakQuery,
           onSearchChanged: (val) => setState(() => _searchCetakQuery = val),
-          catalogIconBuilder: (val) => _CatalogIcon(value: val),
+          catalogIconBuilder: (val) => CatalogIcon(value: val),
           onChatPressed: (item) {
-            final phone = _normalisePhone(
-                _value(item, 'whatsapp', fallback: '6281290320438'));
-            final desc = _value(item, 'deskripsi', fallback: 'Produk cetak');
-            _openWhatsApp(
+            final phone = appNormalisePhone(
+                appValue(item, 'whatsapp', fallback: '6281290320438'));
+            final desc = appValue(item, 'deskripsi', fallback: 'Produk cetak');
+            appOpenWhatsApp(
                 phone, 'Halo, saya tertarik dengan layanan percetakan: $desc');
           },
         );
       case 3:
         return _JasaPage(items: data['biroJasa']!);
       case 4:
-        return _AdminPage(
+        return AdminPage(
           name: userName ?? 'Admin',
           desain: data['desain']!,
           percetakan: data['percetakan']!,
@@ -339,13 +340,13 @@ class _HomeShellState extends State<HomeShell> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EditDataSheet(
+      builder: (_) => EditDataSheet(
         sheetName: sheetName,
         item: item,
         isNew: false,
         onSave: (values) => updateData(
           sheetName,
-          int.tryParse(_value(item, 'row_index')) ?? 0,
+          int.tryParse(appValue(item, 'row_index')) ?? 0,
           values,
         ),
       ),
@@ -357,7 +358,7 @@ class _HomeShellState extends State<HomeShell> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EditDataSheet(
+      builder: (_) => EditDataSheet(
         sheetName: sheetName,
         item: const <String, String>{},
         isNew: true,
@@ -368,8 +369,8 @@ class _HomeShellState extends State<HomeShell> {
 
   Future<void> _confirmDelete(String sheetName, dynamic item) async {
     final title = sheetName == 'Biro Jasa'
-        ? _value(item, 'nomor_kendaraan', fallback: 'data ini')
-        : _value(item, sheetName == 'Desain' ? 'nama' : 'deskripsi',
+        ? appValue(item, 'nomor_kendaraan', fallback: 'data ini')
+        : appValue(item, sheetName == 'Desain' ? 'nama' : 'deskripsi',
             fallback: 'data ini');
     final confirmed = await showDialog<bool>(
       context: context,
@@ -387,15 +388,15 @@ class _HomeShellState extends State<HomeShell> {
       ),
     );
     if (confirmed == true && mounted) {
-      await deleteData(sheetName, int.tryParse(_value(item, 'row_index')) ?? 0);
+      await deleteData(sheetName, int.tryParse(appValue(item, 'row_index')) ?? 0);
     }
   }
 
   Future<void> _showKuasaPreview(dynamic item) async {
-    final name = _value(item, 'nama', fallback: '-');
-    final number = _value(item, 'nomor_kendaraan', fallback: '-');
+    final name = appValue(item, 'nama', fallback: '-');
+    final number = appValue(item, 'nomor_kendaraan', fallback: '-');
     final vehicle =
-        '${_value(item, 'merek', fallback: '-')} / ${_value(item, 'type', fallback: '-')}';
+        '${appValue(item, 'merek', fallback: '-')} / ${appValue(item, 'type', fallback: '-')}';
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -407,12 +408,12 @@ class _HomeShellState extends State<HomeShell> {
             const Text('Pratinjau data kendaraan',
                 style: TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
             const SizedBox(height: 16),
-            _InfoLine(label: 'Nama', value: name),
-            _InfoLine(label: 'Nomor Uji', value: number),
-            _InfoLine(label: 'Merk / Type', value: vehicle),
-            _InfoLine(
+            InfoLine(label: 'Nama', value: name),
+            InfoLine(label: 'Nomor Uji', value: number),
+            InfoLine(label: 'Merk / Type', value: vehicle),
+            InfoLine(
                 label: 'Tanggal',
-                value: _formatDate(DateTime.now().toIso8601String())),
+                value: appFormatDate(DateTime.now().toIso8601String())),
           ],
         ),
         actions: [
@@ -463,21 +464,21 @@ class _HomePage extends StatelessWidget {
         Row(
           children: [
             Expanded(
-                child: _StatTile(
+                child: StatTile(
                     value: '${desain.length}',
                     label: 'Project',
                     icon: Icons.language,
                     color: const Color(0xFF1769FF))),
             const SizedBox(width: 10),
             Expanded(
-                child: _StatTile(
+                child: StatTile(
                     value: '${percetakan.length}',
                     label: 'Produk',
                     icon: Icons.print,
                     color: const Color(0xFF6556D9))),
             const SizedBox(width: 10),
             Expanded(
-                child: _StatTile(
+                child: StatTile(
                     value: '${biroJasa.length}',
                     label: 'Berkas',
                     icon: Icons.directions_car,
@@ -512,7 +513,7 @@ class _HomePage extends StatelessWidget {
         const SizedBox(height: 14),
         ...desain.take(3).map((item) => _ProjectCard(item: item)),
         if (desain.isEmpty)
-          const _EmptyState(message: 'Belum ada project yang ditampilkan.'),
+          const EmptyState(message: 'Belum ada project yang ditampilkan.'),
       ],
     );
   }
@@ -593,9 +594,10 @@ class _WelcomeBanner extends StatelessWidget {
               fontWeight: FontWeight.w800)));
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile(
-      {required this.value,
+class StatTile extends StatelessWidget {
+  const StatTile(
+      {super.key,
+      required this.value,
       required this.label,
       required this.icon,
       required this.color});
@@ -715,7 +717,7 @@ class _JasaPageState extends State<_JasaPage> {
   Widget build(BuildContext context) {
     final filtered = widget.items
         .where((item) =>
-            _searches(item, query, ['nama', 'nomor_kendaraan', 'layanan']))
+            appSearches(item, query, ['nama', 'nomor_kendaraan', 'layanan']))
         .toList();
     return _PageFrame(
       key: const ValueKey('jasa'),
@@ -727,592 +729,11 @@ class _JasaPageState extends State<_JasaPage> {
       itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
       itemBuilder: (context, index) {
         return filtered.isEmpty
-            ? const _EmptyState(message: 'Data layanan tidak ditemukan.')
+            ? const EmptyState(message: 'Data layanan tidak ditemukan.')
             : _JasaCard(item: filtered[index]);
       },
     );
   }
-}
-
-class _AdminPage extends StatefulWidget {
-  const _AdminPage({
-    required this.name,
-    required this.desain,
-    required this.percetakan,
-    required this.biroJasa,
-    required this.onEdit,
-    required this.onAdd,
-    required this.onDelete,
-    required this.onPrintKuasa,
-  });
-
-  final String name;
-  final List<dynamic> desain;
-  final List<dynamic> percetakan;
-  final List<dynamic> biroJasa;
-  final void Function(String sheetName, dynamic item) onEdit;
-  final void Function(String sheetName) onAdd;
-  final void Function(String sheetName, dynamic item) onDelete;
-  final void Function(dynamic item) onPrintKuasa;
-
-  @override
-  State<_AdminPage> createState() => _AdminPageState();
-}
-
-class _AdminPageState extends State<_AdminPage> {
-  String query = '';
-
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: ListView(
-        key: const ValueKey('admin'),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-        children: [
-          Text('DASHBOARD ADMIN',
-              style: GoogleFonts.plusJakartaSans(
-                  color: const Color(0xFF1769FF),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.8)),
-          const SizedBox(height: 7),
-          Text('Halo, ${widget.name}',
-              style: const TextStyle(
-                  color: Color(0xFF172033),
-                  fontSize: 27,
-                  fontWeight: FontWeight.w800)),
-          const SizedBox(height: 7),
-          const Text('Database Explorer',
-              style: TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => widget.onAdd('Desain'),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Tambah Desain'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => widget.onAdd('Percetakan'),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Tambah Cetak'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => widget.onAdd('Biro Jasa'),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Tambah Biro Jasa'),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            onChanged: (value) => setState(() => query = value),
-            decoration: const InputDecoration(
-              hintText: 'Cari data di tab aktif...',
-              prefixIcon: Icon(Icons.search_rounded),
-              contentPadding: EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(children: [
-            Expanded(
-                child: _StatTile(
-                    value: '${widget.desain.length}',
-                    label: 'Desain',
-                    icon: Icons.language,
-                    color: const Color(0xFF1769FF))),
-            const SizedBox(width: 10),
-            Expanded(
-                child: _StatTile(
-                    value: '${widget.percetakan.length}',
-                    label: 'Cetak',
-                    icon: Icons.print,
-                    color: const Color(0xFF6556D9))),
-            const SizedBox(width: 10),
-            Expanded(
-                child: _StatTile(
-                    value: '${widget.biroJasa.length}',
-                    label: 'Jasa',
-                    icon: Icons.directions_car,
-                    color: const Color(0xFF0C9B77))),
-          ]),
-          const SizedBox(height: 26),
-          Container(
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE7EBF2))),
-            child: const TabBar(tabs: [
-              Tab(text: 'Desain'),
-              Tab(text: 'Cetak'),
-              Tab(text: 'Jasa')
-            ]),
-          ),
-          SizedBox(
-            height: 360,
-            child: TabBarView(children: [
-              _AdminDataList(
-                  items: widget.desain,
-                  titleKey: 'nama',
-                  statusKey: 'status',
-                  sheetName: 'Desain',
-                  onEdit: widget.onEdit,
-                  onDelete: widget.onDelete,
-                  onPrintKuasa: widget.onPrintKuasa,
-                  query: query),
-              _AdminDataList(
-                  items: widget.percetakan,
-                  titleKey: 'deskripsi',
-                  statusKey: 'status',
-                  sheetName: 'Percetakan',
-                  onEdit: widget.onEdit,
-                  onDelete: widget.onDelete,
-                  onPrintKuasa: widget.onPrintKuasa,
-                  query: query),
-              _AdminDataList(
-                  items: widget.biroJasa,
-                  titleKey: 'nomor_kendaraan',
-                  statusKey: 'durasi',
-                  sheetName: 'Biro Jasa',
-                  onEdit: widget.onEdit,
-                  onDelete: widget.onDelete,
-                  onPrintKuasa: widget.onPrintKuasa,
-                  query: query),
-            ]),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AdminDataList extends StatelessWidget {
-  const _AdminDataList(
-      {required this.items,
-      required this.titleKey,
-      required this.statusKey,
-      required this.sheetName,
-      required this.onEdit,
-      required this.onDelete,
-      required this.query,
-      required this.onPrintKuasa});
-  final List<dynamic> items;
-  final String titleKey;
-  final String statusKey;
-  final String sheetName;
-  final void Function(String sheetName, dynamic item) onEdit;
-  final void Function(String sheetName, dynamic item) onDelete;
-  final String query;
-  final void Function(dynamic item) onPrintKuasa;
-
-  @override
-  Widget build(BuildContext context) {
-    if (items.isEmpty) return const _EmptyState(message: 'Belum ada data.');
-    final filteredItems = items.where((item) {
-      final fields = sheetName == 'Desain'
-          ? ['nama', 'deskripsi', 'tag', 'status']
-          : sheetName == 'Percetakan'
-              ? ['deskripsi', 'harga', 'status']
-              : [
-                  'layanan',
-                  'nama',
-                  'merek',
-                  'type',
-                  'nomor_kendaraan',
-                  'deskripsi',
-                  'durasi'
-                ];
-      return _searches(item, query, fields);
-    }).toList();
-    if (filteredItems.isEmpty) {
-      return const _EmptyState(message: 'Data tidak ditemukan.');
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.only(top: 14),
-      itemCount: filteredItems.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, index) {
-        final item = filteredItems[index];
-        return Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE7EBF2))),
-          child: sheetName == 'Biro Jasa'
-              ? _AdminJasaRow(
-                  item: item,
-                  onEdit: () => onEdit(sheetName, item),
-                  onDelete: () => onDelete(sheetName, item),
-                  onPrintKuasa: () => onPrintKuasa(item),
-                )
-              : Row(children: [
-                  if (sheetName == 'Percetakan') ...[
-                    SizedBox(
-                      width: 42,
-                      height: 42,
-                      child: _CatalogIcon(
-                        value: _value(item, 'ikon'),
-                        status: _value(item, statusKey),
-                        size: 42,
-                        enableZoom: true,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ] else if (sheetName == 'Desain') ...[
-                    SizedBox(
-                      width: 42,
-                      height: 42,
-                      child: _CatalogIcon(
-                        value: _value(item, 'linkgambar'),
-                        status: _value(item, statusKey),
-                        size: 42,
-                        enableZoom: true,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  Expanded(
-                      child: Text(
-                          _value(item, titleKey, fallback: 'Tanpa nama'),
-                          style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12, fontWeight: FontWeight.w800))),
-                  _StatusChip(
-                      label: _value(item, statusKey, fallback: 'ON PROCESS'),
-                      color: const Color(0xFF1769FF)),
-                  IconButton(
-                      tooltip: 'Edit data',
-                      onPressed: () => onEdit(sheetName, item),
-                      icon: const Icon(Icons.edit_outlined, size: 19),
-                      color: const Color(0xFF1769FF)),
-                  IconButton(
-                      tooltip: 'Hapus data',
-                      onPressed: () => onDelete(sheetName, item),
-                      icon: const Icon(Icons.delete_outline, size: 19),
-                      color: const Color(0xFFE5484D)),
-                ]),
-        );
-      },
-    );
-  }
-}
-
-class _AdminJasaRow extends StatelessWidget {
-  const _AdminJasaRow(
-      {required this.item,
-      required this.onEdit,
-      required this.onDelete,
-      required this.onPrintKuasa});
-  final dynamic item;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback onPrintKuasa;
-
-  @override
-  Widget build(BuildContext context) {
-    final phone = _normalisePhone(_value(item, 'whatsapp'));
-    final message =
-        'Halo ${_value(item, 'nama')}, status layanan ${_value(item, 'layanan')} untuk kendaraan ${_value(item, 'nomor_kendaraan')}.';
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        const _IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
-        const SizedBox(width: 12),
-        Expanded(
-            child: Text(
-                '${_value(item, 'layanan', fallback: 'LAYANAN')} • ${_value(item, 'nomor_kendaraan', fallback: '-')}',
-                style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w800))),
-        _StatusChip(
-            label: _value(item, 'durasi', fallback: 'ON PROCESS'),
-            color: const Color(0xFF1769FF)),
-      ]),
-      const SizedBox(height: 12),
-      _InfoLine(label: 'Nama', value: _value(item, 'nama')),
-      if (_value(item, 'merek').isNotEmpty)
-        _InfoLine(
-            label: 'Merk/Type',
-            value: '${_value(item, 'merek')} / ${_value(item, 'type')}'),
-      if (_value(item, 'aktif').isNotEmpty)
-        _InfoLine(
-            label: 'Masa Aktif', value: _formatDate(_value(item, 'aktif'))),
-      Wrap(spacing: 4, children: [
-        IconButton(
-            tooltip: 'Edit data',
-            onPressed: onEdit,
-            icon: const Icon(Icons.edit_outlined),
-            color: const Color(0xFF1769FF)),
-        IconButton(
-            tooltip: 'Hapus data',
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline),
-            color: const Color(0xFFF43F5E)),
-        IconButton(
-            tooltip: 'Cetak surat kuasa',
-            onPressed: onPrintKuasa,
-            icon: const Icon(Icons.description_outlined),
-            color: const Color(0xFF6556D9)),
-        if (_value(item, 'foto_stnk').isNotEmpty)
-          IconButton(
-              tooltip: 'Lihat STNK',
-              onPressed: () => _openUrl(_value(item, 'foto_stnk')),
-              icon: const Icon(Icons.image_outlined),
-              color: const Color(0xFF0C9B77)),
-        if (phone.isNotEmpty)
-          IconButton(
-              tooltip: 'WhatsApp',
-              onPressed: () => _openWhatsApp(phone, message),
-              icon: const Icon(Icons.chat_outlined),
-              color: const Color(0xFF16A34A)),
-      ]),
-    ]);
-  }
-}
-
-class _EditDataSheet extends StatefulWidget {
-  const _EditDataSheet(
-      {required this.sheetName,
-      required this.item,
-      required this.isNew,
-      required this.onSave});
-
-  final String sheetName;
-  final dynamic item;
-  final bool isNew;
-  final Future<bool> Function(Map<String, String> values) onSave;
-
-  @override
-  State<_EditDataSheet> createState() => _EditDataSheetState();
-}
-
-class _EditDataSheetState extends State<_EditDataSheet> {
-  late final Map<String, TextEditingController> controllers;
-  late final Map<String, String> selections;
-  bool saving = false;
-
-  List<String> get fields {
-    if (widget.sheetName == 'Desain') {
-      return ['nama', 'deskripsi', 'linkgambar', 'tag', 'whatsapp', 'status'];
-    }
-    if (widget.sheetName == 'Percetakan') {
-      return ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'];
-    }
-    return [
-      'layanan',
-      'nama',
-      'merek',
-      'type',
-      'nomor_kendaraan',
-      'deskripsi',
-      'durasi',
-      'whatsapp',
-      'aktif',
-      'foto_stnk',
-    ];
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    controllers = {
-      for (final field in fields)
-        field: TextEditingController(text: _value(widget.item, field)),
-    };
-    selections = {
-      if (widget.sheetName == 'Desain')
-        'status': _choiceValue(_value(widget.item, 'status'),
-            ['ON PROCESS', 'SELESAI', 'DITOLAK'], 'ON PROCESS'),
-      if (widget.sheetName == 'Percetakan')
-        'status': _choiceValue(
-            _value(widget.item, 'status'), ['AKTIF', 'DIARSIPKAN'], 'AKTIF'),
-      if (widget.sheetName == 'Biro Jasa')
-        'layanan': _choiceValue(
-            _value(widget.item, 'layanan'), ['KIR', 'SAMSAT', 'REKOM'], 'KIR'),
-      if (widget.sheetName == 'Biro Jasa')
-        'durasi': _choiceValue(_value(widget.item, 'durasi'),
-            ['ON PROCESS', 'SELESAI', 'DITOLAK'], 'ON PROCESS'),
-    };
-  }
-
-  @override
-  void dispose() {
-    for (final controller in controllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  Future<void> save() async {
-    setState(() => saving = true);
-    final values = <String, String>{
-      for (final field in fields) field: controllers[field]!.text.trim(),
-    };
-    values.addAll(selections);
-    if (widget.sheetName == 'Percetakan' && values['status'] == 'AKTIF') {
-      values['status'] = 'SELESAI';
-    } else if (widget.sheetName == 'Percetakan' &&
-        values['status'] == 'DIARSIPKAN') {
-      values['status'] = 'DITOLAK';
-    }
-    final success = await widget.onSave(values);
-    if (!mounted) return;
-    if (success) Navigator.pop(context);
-    setState(() => saving = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-    return Padding(
-      padding: EdgeInsets.only(top: 70, bottom: bottomInset),
-      child: Material(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 4,
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFD8DEE8),
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text('${widget.isNew ? 'Tambah' : 'Edit'} ${widget.sheetName}',
-                    style: GoogleFonts.plusJakartaSans(
-                        fontSize: 21, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 16),
-                ...fields.map((field) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildField(field),
-                    )),
-                const SizedBox(height: 4),
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16))),
-                    onPressed: saving ? null : save,
-                    icon: saving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.save_outlined),
-                    label: Text(saving
-                        ? 'Menyimpan...'
-                        : widget.isNew
-                            ? 'Simpan Data'
-                            : 'Simpan Perubahan'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildField(String field) {
-    final choices = _choicesFor(field);
-    if (choices != null) {
-      return DropdownButtonFormField<String>(
-        initialValue: selections[field],
-        decoration: InputDecoration(labelText: _labelFor(field)),
-        items: choices
-            .map((choice) =>
-                DropdownMenuItem<String>(value: choice, child: Text(choice)))
-            .toList(),
-        onChanged: (value) {
-          if (value != null) setState(() => selections[field] = value);
-        },
-      );
-    }
-    if (field == 'aktif') {
-      return TextField(
-        controller: controllers[field],
-        readOnly: true,
-        onTap: _pickActiveDate,
-        decoration: InputDecoration(
-          labelText: 'Masa Aktif',
-          hintText: 'Pilih tanggal',
-          prefixIcon: const Icon(Icons.calendar_month_outlined),
-          suffixIcon: IconButton(
-              onPressed: _pickActiveDate,
-              icon: const Icon(Icons.edit_calendar_outlined)),
-        ),
-      );
-    }
-    return TextField(
-      controller: controllers[field],
-      maxLines: field == 'deskripsi' ? 3 : 1,
-      keyboardType: TextInputType.text,
-      decoration: InputDecoration(labelText: _labelFor(field)),
-    );
-  }
-
-  List<String>? _choicesFor(String field) {
-    if (widget.sheetName == 'Desain' && field == 'status') {
-      return ['ON PROCESS', 'SELESAI', 'DITOLAK'];
-    }
-    if (widget.sheetName == 'Percetakan' && field == 'status') {
-      return ['AKTIF', 'DIARSIPKAN'];
-    }
-    if (widget.sheetName == 'Biro Jasa' && field == 'layanan') {
-      return ['KIR', 'SAMSAT', 'REKOM'];
-    }
-    if (widget.sheetName == 'Biro Jasa' && field == 'durasi') {
-      return ['ON PROCESS', 'SELESAI', 'DITOLAK'];
-    }
-    return null;
-  }
-
-  Future<void> _pickActiveDate() async {
-    final initial =
-        DateTime.tryParse(controllers['aktif']!.text) ?? DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      helpText: 'Pilih masa aktif',
-    );
-    if (picked != null) {
-      controllers['aktif']!.text =
-          '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-    }
-  }
-}
-
-String _labelFor(String field) => field
-    .replaceAll('_', ' ')
-    .split(' ')
-    .map((word) =>
-        word.isEmpty ? word : '${word[0].toUpperCase()}${word.substring(1)}')
-    .join(' ');
-
-String _choiceValue(String current, List<String> choices, String fallback) {
-  final normalized = current.trim().toUpperCase();
-  return choices.contains(normalized) ? normalized : fallback;
 }
 
 class _PageFrame extends StatelessWidget {
@@ -1390,30 +811,30 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = _value(item, 'status', fallback: 'ON PROCESS');
+    final status = appValue(item, 'status', fallback: 'ON PROCESS');
     return _SurfaceCard(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        const _IconBadge(icon: Icons.language, color: Color(0xFF1769FF)),
+        const IconBadge(icon: Icons.language, color: Color(0xFF1769FF)),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(_value(item, 'nama', fallback: 'Project tanpa nama'),
+          child: Text(appValue(item, 'nama', fallback: 'Project tanpa nama'),
               style:
                   const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
         ),
-        _StatusChip(
+        StatusChip(
             label: status,
             color: status.toUpperCase() == 'SELESAI'
                 ? const Color(0xFF0C9B77)
                 : const Color(0xFF1769FF)),
       ]),
       const SizedBox(height: 13),
-      Text(_value(item, 'deskripsi'),
+      Text(appValue(item, 'deskripsi'),
           style: const TextStyle(
               color: Color(0xFF8993A4), fontSize: 11, height: 1.5)),
-      if (_value(item, 'tag').isNotEmpty) ...[
+      if (appValue(item, 'tag').isNotEmpty) ...[
         const SizedBox(height: 12),
-        Text(_value(item, 'tag'),
+        Text(appValue(item, 'tag'),
             style: const TextStyle(
                 color: Color(0xFF1769FF),
                 fontSize: 10,
@@ -1424,8 +845,9 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
-class _CatalogIcon extends StatelessWidget {
-  const _CatalogIcon({
+class CatalogIcon extends StatelessWidget {
+  const CatalogIcon({
+    super.key,
     required this.value,
     this.status,
     this.enableZoom = false,
@@ -1442,7 +864,7 @@ class _CatalogIcon extends StatelessWidget {
     // 1. Rewrite URL using helper for Google Drive optimization
     String url = _formatImageUrl(value);
     if (url.isEmpty) {
-      return _IconBadge(
+      return IconBadge(
           icon: Icons.help_outline, color: Colors.grey, size: size);
     }
 
@@ -1493,7 +915,7 @@ class _CatalogIcon extends StatelessWidget {
               height: size,
               fit: BoxFit.cover,
               headers: requestHeaders,
-              errorBuilder: (context, error, stackTrace) => _IconBadge(
+              errorBuilder: (context, error, stackTrace) => IconBadge(
                   icon: Icons.broken_image_outlined,
                   color: const Color(0xFF6556D9),
                   size: size * 0.4),
@@ -1514,7 +936,7 @@ class _CatalogIcon extends StatelessWidget {
               fit: BoxFit.cover,
               placeholder: (context, url) => const Center(
                   child: CircularProgressIndicator(strokeWidth: 2)),
-              errorWidget: (context, url, error) => _IconBadge(
+              errorWidget: (context, url, error) => IconBadge(
                   icon: Icons.broken_image_outlined,
                   color: const Color(0xFF6556D9),
                   size: size),
@@ -1619,19 +1041,19 @@ class _JasaCard extends StatelessWidget {
   final dynamic item;
   @override
   Widget build(BuildContext context) {
-    final vehicle = _value(item, 'nomor_kendaraan');
+    final vehicle = appValue(item, 'nomor_kendaraan');
     final status =
-        _serviceStatus(_value(item, 'aktif'), _value(item, 'durasi'));
+        _serviceStatus(appValue(item, 'aktif'), appValue(item, 'durasi'));
     return _SurfaceCard(
         child: Row(children: [
-      const _IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
+      const IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
       const SizedBox(width: 12),
       Expanded(
           child: Text(
-              '${_value(item, 'layanan', fallback: 'LAYANAN')}  •  ${_mask(vehicle)}',
+              '${appValue(item, 'layanan', fallback: 'LAYANAN')}  •  ${_mask(vehicle)}',
               style:
                   const TextStyle(fontWeight: FontWeight.w800, fontSize: 13))),
-      _StatusChip(label: status.label, color: status.color)
+      StatusChip(label: status.label, color: status.color)
     ]));
   }
 }
@@ -1651,8 +1073,8 @@ class _SurfaceCard extends StatelessWidget {
       child: child);
 }
 
-class _IconBadge extends StatelessWidget {
-  const _IconBadge({required this.icon, required this.color, this.size = 42.0});
+class IconBadge extends StatelessWidget {
+  const IconBadge({super.key, required this.icon, required this.color, this.size = 42.0});
   final IconData icon;
   final Color color;
   final double size;
@@ -1667,8 +1089,8 @@ class _IconBadge extends StatelessWidget {
       child: Icon(icon, color: color, size: size * 0.48));
 }
 
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, required this.color});
+class StatusChip extends StatelessWidget {
+  const StatusChip({super.key, required this.label, required this.color});
   final String label;
   final Color color;
 
@@ -1683,8 +1105,8 @@ class _StatusChip extends StatelessWidget {
               color: color, fontSize: 9, fontWeight: FontWeight.w800)));
 }
 
-class _InfoLine extends StatelessWidget {
-  const _InfoLine({required this.label, required this.value});
+class InfoLine extends StatelessWidget {
+  const InfoLine({super.key, required this.label, required this.value});
   final String label;
   final String value;
 
@@ -1706,8 +1128,8 @@ class _InfoLine extends StatelessWidget {
       ]));
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.message});
+class EmptyState extends StatelessWidget {
+  const EmptyState({super.key, required this.message});
   final String message;
   @override
   Widget build(BuildContext context) => Padding(
@@ -1834,7 +1256,7 @@ class _LoginPageState extends State<LoginPage> {
             controller: usernameController,
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
-                labelText: 'Username', prefixIcon: Icon(Icons.person_outline))),
+                labelText: 'Username', prefixIcon: Icon(Icons.person_outline_rounded))),
         const SizedBox(height: 14),
         TextField(
             controller: passwordController,
@@ -1861,13 +1283,13 @@ class _LoginPageState extends State<LoginPage> {
       ]));
 }
 
-bool _searches(dynamic item, String query, List<String> keys) {
+bool appSearches(dynamic item, String query, List<String> keys) {
   if (query.trim().isEmpty) return true;
-  final text = keys.map((key) => _value(item, key)).join(' ').toLowerCase();
+  final text = keys.map((key) => appValue(item, key)).join(' ').toLowerCase();
   return text.contains(query.trim().toLowerCase());
 }
 
-String _value(dynamic item, String key, {String fallback = ''}) {
+String appValue(dynamic item, String key, {String fallback = ''}) {
   if (item is Map &&
       item[key] != null &&
       item[key].toString().trim().isNotEmpty) {
@@ -1891,7 +1313,7 @@ String _mask(String value) {
   return '${value.substring(0, 2)}***${value.substring(value.length - 1)}';
 }
 
-String _formatDate(String value) {
+String appFormatDate(String value) {
   final date = DateTime.tryParse(value);
   if (date == null) return value;
   const months = [
@@ -1911,21 +1333,21 @@ String _formatDate(String value) {
   return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
 }
 
-String _normalisePhone(String value) {
+String appNormalisePhone(String value) {
   var phone = value.replaceAll(RegExp(r'\D'), '');
   if (phone.startsWith('0')) phone = '62${phone.substring(1)}';
   if (phone.startsWith('8')) phone = '62$phone';
   return phone;
 }
 
-Future<void> _openWhatsApp(String phone, String message) async {
+Future<void> appOpenWhatsApp(String phone, String message) async {
   if (phone.isEmpty) return;
   final uri =
       Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
   await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
-Future<void> _openUrl(String value) async {
+Future<void> appOpenUrl(String value) async {
   final uri = Uri.tryParse(value);
   if (uri == null || !uri.hasScheme) return;
   await launchUrl(uri, mode: LaunchMode.externalApplication);
