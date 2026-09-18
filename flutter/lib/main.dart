@@ -5,13 +5,26 @@ import 'package:flutter/foundation.dart'; // Required for compute()
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart'; // Added for efficient image loading
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'config.dart';
 import 'kuasa.dart';
 import 'design.dart';
 import 'percetakan.dart';
 import 'dashboard.dart';
 
-void main() => runApp(const KiranaTanjungApp());
+void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Optimasi RAM untuk HP Kentang: Batasi cache gambar (10MB max)
+  // Default Flutter bisa mencapai 100MB+, memicu OOM (Out Of Memory)
+  PaintingBinding.instance.imageCache.maximumSize = 50; // 50 items
+  PaintingBinding.instance.imageCache.maximumSizeBytes =
+      10 * 1024 * 1024; // 10MB
+
+  runApp(const KiranaTanjungApp());
+}
 
 class KiranaTanjungApp extends StatelessWidget {
   const KiranaTanjungApp({super.key});
@@ -61,8 +74,7 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
-  static const apiUrl =
-      'https://script.google.com/macros/s/AKfycbzwJz5NMOBnkuT_LaQD82845M7hoWA7EiuezNEWUQ35Hibn-WF2UXv2HCFyh5GvOh03/exec';
+  static const apiUrl = AppConfig.databaseUrl;
   static const blue = Color(0xFF1769FF);
   static const ink = Color(0xFF172033);
 
@@ -106,12 +118,14 @@ class _HomeShellState extends State<HomeShell> {
         data['biroJasa'] = processedData['biroJasa']!;
         loading = false;
       });
+      FlutterNativeSplash.remove();
     } catch (_) {
       if (!mounted) return;
       setState(() {
         loading = false;
         errorMessage = 'Data belum dapat dimuat. Periksa koneksi internet.';
       });
+      FlutterNativeSplash.remove();
     }
   }
 
@@ -195,9 +209,13 @@ class _HomeShellState extends State<HomeShell> {
             ? const Center(child: CircularProgressIndicator())
             : errorMessage != null
                 ? _ErrorState(message: errorMessage!, onRetry: fetchData)
-                : AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: _buildSelectedPage(),
+                : RepaintBoundary(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeIn,
+                      switchOutCurve: Curves.easeOut,
+                      child: _buildSelectedPage(),
+                    ),
                   ),
       ),
       bottomNavigationBar: NavigationBar(
@@ -254,11 +272,19 @@ class _HomeShellState extends State<HomeShell> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: blue,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
-              child:
-                  const Icon(Icons.hub_outlined, color: Colors.white, size: 21),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: AppConfig.logoUrl,
+                  fit: BoxFit.contain,
+                  errorWidget: (_, __, ___) =>
+                      const Icon(Icons.hub_outlined, color: blue, size: 21),
+                ),
+              ),
             ),
             const SizedBox(width: 10),
             Text('KIRANA',

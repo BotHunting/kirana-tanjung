@@ -8,10 +8,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_native_splash: ^2.4.0
   http: ^1.1.0
   url_launcher: ^6.2.0
   google_fonts: ^6.1.0
   cached_network_image: ^3.4.1
+  webview_flutter: ^4.10.0
+  webview_flutter_android: ^4.14.1
+  web: ^1.1.1
   pdf: ^3.10.0
   printing: ^5.11.0
 
@@ -19,6 +23,23 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#F7F9FC"
+  image: "assets/logo.png"
+  android_12:
+    image: "assets/logo.png"
+    color: "#F7F9FC"
+  fullscreen: true
 
 flutter:
   uses-material-design: true
+  #assets:
+  #  - assets/logo.png

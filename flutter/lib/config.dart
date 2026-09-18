@@ -1,4 +1,10 @@
 class AppConfig {
+  static const String databaseUrl =
+      'https://script.google.com/macros/s/AKfycbzwJz5NMOBnkuT_LaQD82845M7hoWA7EiuezNEWUQ35Hibn-WF2UXv2HCFyh5GvOh03/exec';
+
+  static const String materaiUrl =
+      'https://raw.githubusercontent.com/BotHunting/kirana-tanjung/refs/heads/main/www/materai.png';
+
   static const String logoUrl =
       'https://raw.githubusercontent.com/BotHunting/kirana-tanjung/refs/heads/main/www/Kirana.png';
 
