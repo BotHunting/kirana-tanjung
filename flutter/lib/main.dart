@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart'; // Added for efficient image loading
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'config.dart';
 import 'kuasa.dart';
 import 'design.dart';
@@ -118,15 +119,123 @@ class _HomeShellState extends State<HomeShell> {
         data['biroJasa'] = processedData['biroJasa']!;
         loading = false;
       });
-      FlutterNativeSplash.remove();
+      _checkAppUpdate();
     } catch (_) {
       if (!mounted) return;
       setState(() {
         loading = false;
         errorMessage = 'Data belum dapat dimuat. Periksa koneksi internet.';
       });
+    } finally {
       FlutterNativeSplash.remove();
     }
+  }
+
+  Future<void> _checkAppUpdate() async {
+    try {
+      final currentVersion =
+          kIsWeb ? '1.0.0' : (await PackageInfo.fromPlatform()).version;
+      final response = await http.get(
+        Uri.parse(
+            'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest'),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) return;
+      final releaseData = await compute(_parseJson, response.body);
+      final latestVersion = (releaseData['tag_name'] as String)
+          .replaceAll(RegExp(r'[a-zA-Z]'), '')
+          .trim();
+
+      if (_isVersionNewer(currentVersion, latestVersion)) {
+        final changelog = releaseData['body']?.toString() ??
+            'Pembaruan sistem dan optimalisasi performa.';
+        final assets = releaseData['assets'] as List<dynamic>;
+        String downloadUrl = '';
+
+        if (kIsWeb) {
+          downloadUrl = Uri.base.toString();
+        } else {
+          final apkAsset = assets.firstWhere(
+              (a) => a['name'].toString().endsWith('.apk'),
+              orElse: () => null);
+          if (apkAsset != null) {
+            downloadUrl = apkAsset['browser_download_url'].toString();
+          }
+        }
+
+        if (downloadUrl.isNotEmpty && mounted) {
+          _showUpdateDialog(latestVersion, changelog, downloadUrl);
+        }
+      }
+    } catch (_) {}
+  }
+
+  bool _isVersionNewer(String current, String latest) {
+    List<int> currNodes =
+        current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    List<int> lateNodes =
+        latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    for (int i = 0; i < currNodes.length && i < lateNodes.length; i++) {
+      if (lateNodes[i] > currNodes[i]) return true;
+      if (currNodes[i] > lateNodes[i]) return false;
+    }
+    return lateNodes.length > currNodes.length;
+  }
+
+  void _showUpdateDialog(String version, String changelog, String url) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            const Icon(Icons.system_update_rounded, color: blue, size: 28),
+            const SizedBox(width: 12),
+            Text('Update Tersedia (v$version)',
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w800, fontSize: 16)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Catatan Pembaruan:',
+                  style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold, fontSize: 12, color: ink)),
+              const SizedBox(height: 6),
+              Text(changelog,
+                  style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      color: const Color(0xFF64748B),
+                      height: 1.5)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Nanti',
+                style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.bold)),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await launchUrl(Uri.parse(url),
+                  mode: LaunchMode.externalApplication);
+            },
+            child: Text('Update Sekarang',
+                style:
+                    GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> openLogin() async {
