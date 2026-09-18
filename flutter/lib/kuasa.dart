@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'config.dart';
 
 class ModalKuasaViewer extends StatelessWidget {
@@ -16,6 +19,146 @@ class ModalKuasaViewer extends StatelessWidget {
       }
     }
     return '-';
+  }
+
+  Future<void> _handlePrint(String nama, String nomor, String kendaraan) async {
+    final doc = pw.Document();
+
+    // Load font & gambar materai secara asynchronous sebelum render PDF
+    final fontRegular = await PdfGoogleFonts.plusJakartaSansRegular();
+    final fontBold = await PdfGoogleFonts.plusJakartaSansBold();
+    final imageProvider = await networkImage(AppConfig.materaiUrl);
+
+    doc.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(32),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Center(
+                  child: pw.Column(
+                    children: [
+                      pw.Text('CV. KIRANA TANJUNG PELAKAR',
+                          style: pw.TextStyle(font: fontBold, fontSize: 16)),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                          'Konsultan Teknologi Informasi & Layanan Transportasi Terpadu',
+                          style: pw.TextStyle(font: fontRegular, fontSize: 10)),
+                      pw.Text(
+                          'Alamat: Jl. Ky Syahlan 1 No. 9, Ds. Manyarejo, Kec. Manyar, Kab. Gresik',
+                          style: pw.TextStyle(font: fontRegular, fontSize: 9)),
+                      pw.SizedBox(height: 12),
+                      pw.Divider(thickness: 1.5, color: PdfColors.black),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+                pw.Center(
+                  child: pw.Text('SURAT TUGAS PENGURUSAN',
+                      style: pw.TextStyle(
+                          font: fontBold,
+                          fontSize: 14,
+                          decoration: pw.TextDecoration.underline)),
+                ),
+                pw.SizedBox(height: 20),
+                pw.Text(
+                  'Yang bertanda tangan di bawah ini memberikan tugas pengurusan kendaraan kepada staff resmi dengan rincian identitas kendaraan sebagai berikut:',
+                  style: pw.TextStyle(
+                      font: fontRegular, fontSize: 11, lineSpacing: 1.5),
+                ),
+                pw.SizedBox(height: 16),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.grey300),
+                    borderRadius:
+                        const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  ),
+                  child: pw.Column(
+                    children: [
+                      pw.Row(children: [
+                        pw.SizedBox(
+                            width: 100,
+                            child: pw.Text('Nama Pemilik',
+                                style: pw.TextStyle(
+                                    font: fontRegular, fontSize: 11))),
+                        pw.Text(': ',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 11)),
+                        pw.Text(nama,
+                            style: pw.TextStyle(font: fontBold, fontSize: 11)),
+                      ]),
+                      pw.SizedBox(height: 8),
+                      pw.Row(children: [
+                        pw.SizedBox(
+                            width: 100,
+                            child: pw.Text('Nomor Uji',
+                                style: pw.TextStyle(
+                                    font: fontRegular, fontSize: 11))),
+                        pw.Text(': ',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 11)),
+                        pw.Text(nomor,
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 11)),
+                      ]),
+                      pw.SizedBox(height: 8),
+                      pw.Row(children: [
+                        pw.SizedBox(
+                            width: 100,
+                            child: pw.Text('Merk / Type',
+                                style: pw.TextStyle(
+                                    font: fontRegular, fontSize: 11))),
+                        pw.Text(': ',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 11)),
+                        pw.Text(kendaraan,
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 11)),
+                      ]),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 20),
+                pw.Text(
+                  'Demikian Surat Tugas ini dibuat dengan sebenarnya untuk dipergunakan dalam proses pengujian berkala kendaraan bermotor sebagaimana mestinya.',
+                  style: pw.TextStyle(
+                      font: fontRegular, fontSize: 11, lineSpacing: 1.5),
+                ),
+                pw.SizedBox(height: 40),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Column(
+                    children: [
+                      pw.Text('Gresik, 11 September 2026',
+                          style: pw.TextStyle(font: fontRegular, fontSize: 11)),
+                      pw.SizedBox(height: 4),
+                      pw.Text('Hormat kami,',
+                          style: pw.TextStyle(font: fontRegular, fontSize: 11)),
+                      pw.SizedBox(height: 8),
+                      pw.Image(imageProvider, width: 80, height: 80),
+                      pw.SizedBox(height: 8),
+                      pw.Text('ADI JUNAIDI',
+                          style: pw.TextStyle(font: fontBold, fontSize: 12)),
+                      pw.Text('NIK. 9203015308670001',
+                          style: pw.TextStyle(font: fontRegular, fontSize: 10)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => doc.save(),
+      name: 'Surat_Tugas_${nomor.replaceAll(' ', '_')}',
+    );
   }
 
   @override
@@ -59,9 +202,8 @@ class ModalKuasaViewer extends StatelessWidget {
                 IconButton(
                   tooltip: 'Cetak Dokumen',
                   icon: const Icon(Icons.print, color: Color(0xFF1769FF)),
-                  onPressed: () {
-                    // Panggil fungsi cetak dokumen
-                  },
+                  onPressed: () =>
+                      _handlePrint(namaPemilik, nomorUji, merkType),
                 ),
               ],
             ),

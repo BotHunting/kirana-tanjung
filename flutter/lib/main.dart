@@ -414,7 +414,8 @@ class _HomeShellState extends State<HomeShell> {
       ),
     );
     if (confirmed == true && mounted) {
-      await deleteData(sheetName, int.tryParse(appValue(item, 'row_index')) ?? 0);
+      await deleteData(
+          sheetName, int.tryParse(appValue(item, 'row_index')) ?? 0);
     }
   }
 
@@ -972,7 +973,7 @@ class CatalogIcon extends StatelessWidget {
       }
     } else {
       final iconName = url.toLowerCase().replaceFirst(RegExp(r'^fa-'), '');
-      content = _IconBadge(
+      content = IconBadge(
           icon: _fontAwesomeIcon(iconName),
           color: const Color(0xFF6556D9),
           size: size);
@@ -1100,7 +1101,8 @@ class _SurfaceCard extends StatelessWidget {
 }
 
 class IconBadge extends StatelessWidget {
-  const IconBadge({super.key, required this.icon, required this.color, this.size = 42.0});
+  const IconBadge(
+      {super.key, required this.icon, required this.color, this.size = 42.0});
   final IconData icon;
   final Color color;
   final double size;
@@ -1282,7 +1284,8 @@ class _LoginPageState extends State<LoginPage> {
             controller: usernameController,
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
-                labelText: 'Username', prefixIcon: Icon(Icons.person_outline_rounded))),
+                labelText: 'Username',
+                prefixIcon: Icon(Icons.person_outline_rounded))),
         const SizedBox(height: 14),
         TextField(
             controller: passwordController,
