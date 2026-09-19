@@ -2,7 +2,7 @@
 
 ## Kirana Tanjung Management Dashboard
 
-Aplikasi Flutter untuk manajemen data dan layanan CV. Kirana Tanjung Pelakar.
+Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung Pelakar.
 
 ---
 
@@ -27,5 +27,27 @@ Aplikasi Flutter untuk manajemen data dan layanan CV. Kirana Tanjung Pelakar.
 -   **Cetak Dokumen**:
     -   Generasi dan pratinjau PDF Surat Kuasa untuk layanan biro jasa.
     -   Fungsionalitas cetak langsung melalui `printing` package.
+
+---
+
+### Panduan Teknis & Build:
+
+-   **Optimasi Dependensi**:
+    -   Pembersihan dependensi tidak terpakai (`webview_flutter`, `web`) untuk reduksi ukuran biner.
+    -   Otomatisasi pembersihan impor menggunakan `dart fix --apply`.
+-   **Konfigurasi Build Android**:
+    -   **SDK Version**: `minSdkVersion 21`, `targetSdkVersion 34`, `compileSdkVersion 34`.
+    -   **Toolchain Fix**: Penghapusan *hardcoded* `ndkVersion` untuk fleksibilitas compiler.
+    -   **JDK Compatibility**: Direkomendasikan menggunakan JDK 17 (JetBrains Runtime) untuk menghindari *restricted method warnings* pada Gradle 8.1.
+-   **Export Produksi**:
+    ```bash
+    # Membersihkan cache korup
+    flutter clean
+    
+    # Build APK terpisah per arsitektur (ARMv7, ARMv8, x86_64)
+    flutter build apk --release --split-per-abi
+    ```
+-   **Keamanan & Ukuran**:
+    -   Implementasi R8/ProGuard (`minifyEnabled true`) untuk *code shrinking* dan *obfuscation*.
 
 ---
