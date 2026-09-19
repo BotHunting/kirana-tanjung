@@ -124,18 +124,35 @@ class BiroJasaView extends StatelessWidget {
                             (item['nomor_kendaraan'] ?? '-').toString();
                         final merk =
                             '${item['merek'] ?? '-'} / ${item['type'] ?? '-'}';
-                        final masaAktif = (item['aktif'] ?? '').toString();
-                        final status =
+                        final masaAktifStr =
+                            (item['aktif'] ?? item['tanggal'] ?? '').toString();
+                        final statusPengurusan =
                             (item['durasi'] ?? 'ON PROCESS').toString();
-                        final isSelesai =
-                            status.toUpperCase().contains('SELESAI');
+                        final isSelesai = statusPengurusan.contains('SELESAI');
 
-                        // Menggunakan objek status terpusat
-                        final expiry = AppConfig.getSisaHari(masaAktif);
+                        final expiry = AppConfig.getSisaHari(masaAktifStr);
                         final sisaHari = expiry.sisa;
-                        final isExpired = expiry.isExpired;
-                        final isWarning = expiry.isWarning;
 
+                        String labelH = '';
+                        if (sisaHari < 0) {
+                          labelH = 'Lewat ${sisaHari.abs()} hr';
+                        } else if (sisaHari == 0) {
+                          labelH = 'Jatuh Tempo Hari Ini';
+                        } else if (sisaHari <= 30) {
+                          labelH = 'Sisa $sisaHari hr';
+                        }
+
+                        final bool perluWarning =
+                            expiry.isValid && sisaHari <= 30;
+                        final Color bannerBg = sisaHari <= 0
+                            ? const Color(0xFFFEE2E2)
+                            : const Color(0xFFFEF3C7);
+                        final Color bannerText = sisaHari <= 0
+                            ? const Color(0xFF991B1B)
+                            : const Color(0xFF92400E);
+                        final Color bannerBorder = sisaHari <= 0
+                            ? const Color(0xFFFCA5A5)
+                            : const Color(0xFFFCD34D);
                         final hpPemilik = (item['whatsapp'] ?? '').toString();
 
                         final layanan =
@@ -216,8 +233,8 @@ class BiroJasaView extends StatelessWidget {
                                           : const Color(0xFFDBEAFE),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Text(status,
-                                        style: GoogleFonts.plusJakartaSans(
+                                    child: Text(statusPengurusan,
+                                        style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                             color: isSelesai
@@ -226,47 +243,35 @@ class BiroJasaView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              if (isExpired || isWarning) ...[
-                                const SizedBox(height: 12),
+                              if (perluWarning) ...[
+                                const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 8),
+                                      horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: isExpired
-                                        ? const Color(0xFFFEE2E2)
-                                        : const Color(0xFFFEF3C7),
+                                    color: bannerBg,
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: isExpired
-                                          ? const Color(0xFFEF4444)
-                                              .withValues(alpha: 0.3)
-                                          : const Color(0xFFF59E0B)
-                                              .withValues(alpha: 0.3),
-                                    ),
+                                    border: Border.all(color: bannerBorder),
                                   ),
                                   child: Row(
                                     children: [
                                       Icon(
-                                        isExpired
-                                            ? Icons.warning_rounded
+                                        sisaHari <= 0
+                                            ? Icons.error_outline_rounded
                                             : Icons.access_time_rounded,
-                                        size: 14,
-                                        color: isExpired
-                                            ? const Color(0xFFDC2626)
-                                            : const Color(0xFFD97706),
+                                        size: 15,
+                                        color: bannerText,
                                       ),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          isExpired
-                                              ? 'Masa berlaku habis (${sisaHari.abs()} hr lalu)'
-                                              : 'Jatuh tempo dalam $sisaHari hari lagi',
+                                          sisaHari <= 0
+                                              ? 'KEDALUWARSA ($labelH)'
+                                              : 'MENDEKATI JATUH TEMPO ($labelH)',
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
-                                            color: isExpired
-                                                ? const Color(0xFF991B1B)
-                                                : const Color(0xFF92400E),
+                                            color: bannerText,
                                           ),
                                         ),
                                       ),
@@ -275,7 +280,7 @@ class BiroJasaView extends StatelessWidget {
                                           onTap: () async {
                                             final text = Uri.encodeComponent(
                                               'Halo Bapak/Ibu $nama,\n\n'
-                                              'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${item['nomor_kendaraan']}* akan jatuh tempo pada *$masaAktif* ($sisaHari hari lagi).\n\n'
+                                              'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${item['nomor_kendaraan']}* akan jatuh tempo pada *$masaAktifStr* ($sisaHari hari lagi).\n\n'
                                               'Segera perpanjang di CV. Kirana Tanjung Pelakar agar tetap aman. Terima kasih!',
                                             );
                                             final waUrl = Uri.parse(
@@ -286,32 +291,9 @@ class BiroJasaView extends StatelessWidget {
                                                       .externalApplication);
                                             }
                                           },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF16A34A),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                const Icon(Icons.chat,
-                                                    size: 10,
-                                                    color: Colors.white),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  'INGATKAN',
-                                                  style: GoogleFonts
-                                                      .plusJakartaSans(
-                                                          fontSize: 9,
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.w800),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                          child: const Icon(Icons.send_rounded,
+                                              size: 16,
+                                              color: Color(0xFF16A34A)),
                                         ),
                                     ],
                                   ),
@@ -334,7 +316,7 @@ class BiroJasaView extends StatelessWidget {
                                               fontSize: 11,
                                               color: const Color(0xFF64748B))),
                                       const SizedBox(height: 2),
-                                      Text('Masa Aktif: $masaAktif',
+                                      Text('Masa Aktif: $masaAktifStr',
                                           style: GoogleFonts.plusJakartaSans(
                                               fontSize: 11,
                                               color: const Color(0xFF64748B))),

@@ -37,7 +37,36 @@ class AppConfig {
       return (sisa: 999, isExpired: false, isWarning: false, isValid: false);
     }
     try {
-      final targetDate = DateTime.parse(tanggalStr.trim());
+      String sanitizedStr = tanggalStr.trim();
+
+      // Map nama bulan lokal/singkat ke format angka ISO
+      final bulanMap = {
+        'jan': '01',
+        'feb': '02',
+        'mar': '03',
+        'apr': '04',
+        'mei': '05',
+        'jun': '06',
+        'jul': '07',
+        'agu': '08',
+        'sep': '09',
+        'okt': '10',
+        'nov': '11',
+        'des': '12'
+      };
+
+      final parts = sanitizedStr.split(' ');
+      if (parts.length == 3) {
+        final day = parts[0].padLeft(2, '0');
+        final bulanLower = parts[1].toLowerCase();
+        final month = bulanMap[bulanLower] ??
+            bulanMap[bulanLower.substring(0, 3)] ??
+            '01';
+        final year = parts[2];
+        sanitizedStr = '$year-$month-$day';
+      }
+
+      final targetDate = DateTime.parse(sanitizedStr);
       final now = DateTime.now();
       final currentDate = DateTime(now.year, now.month, now.day);
       final sisa = targetDate.difference(currentDate).inDays;
