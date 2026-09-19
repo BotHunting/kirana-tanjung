@@ -6,7 +6,7 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
 
 ---
 
-### Versi Aplikasi: `1.0.2`
+### Versi Aplikasi: `1.0.3`
 
 ### Fitur Utama:
 

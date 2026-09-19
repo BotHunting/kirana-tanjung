@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'config.dart';
 
 class BiroJasaView extends StatelessWidget {
   const BiroJasaView({
@@ -27,8 +29,8 @@ class BiroJasaView extends StatelessWidget {
     }).toList();
 
     filteredItems.sort((a, b) {
-      final dateA = DateTime.tryParse(a['aktif']?.toString() ?? '');
-      final dateB = DateTime.tryParse(b['aktif']?.toString() ?? '');
+      final dateA = DateTime.tryParse(a['aktif']?.toString() ?? '-');
+      final dateB = DateTime.tryParse(b['aktif']?.toString() ?? '-');
       if (dateA == null && dateB == null) return 0;
       if (dateA == null) return 1;
       if (dateB == null) return -1;
@@ -122,11 +124,20 @@ class BiroJasaView extends StatelessWidget {
                             (item['nomor_kendaraan'] ?? '-').toString();
                         final merk =
                             '${item['merek'] ?? '-'} / ${item['type'] ?? '-'}';
-                        final masaAktif = (item['aktif'] ?? '-').toString();
+                        final masaAktif = (item['aktif'] ?? '').toString();
                         final status =
                             (item['durasi'] ?? 'ON PROCESS').toString();
                         final isSelesai =
                             status.toUpperCase().contains('SELESAI');
+
+                        // Menggunakan objek status terpusat
+                        final expiry = AppConfig.getSisaHari(masaAktif);
+                        final sisaHari = expiry.sisa;
+                        final isExpired = expiry.isExpired;
+                        final isWarning = expiry.isWarning;
+
+                        final hpPemilik = (item['whatsapp'] ?? '').toString();
+
                         final layanan =
                             (item['layanan'] ?? '').toString().toUpperCase();
                         final IconData jasaIcon = layanan == 'KIR'
@@ -215,6 +226,97 @@ class BiroJasaView extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              if (isExpired || isWarning) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isExpired
+                                        ? const Color(0xFFFEE2E2)
+                                        : const Color(0xFFFEF3C7),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: isExpired
+                                          ? const Color(0xFFEF4444)
+                                              .withValues(alpha: 0.3)
+                                          : const Color(0xFFF59E0B)
+                                              .withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isExpired
+                                            ? Icons.warning_rounded
+                                            : Icons.access_time_rounded,
+                                        size: 14,
+                                        color: isExpired
+                                            ? const Color(0xFFDC2626)
+                                            : const Color(0xFFD97706),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          isExpired
+                                              ? 'Masa berlaku habis (${sisaHari.abs()} hr lalu)'
+                                              : 'Jatuh tempo dalam $sisaHari hari lagi',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: isExpired
+                                                ? const Color(0xFF991B1B)
+                                                : const Color(0xFF92400E),
+                                          ),
+                                        ),
+                                      ),
+                                      if (hpPemilik.isNotEmpty)
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final text = Uri.encodeComponent(
+                                              'Halo Bapak/Ibu $nama,\n\n'
+                                              'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${item['nomor_kendaraan']}* akan jatuh tempo pada *$masaAktif* ($sisaHari hari lagi).\n\n'
+                                              'Segera perpanjang di CV. Kirana Tanjung Pelakar agar tetap aman. Terima kasih!',
+                                            );
+                                            final waUrl = Uri.parse(
+                                                'https://wa.me/${hpPemilik.replaceAll(RegExp(r'\D'), '')}?text=$text');
+                                            if (await canLaunchUrl(waUrl)) {
+                                              await launchUrl(waUrl,
+                                                  mode: LaunchMode
+                                                      .externalApplication);
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF16A34A),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                const Icon(Icons.chat,
+                                                    size: 10,
+                                                    color: Colors.white),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  'INGATKAN',
+                                                  style: GoogleFonts
+                                                      .plusJakartaSans(
+                                                          fontSize: 9,
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w800),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: 12),
                               const Divider(
                                   height: 1, color: Color(0xFFF1F5F9)),

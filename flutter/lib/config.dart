@@ -1,7 +1,7 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppConfig {
-  static String appVersion = '1.0.2';
+  static String appVersion = '1.0.3';
 
   static const String updateApiUrl =
       'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
@@ -28,5 +28,27 @@ class AppConfig {
       final packageInfo = await PackageInfo.fromPlatform();
       appVersion = packageInfo.version;
     } catch (_) {}
+  }
+
+  // Helper Menghitung Sisa Hari Masa Aktif
+  static ({int sisa, bool isExpired, bool isWarning, bool isValid}) getSisaHari(
+      String? tanggalStr) {
+    if (tanggalStr == null || tanggalStr.trim().isEmpty) {
+      return (sisa: 999, isExpired: false, isWarning: false, isValid: false);
+    }
+    try {
+      final targetDate = DateTime.parse(tanggalStr.trim());
+      final now = DateTime.now();
+      final currentDate = DateTime(now.year, now.month, now.day);
+      final sisa = targetDate.difference(currentDate).inDays;
+      return (
+        sisa: sisa,
+        isExpired: sisa <= 0,
+        isWarning: sisa > 0 && sisa <= 30,
+        isValid: true,
+      );
+    } catch (_) {
+      return (sisa: 999, isExpired: false, isWarning: false, isValid: false);
+    }
   }
 }

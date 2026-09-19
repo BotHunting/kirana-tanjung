@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'main.dart';
+import 'config.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({
@@ -362,9 +363,17 @@ class AdminDataList extends StatelessWidget {
                           appValue(item, titleKey, fallback: 'Tanpa nama'),
                           style: GoogleFonts.plusJakartaSans(
                               fontSize: 12, fontWeight: FontWeight.w800))),
-                  StatusChip(
-                      label: appValue(item, statusKey, fallback: 'ON PROCESS'),
-                      color: const Color(0xFF1769FF)),
+                  Builder(builder: (context) {
+                    final s = appValue(item, statusKey, fallback: 'ON PROCESS')
+                        .toUpperCase();
+                    Color c = const Color(0xFF1769FF);
+                    if (s == 'SELESAI' || s == 'AKTIF') {
+                      c = const Color(0xFF0C9B77);
+                    } else if (s == 'DITOLAK' || s == 'DIARSIPKAN') {
+                      c = const Color(0xFFE5484D);
+                    }
+                    return StatusChip(label: s, color: c);
+                  }),
                   IconButton(
                       tooltip: 'Edit data',
                       onPressed: () => onEdit(sheetName, item),
@@ -399,19 +408,90 @@ class AdminJasaRow extends StatelessWidget {
     final phone = appNormalisePhone(appValue(item, 'whatsapp'));
     final message =
         'Halo ${appValue(item, 'nama')}, status layanan ${appValue(item, 'layanan')} untuk kendaraan ${appValue(item, 'nomor_kendaraan')}.';
+    final layanan = appValue(item, 'layanan').toUpperCase();
+
+    // Kalkulasi sisa hari dan status kedaluwarsa
+    final expiry = AppConfig.getSisaHari(appValue(item, 'aktif'));
+    final hIndicator = expiry.isValid
+        ? (expiry.isExpired
+            ? ' (H+${expiry.sisa.abs()})'
+            : ' (H-${expiry.sisa})')
+        : '';
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         const IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
         const SizedBox(width: 12),
         Expanded(
             child: Text(
-                '${appValue(item, 'layanan', fallback: 'LAYANAN')} • ${appValue(item, 'nomor_kendaraan', fallback: '-')}',
+                '$layanan • ${appValue(item, 'nomor_kendaraan', fallback: '-')}',
                 style: const TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w800))),
         StatusChip(
-            label: appValue(item, 'durasi', fallback: 'ON PROCESS'),
-            color: const Color(0xFF1769FF)),
+            label:
+                '${appValue(item, 'durasi', fallback: 'ON PROCESS')}$hIndicator',
+            color: expiry.isExpired
+                ? const Color(0xFFE5484D)
+                : const Color(0xFF1769FF)),
       ]),
+      if (expiry.isExpired || expiry.isWarning) ...[
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: expiry.isExpired
+                ? const Color(0xFFFEE2E2)
+                : const Color(0xFFFEF3C7),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: expiry.isExpired
+                  ? const Color(0xFFEF4444).withValues(alpha: 0.2)
+                  : const Color(0xFFF59E0B).withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                expiry.isExpired
+                    ? Icons.warning_rounded
+                    : Icons.access_time_rounded,
+                size: 14,
+                color: expiry.isExpired
+                    ? const Color(0xFFDC2626)
+                    : const Color(0xFFD97706),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  expiry.isExpired
+                      ? 'KEDALUWARSA (${expiry.sisa.abs()} hari)'
+                      : 'Mendekati Jatuh Tempo (${expiry.sisa} hari lagi)',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: expiry.isExpired
+                        ? const Color(0xFF991B1B)
+                        : const Color(0xFF92400E),
+                  ),
+                ),
+              ),
+              if (phone.isNotEmpty)
+                GestureDetector(
+                  onTap: () async {
+                    final text = Uri.encodeComponent(
+                      'Halo Bapak/Ibu ${appValue(item, 'nama')},\n\n'
+                      'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${appValue(item, 'nomor_kendaraan')}* akan jatuh tempo pada *${appValue(item, 'aktif')}* (${expiry.sisa} hari lagi).\n\n'
+                      'Segera perpanjang di CV. Kirana Tanjung Pelakar. Terima kasih!',
+                    );
+                    appOpenWhatsApp(phone, text);
+                  },
+                  child: const Icon(Icons.send_rounded,
+                      size: 16, color: Color(0xFF16A34A)),
+                ),
+            ],
+          ),
+        ),
+      ],
       const SizedBox(height: 12),
       InfoLine(label: 'Nama', value: appValue(item, 'nama')),
       if (appValue(item, 'merek').isNotEmpty)
