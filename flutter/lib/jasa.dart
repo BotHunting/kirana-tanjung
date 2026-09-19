@@ -26,6 +26,15 @@ class BiroJasaView extends StatelessWidget {
       return nama.contains(q) || nomorUji.contains(q) || merk.contains(q);
     }).toList();
 
+    filteredItems.sort((a, b) {
+      final dateA = DateTime.tryParse(a['aktif']?.toString() ?? '');
+      final dateB = DateTime.tryParse(b['aktif']?.toString() ?? '');
+      if (dateA == null && dateB == null) return 0;
+      if (dateA == null) return 1;
+      if (dateB == null) return -1;
+      return dateA.compareTo(dateB);
+    });
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
@@ -118,6 +127,22 @@ class BiroJasaView extends StatelessWidget {
                             (item['durasi'] ?? 'ON PROCESS').toString();
                         final isSelesai =
                             status.toUpperCase().contains('SELESAI');
+                        final layanan =
+                            (item['layanan'] ?? '').toString().toUpperCase();
+                        final IconData jasaIcon = layanan == 'KIR'
+                            ? Icons.local_shipping_outlined
+                            : layanan == 'SAMSAT'
+                                ? Icons.credit_card_outlined
+                                : layanan == 'REKOM'
+                                    ? Icons.verified_outlined
+                                    : Icons.directions_car_outlined;
+                        final Color jasaColor = layanan == 'KIR'
+                            ? const Color(0xFF6556D9)
+                            : layanan == 'SAMSAT'
+                                ? const Color(0xFF1769FF)
+                                : layanan == 'REKOM'
+                                    ? const Color(0xFF0C9B77)
+                                    : const Color(0xFF64748B);
 
                         return Container(
                           padding: const EdgeInsets.all(16),
@@ -141,13 +166,14 @@ class BiroJasaView extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFEFF6FF),
+                                      color: jasaColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: const Icon(
-                                        Icons.directions_car_outlined,
-                                        color: Color(0xFF1769FF),
-                                        size: 20),
+                                    child: Icon(
+                                      jasaIcon,
+                                      color: jasaColor,
+                                      size: 20,
+                                    ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(

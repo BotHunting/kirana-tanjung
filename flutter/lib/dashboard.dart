@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'main.dart';
 
 class AdminPage extends StatefulWidget {
@@ -9,6 +10,10 @@ class AdminPage extends StatefulWidget {
     required this.desain,
     required this.percetakan,
     required this.biroJasa,
+    required this.currentVersion,
+    required this.latestVersion,
+    required this.changelog,
+    required this.updateUrl,
     required this.onEdit,
     required this.onAdd,
     required this.onDelete,
@@ -19,6 +24,10 @@ class AdminPage extends StatefulWidget {
   final List<dynamic> desain;
   final List<dynamic> percetakan;
   final List<dynamic> biroJasa;
+  final String currentVersion;
+  final String? latestVersion;
+  final String? changelog;
+  final String? updateUrl;
   final void Function(String sheetName, dynamic item) onEdit;
   final void Function(String sheetName) onAdd;
   final void Function(String sheetName, dynamic item) onDelete;
@@ -28,8 +37,69 @@ class AdminPage extends StatefulWidget {
   State<AdminPage> createState() => _AdminPageState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class _AdminPageState extends State<AdminPage>
+    with SingleTickerProviderStateMixin {
   String query = '';
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+    _pulseAnimation =
+        Tween<double>(begin: 0.4, end: 1.0).animate(_pulseController);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  void _showChangelogDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text('Pembaruan v${widget.latestVersion}',
+            style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w800, fontSize: 16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Catatan Perubahan:',
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.bold, fontSize: 12)),
+            const SizedBox(height: 6),
+            Text(widget.changelog ?? 'Sistem optimalisasi performa.',
+                style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12, color: const Color(0xFF64748B), height: 1.5)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final uri = Uri.parse(widget.updateUrl!);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
+            child: const Text('Update Sekarang'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +121,32 @@ class _AdminPageState extends State<AdminPage> {
                   color: Color(0xFF172033),
                   fontSize: 27,
                   fontWeight: FontWeight.w800)),
-          const SizedBox(height: 7),
-          const Text('Database Explorer',
-              style: TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Database Explorer (v${widget.currentVersion})',
+                  style:
+                      const TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
+              if (widget.updateUrl != null)
+                FadeTransition(
+                  opacity: _pulseAnimation,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF1769FF),
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () => _showChangelogDialog(context),
+                    icon: const Icon(Icons.system_update_rounded, size: 14),
+                    label: const Text('Update Tersedia',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -204,6 +297,18 @@ class AdminDataList extends StatelessWidget {
                 ];
       return appSearches(item, query, fields);
     }).toList();
+
+    if (sheetName == 'Biro Jasa') {
+      filteredItems.sort((a, b) {
+        final dateA = DateTime.tryParse(appValue(a, 'aktif'));
+        final dateB = DateTime.tryParse(appValue(b, 'aktif'));
+        if (dateA == null && dateB == null) return 0;
+        if (dateA == null) return 1;
+        if (dateB == null) return -1;
+        return dateA.compareTo(dateB);
+      });
+    }
+
     if (filteredItems.isEmpty) {
       return const EmptyState(message: 'Data tidak ditemukan.');
     }
@@ -407,8 +512,8 @@ class _EditDataSheetState extends State<EditDataSheet> {
         'status': _choiceValue(
             appValue(widget.item, 'status'), ['AKTIF', 'DIARSIPKAN'], 'AKTIF'),
       if (widget.sheetName == 'Biro Jasa')
-        'layanan': _choiceValue(
-            appValue(widget.item, 'layanan'), ['KIR', 'SAMSAT', 'REKOM'], 'KIR'),
+        'layanan': _choiceValue(appValue(widget.item, 'layanan'),
+            ['KIR', 'SAMSAT', 'REKOM'], 'KIR'),
       if (widget.sheetName == 'Biro Jasa')
         'durasi': _choiceValue(appValue(widget.item, 'durasi'),
             ['ON PROCESS', 'SELESAI', 'DITOLAK'], 'ON PROCESS'),

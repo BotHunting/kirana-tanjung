@@ -91,6 +91,10 @@ class _HomeShellState extends State<HomeShell> {
   String? userName;
   String _webSearchQuery = '';
   String _searchCetakQuery = '';
+  String _currentVersion = AppConfig.appVersion;
+  String? _latestVersion;
+  String? _changelog;
+  String? _updateUrl;
 
   @override
   void initState() {
@@ -133,23 +137,31 @@ class _HomeShellState extends State<HomeShell> {
 
   Future<void> _checkAppUpdate() async {
     try {
-      final currentVersion =
-          kIsWeb ? '1.0.0' : (await PackageInfo.fromPlatform()).version;
+      final currentVersion = kIsWeb
+          ? AppConfig.appVersion
+          : (await PackageInfo.fromPlatform()).version;
       final response = await http.get(
-        Uri.parse(
-            'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest'),
+        Uri.parse(AppConfig.updateApiUrl),
         headers: {'Accept': 'application/vnd.github.v3+json'},
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) return;
       final releaseData = await compute(_parseJson, response.body);
+      final changelog = releaseData['body']?.toString() ??
+          'Pembaruan sistem dan optimalisasi performa.';
       final latestVersion = (releaseData['tag_name'] as String)
           .replaceAll(RegExp(r'[a-zA-Z]'), '')
           .trim();
 
+      if (mounted) {
+        setState(() {
+          _currentVersion = currentVersion;
+          _latestVersion = latestVersion;
+          _changelog = changelog;
+        });
+      }
+
       if (_isVersionNewer(currentVersion, latestVersion)) {
-        final changelog = releaseData['body']?.toString() ??
-            'Pembaruan sistem dan optimalisasi performa.';
         final assets = releaseData['assets'] as List<dynamic>;
         String downloadUrl = '';
 
@@ -165,6 +177,9 @@ class _HomeShellState extends State<HomeShell> {
         }
 
         if (downloadUrl.isNotEmpty && mounted) {
+          setState(() {
+            _updateUrl = downloadUrl;
+          });
           _showUpdateDialog(latestVersion, changelog, downloadUrl);
         }
       }
@@ -390,8 +405,12 @@ class _HomeShellState extends State<HomeShell> {
                 child: CachedNetworkImage(
                   imageUrl: AppConfig.logoUrl,
                   fit: BoxFit.contain,
-                  errorWidget: (_, __, ___) =>
-                      const Icon(Icons.hub_outlined, color: blue, size: 21),
+                  errorWidget: (_, __, ___) => Image.asset(
+                    'web/favicon.png',
+                    width: 21,
+                    height: 21,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
@@ -430,14 +449,16 @@ class _HomeShellState extends State<HomeShell> {
           items: data['desain']!.cast<Map<String, dynamic>>(),
           searchQuery: _webSearchQuery,
           onSearchChanged: (val) => setState(() => _webSearchQuery = val),
-          catalogIconBuilder: (val) => CatalogIcon(value: val),
+          catalogIconBuilder: (val) =>
+              CatalogIcon(value: val, enableZoom: true),
         );
       case 2:
         return PercetakanView(
           items: data['percetakan']!.cast<Map<String, dynamic>>(),
           searchQuery: _searchCetakQuery,
           onSearchChanged: (val) => setState(() => _searchCetakQuery = val),
-          catalogIconBuilder: (val) => CatalogIcon(value: val),
+          catalogIconBuilder: (val) =>
+              CatalogIcon(value: val, enableZoom: true),
           onChatPressed: (item) {
             final phone = appNormalisePhone(
                 appValue(item, 'whatsapp', fallback: '6281290320438'));
@@ -454,6 +475,10 @@ class _HomeShellState extends State<HomeShell> {
           desain: data['desain']!,
           percetakan: data['percetakan']!,
           biroJasa: data['biroJasa']!,
+          currentVersion: _currentVersion,
+          latestVersion: _latestVersion,
+          changelog: _changelog,
+          updateUrl: _updateUrl,
           onEdit: (sheetName, item) => _showEditSheet(sheetName, item),
           onAdd: _showAddSheet,
           onDelete: _confirmDelete,
@@ -855,6 +880,16 @@ class _JasaPageState extends State<_JasaPage> {
         .where((item) =>
             appSearches(item, query, ['nama', 'nomor_kendaraan', 'layanan']))
         .toList();
+
+    filtered.sort((a, b) {
+      final dateA = DateTime.tryParse(appValue(a, 'aktif'));
+      final dateB = DateTime.tryParse(appValue(b, 'aktif'));
+      if (dateA == null && dateB == null) return 0;
+      if (dateA == null) return 1;
+      if (dateB == null) return -1;
+      return dateA.compareTo(dateB);
+    });
+
     return _PageFrame(
       key: const ValueKey('jasa'),
       eyebrow: 'STATUS LAYANAN',
@@ -1178,11 +1213,26 @@ class _JasaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vehicle = appValue(item, 'nomor_kendaraan');
+    final layanan = appValue(item, 'layanan').toUpperCase();
     final status =
         _serviceStatus(appValue(item, 'aktif'), appValue(item, 'durasi'));
+    final IconData jasaIcon = layanan == 'KIR'
+        ? Icons.local_shipping_outlined
+        : layanan == 'SAMSAT'
+            ? Icons.credit_card_outlined
+            : layanan == 'REKOM'
+                ? Icons.verified_outlined
+                : Icons.directions_car_outlined;
+    final Color jasaColor = layanan == 'KIR'
+        ? const Color(0xFF6556D9)
+        : layanan == 'SAMSAT'
+            ? const Color(0xFF1769FF)
+            : layanan == 'REKOM'
+                ? const Color(0xFF0C9B77)
+                : const Color(0xFF64748B);
     return _SurfaceCard(
-        child: Row(children: [
-      const IconBadge(icon: Icons.directions_car, color: Color(0xFF0C9B77)),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      IconBadge(icon: jasaIcon, color: jasaColor, size: 42),
       const SizedBox(width: 12),
       Expanded(
           child: Text(

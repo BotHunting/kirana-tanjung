@@ -1,4 +1,11 @@
+import 'package:package_info_plus/package_info_plus.dart';
+
 class AppConfig {
+  static String appVersion = '1.0.2';
+
+  static const String updateApiUrl =
+      'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
+
   static const String databaseUrl =
       'https://script.google.com/macros/s/AKfycbzwJz5NMOBnkuT_LaQD82845M7hoWA7EiuezNEWUQ35Hibn-WF2UXv2HCFyh5GvOh03/exec';
 
@@ -15,4 +22,11 @@ class AppConfig {
   // Data Base64 Stempel (Placeholder)
   static const String stampBase64 =
       'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5QgKDA8dJz9F4AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUOdlbmQAAAAASUVORK5CYII=';
+
+  static Future<void> init() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      appVersion = packageInfo.version;
+    } catch (_) {}
+  }
 }
