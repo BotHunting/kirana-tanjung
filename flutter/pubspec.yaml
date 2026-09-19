@@ -24,10 +24,16 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
   image_path: "web/favicon.png"
   min_sdk_android: 21
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "web/favicon.png"
+    background_color: "#ffffff"
+    theme_color: "#1769FF"
 
 flutter_native_splash:
   color: "#F7F9FC"
