@@ -11,3 +11,10 @@
 -keepattributes *Annotation*
 -keepattributes Signature
 -keepattributes InnerClasses
+
+# Plugins and native integration
+-dontwarn java.lang.invoke.**
+-dontwarn javax.annotation.**
+-keep class net.nfet.flutter.printing.** { *; }
+-keep class dev.fluttercommunity.plus.packageinfo.** { *; }
+-keep class io.flutter.plugins.urllauncher.** { *; }

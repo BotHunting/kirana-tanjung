@@ -6,9 +6,8 @@ plugins {
 
 android {
     namespace = "com.kiranatanjung.app"
-    compileSdkVersion 34
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -17,9 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.kiranatanjung.app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdkVersion 21
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
