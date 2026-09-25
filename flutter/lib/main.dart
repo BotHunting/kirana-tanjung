@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'config.dart';
 import 'kuasa.dart';
 import 'design.dart';
+import 'konveksi.dart'; // Import the new KonveksiView
 import 'percetakan.dart';
 import 'dashboard.dart';
 
@@ -95,6 +96,25 @@ class _HomeShellState extends State<HomeShell> {
   String? _latestVersion;
   String? _changelog;
   String? _updateUrl;
+
+  int _logoClickCount = 0;
+  DateTime? _lastLogoClickTime;
+
+  void _onLogoTapped() {
+    final now = DateTime.now();
+    if (_lastLogoClickTime == null ||
+        now.difference(_lastLogoClickTime!) > const Duration(seconds: 2)) {
+      _logoClickCount = 1;
+    } else {
+      _logoClickCount++;
+    }
+    _lastLogoClickTime = now;
+    setState(() => selectedIndex = 0);
+    if (_logoClickCount >= 3) {
+      _logoClickCount = 0;
+      openLogin();
+    }
+  }
 
   @override
   void initState() {
@@ -260,8 +280,8 @@ class _HomeShellState extends State<HomeShell> {
     if (result == null || !mounted) return;
     setState(() {
       loggedIn = true;
-      userName = result.name;
-      selectedIndex = 4;
+      userName = result.name; // Keep existing userName logic
+      selectedIndex = 5;
     });
     _showMessage('Selamat datang, ${result.name}');
   }
@@ -371,6 +391,10 @@ class _HomeShellState extends State<HomeShell> {
               icon: Icon(Icons.directions_car_outlined),
               selectedIcon: Icon(Icons.directions_car),
               label: 'Biro Jasa'),
+          const NavigationDestination(
+              icon: Icon(Icons.shopping_bag_outlined), // New icon for Konveksi
+              selectedIcon: Icon(Icons.shopping_bag),
+              label: 'Konveksi'), // New navigation item
           if (loggedIn)
             const NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),
@@ -388,40 +412,44 @@ class _HomeShellState extends State<HomeShell> {
       surfaceTintColor: Colors.transparent,
       titleSpacing: 20,
       title: GestureDetector(
-        onTap: () => setState(() => selectedIndex = 0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CachedNetworkImage(
-                  imageUrl: AppConfig.logoUrl,
-                  fit: BoxFit.contain,
-                  errorWidget: (_, __, ___) => Image.asset(
-                    'web/favicon.png',
-                    width: 21,
-                    height: 21,
+        onTap: _onLogoTapped,
+        behavior: HitTestBehavior.opaque,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: AppConfig.logoUrl,
                     fit: BoxFit.contain,
+                    errorWidget: (_, __, ___) => Image.asset(
+                      'web/favicon.png',
+                      width: 21,
+                      height: 21,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Text('KIRANA',
-                style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w800, color: ink, fontSize: 16)),
-            Text(' TANJUNG',
-                style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w800, color: blue, fontSize: 16)),
-          ],
+              const SizedBox(width: 10),
+              Text('KIRANA',
+                  style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w800, color: ink, fontSize: 16)),
+              Text(' TANJUNG',
+                  style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w800, color: blue, fontSize: 16)),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -429,15 +457,15 @@ class _HomeShellState extends State<HomeShell> {
             tooltip: 'Perbarui data',
             onPressed: loading ? null : fetchData,
             icon: const Icon(Icons.refresh_rounded)),
-        Padding(
-          padding: const EdgeInsets.only(right: 14),
-          child: IconButton.filledTonal(
-            tooltip: loggedIn ? 'Keluar' : 'Login admin',
-            onPressed: loggedIn ? logout : openLogin,
-            icon: Icon(
-                loggedIn ? Icons.logout_rounded : Icons.lock_outline_rounded),
+        if (loggedIn)
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: IconButton.filledTonal(
+              tooltip: 'Keluar',
+              onPressed: logout,
+              icon: const Icon(Icons.logout_rounded),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -469,7 +497,9 @@ class _HomeShellState extends State<HomeShell> {
         );
       case 3:
         return _JasaPage(items: data['biroJasa']!);
-      case 4:
+      case 4: // New case for KonveksiView
+        return const KonveksiView();
+      case 5:
         return AdminPage(
           name: userName ?? 'Admin',
           desain: data['desain']!,
