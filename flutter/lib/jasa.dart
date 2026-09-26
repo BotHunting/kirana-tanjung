@@ -278,13 +278,17 @@ class BiroJasaView extends StatelessWidget {
                                       if (hpPemilik.isNotEmpty)
                                         GestureDetector(
                                           onTap: () async {
-                                            final text = Uri.encodeComponent(
-                                              'Halo Bapak/Ibu $nama,\n\n'
-                                              'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${item['nomor_kendaraan']}* akan jatuh tempo pada *$masaAktifStr* ($sisaHari hari lagi).\n\n'
-                                              'Segera perpanjang di CV. Kirana Tanjung Pelakar agar tetap aman. Terima kasih!',
-                                            );
-                                            final waUrl = Uri.parse(
-                                                'https://wa.me/${hpPemilik.replaceAll(RegExp(r'\D'), '')}?text=$text');
+                                            final message =
+                                                'Halo Bapak/Ibu $nama,\n\n'
+                                                'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${item['nomor_kendaraan']}* akan jatuh tempo pada *$masaAktifStr* ($sisaHari hari lagi).\n\n'
+                                                'Segera perpanjang di CV. Kirana Tanjung Pelakar agar tetap aman. Terima kasih!';
+                                            final targetPhone =
+                                                hpPemilik.isNotEmpty
+                                                    ? hpPemilik.replaceAll(
+                                                        RegExp(r'\D'), '')
+                                                    : AppConfig.waBiroJasa;
+                                            final waUrl = AppConfig.getWaUrl(
+                                                targetPhone, message);
                                             if (await canLaunchUrl(waUrl)) {
                                               await launchUrl(waUrl,
                                                   mode: LaunchMode

@@ -9,6 +9,18 @@ class AppConfig {
   static const String databaseUrl =
       'https://script.google.com/macros/s/AKfycbzwJz5NMOBnkuT_LaQD82845M7hoWA7EiuezNEWUQ35Hibn-WF2UXv2HCFyh5GvOh03/exec';
 
+  // Daftar Kontak WhatsApp Resmi Per Kategori
+  static const String waDesainSistem = '6281290320438'; // Desain & Web System
+  static const String waPercetakan = '6281233223830'; // Layanan Percetakan
+  static const String waBoutique = '6281938929455'; // Boutique & Konveksi
+  static const String waBiroJasa = '6281290320438'; // Biro Jasa Transportasi
+
+  // Helper Pembuat Link WA
+  static Uri getWaUrl(String targetNumber, String message) {
+    final encodedText = Uri.encodeComponent(message);
+    return Uri.parse('https://wa.me/$targetNumber?text=$encodedText');
+  }
+
   static const String materaiUrl =
       'https://raw.githubusercontent.com/BotHunting/kirana-tanjung/refs/heads/main/www/materai.png';
 

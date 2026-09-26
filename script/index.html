@@ -134,7 +134,7 @@
       <p class="text-slate-400 max-w-2xl mx-auto mb-12 text-lg font-medium leading-relaxed">Layanan profesional dari CV. Kirana Tanjung Pelakar untuk transformasi bisnis, pengembangan sistem, dan pengurusan dokumen legalitas Anda.</p>
       <div class="flex flex-wrap justify-center gap-5">
         <button onclick="navigateToSection('portfolio')" class="bg-slate-900 text-white px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all hover:-translate-y-1 active:scale-95 uppercase">Jelajahi Karya</button>
-        <a href="https://wa.me/6281290320438" target="_blank" class="bg-white text-slate-800 border-2 border-slate-100 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
+        <a id="heroWaBtn" href="https://wa.me/6281290320438" target="_blank" class="bg-white text-slate-800 border-2 border-slate-100 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
       </div>
     </section>
 
@@ -291,7 +291,7 @@
               var iconValue = item.ikon || '';
               var isImageIcon = /^(https?:\/\/|data:image)/i.test(iconValue);
 
-              var waNumRaw = item.whatsapp || '6281290320438';
+              var waNumRaw = item.whatsapp || WA_CONTACTS.percetakan;
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
               var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
           ?>
@@ -333,7 +333,7 @@
               var status = (item.status || 'ON PROCESS').toUpperCase();
               if (status === 'DITOLAK') continue;
               var isBoutique = (item.kategori || '').toString().toLowerCase().includes('boutique');
-              var waNumRaw = item.whatsapp || '6281290320438';
+              var waNumRaw = item.whatsapp || WA_CONTACTS.boutique;
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
               var waMessage = encodeURIComponent('Halo Kak, saya ingin order: ' + item.judul);
           ?>
@@ -390,7 +390,7 @@
                 ?>
                 <?
                   var waMessageJasa = encodeURIComponent('Halo, saya ingin bertanya mengenai status layanan ' + item.layanan + ' untuk kendaraan ' + item.nomor_kendaraan + ' atas nama ' + item.nama + '.');
-                  var adminWa = '6281290320438'; // Hardcoded admin number for public inquiries
+                  var adminWa = WA_CONTACTS.jasa; // Centralized admin number for public inquiries
                 ?>
                 <tr class="hover:bg-blue-50/30 transition-colors">
                   <td class="px-8 py-6">
@@ -602,7 +602,7 @@
       <i class="fas fa-arrow-up"></i>
     </button>
     <!-- WhatsApp FAB -->
-    <a href="https://wa.me/6281290320438" target="_blank" class="h-16 w-16 bg-green-500 text-white rounded-full shadow-2xl shadow-green-200 flex items-center justify-center hover:bg-green-600 transition-all transform hover:-translate-y-1">
+    <a id="floatingWaBtn" href="https://wa.me/6281290320438" target="_blank" class="h-16 w-16 bg-green-500 text-white rounded-full shadow-2xl shadow-green-200 flex items-center justify-center hover:bg-green-600 transition-all transform hover:-translate-y-1">
       <i class="fab fa-whatsapp text-4xl"></i>
     </a>
   </div>
@@ -616,6 +616,14 @@
   </footer>
 
   <script>
+    // Centralized WhatsApp Contacts
+    const WA_CONTACTS = {
+      desain: '6281290320438',
+      percetakan: '6281233223830',
+      boutique: '6281938929455',
+      jasa: '6281290320438'
+    };
+
     // --- Mobile Menu ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -1375,6 +1383,12 @@ Terima kasih.`;
     document.getElementById('currentYear').textContent = new Date().getFullYear();
 
     function initializeObfuscation() {
+        // Dynamic WA Link setup
+        const heroWaBtn = document.getElementById('heroWaBtn');
+        if (heroWaBtn) heroWaBtn.href = `https://wa.me/${WA_CONTACTS.desain}`;
+        const floatingWaBtn = document.getElementById('floatingWaBtn');
+        if (floatingWaBtn) floatingWaBtn.href = `https://wa.me/${WA_CONTACTS.desain}`;
+
         const rows = document.querySelectorAll('#publicTbodyJasa tr');
         rows.forEach(row => {
             if (row.classList.contains('no-result-row')) return;

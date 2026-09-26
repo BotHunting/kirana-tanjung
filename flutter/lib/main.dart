@@ -489,7 +489,7 @@ class _HomeShellState extends State<HomeShell> {
               CatalogIcon(value: val, enableZoom: true),
           onChatPressed: (item) {
             final phone = appNormalisePhone(
-                appValue(item, 'whatsapp', fallback: '6281290320438'));
+                appValue(item, 'whatsapp', fallback: AppConfig.waPercetakan));
             final desc = appValue(item, 'deskripsi', fallback: 'Produk cetak');
             appOpenWhatsApp(
                 phone, 'Halo, saya tertarik dengan layanan percetakan: $desc');

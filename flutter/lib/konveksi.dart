@@ -41,14 +41,13 @@ class _KonveksiViewState extends State<KonveksiView> {
   }
 
   void _kirimPesanWA(Map<String, dynamic> item) async {
-    final text = Uri.encodeComponent(
-      'Halo Kak, saya ingin konsultasi order Konveksi/Boutique:\n\n'
-      '• *Produk*: ${item['judul']}\n'
-      '• *Kategori*: ${item['kategori']}\n'
-      '• *Harga*: ${item['harga']}\n\n'
-      'Bisa info detail bahan dan alur pemesanannya?',
-    );
-    final waUrl = Uri.parse('https://wa.me/6281290320438?text=$text');
+    final message =
+        'Halo Kak, saya ingin konsultasi order Konveksi/Boutique:\n\n'
+        '• *Produk*: ${item['judul']}\n'
+        '• *Kategori*: ${item['kategori']}\n'
+        '• *Harga*: ${item['harga']}\n\n'
+        'Bisa info detail bahan dan alur pemesanannya?';
+    final waUrl = AppConfig.getWaUrl(AppConfig.waBoutique, message);
     if (await canLaunchUrl(waUrl)) {
       await launchUrl(waUrl, mode: LaunchMode.externalApplication);
     }
