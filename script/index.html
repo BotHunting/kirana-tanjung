@@ -79,7 +79,7 @@
     <div class="max-w-7xl mx-auto px-6">
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
-        <div class="flex items-center space-x-3 cursor-pointer" onclick="showPublicView()">
+        <div id="brand-logo" class="flex items-center space-x-3 cursor-pointer" onclick="showPublicView()">
           <img src="https://raw.githubusercontent.com/BotHunting/kirana-tanjung/refs/heads/main/www/Kirana.png" alt="Kirana Tanjung Logo" class="h-10 w-10 object-contain">
           <span class="text-xl font-800 tracking-tighter uppercase">KIRANA <span class="text-blue-600">TANJUNG</span></span>
         </div>
@@ -95,9 +95,6 @@
             <a id="desktopNavDashboard" href="javascript:void(0)" onclick="showDashboardView()" class="hidden hover:text-blue-600 transition-all font-bold text-blue-600">Dashboard</a>
           </div>
           <div class="flex items-center space-x-4">
-            <button id="desktopBtnLoginTab" onclick="showLoginView()" class="bg-slate-900 text-white px-6 py-2.5 rounded-full text-xs font-bold hover:bg-blue-600 transition shadow-xl">
-              <i class="fas fa-user-lock mr-2"></i> LOGIN
-            </button>
             <button id="desktopBtnLogout" onclick="logout()" class="hidden bg-red-50 text-red-600 px-6 py-2.5 rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition">
               <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
             </button>
@@ -123,9 +120,6 @@
         <a href="javascript:void(0)" onclick="navigateToSection('jasa', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Biro Jasa</a>
         <a id="mobileNavDashboard" href="javascript:void(0)" onclick="showDashboardView(true)" class="hidden text-blue-600 font-bold hover:text-blue-700 transition-all py-2 text-sm">Dashboard</a>
         <div class="border-t border-slate-200 pt-5 mt-3 space-y-4">
-          <button id="mobileBtnLoginTab" onclick="showLoginView(true)" class="w-full bg-slate-900 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-lg">
-            <i class="fas fa-user-lock mr-2"></i> LOGIN
-          </button>
           <button id="mobileBtnLogout" onclick="logout(true)" class="hidden w-full bg-red-50 text-red-600 px-6 py-3 rounded-xl text-sm font-bold border border-red-100 hover:bg-red-100 transition">
             <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
           </button>
@@ -706,8 +700,14 @@
           if (res && res.success) {
             showDashboardView();
             // Update UI for both desktop and mobile
-            ['desktopNavDashboard', 'mobileNavDashboard', 'desktopBtnLogout', 'mobileBtnLogout'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-            ['desktopBtnLoginTab', 'mobileBtnLoginTab'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['desktopNavDashboard', 'mobileNavDashboard', 'desktopBtnLogout', 'mobileBtnLogout'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.classList.remove('hidden');
+            });
+            ['desktopBtnLoginTab', 'mobileBtnLoginTab'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.classList.add('hidden');
+            });
             document.getElementById('welcomeName').querySelector('span').innerText = "Halo, " + res.nama;
             renderAdminTable();
           } else {
@@ -732,8 +732,14 @@
       document.getElementById('loginView').classList.add('hidden-view');
       
       // Update UI for both desktop and mobile
-      ['desktopNavDashboard', 'mobileNavDashboard', 'desktopBtnLogout', 'mobileBtnLogout'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      ['desktopBtnLoginTab', 'mobileBtnLoginTab'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+      ['desktopNavDashboard', 'mobileNavDashboard', 'desktopBtnLogout', 'mobileBtnLogout'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      ['desktopBtnLoginTab', 'mobileBtnLoginTab'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('hidden');
+      });
 
       showPublicView();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1393,6 +1399,30 @@ Terima kasih.`;
         backToTopBtn.classList.add('hidden');
       }
     });
+
+    // --- Secret Login Trigger (3x Clicks on Logo) ---
+    (function() {
+      let logoClickCount = 0;
+      let lastClickTime = 0;
+      const brandLogo = document.getElementById('brand-logo');
+      if (brandLogo) {
+        brandLogo.addEventListener('click', function(e) {
+          const currentTime = new Date().getTime();
+          if (currentTime - lastClickTime > 2000) {
+            logoClickCount = 1;
+          } else {
+            logoClickCount++;
+          }
+          lastClickTime = currentTime;
+          if (logoClickCount >= 3) {
+            logoClickCount = 0;
+            if (typeof showLoginView === 'function') {
+              showLoginView();
+            }
+          }
+        });
+      }
+    })();
 
     // --- Dynamic Year for Footer ---
     document.getElementById('currentYear').textContent = new Date().getFullYear();

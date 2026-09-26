@@ -26,6 +26,7 @@
 - [6. Panduan Setup & Deployment](#-6-panduan-setup--deployment)
 - [7. Aspek Keamanan & Performa](#-7-aspek-keamanan--performa)
 - [8. Catatan Perubahan 10 September 2026](#-8-catatan-perubahan-10-september-2026)
+- [9. Pembaruan Terbaru](#-9-pembaruan-terbaru)
 
 ---
 
@@ -127,6 +128,17 @@ Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sh
 | whatsapp | Nomor WhatsApp pemesanan. |
 | status | Ketersediaan layanan. |
 
+### 5.3. Sheet: `Boutique`
+| Nama Kolom | Keterangan |
+| :--- | :--- |
+| judul | Judul produk atau layanan boutique/konveksi. |
+| kategori | Kategori produk (e.g., BOUTIQUE, KONVEKSI). |
+| deskripsi | Deskripsi detail produk. |
+| harga | Harga produk (Mulai Rp... atau NEGO). |
+| min_order | Minimum order produk. |
+| gambar_url | URL gambar produk. |
+| status | Status visibilitas (AKTIF, DITOLAK/SEMBUNYIKAN). |
+
 ### 5.3. Sheet: `Biro Jasa`
 | Nama Kolom | Keterangan |
 | :--- | :--- |
@@ -212,3 +224,13 @@ Perubahan yang dikerjakan pada hari ini:
 - Menampilkan detail Biro Jasa lengkap setelah login, termasuk Foto STNK dan WhatsApp.
 - Menambahkan preview dan cetak Surat Kuasa berdasarkan data kendaraan.
 - Menambahkan validasi `flutter analyze` dan pemeriksaan sintaks `node --check script/Code.js`.
+
+## 9. Pembaruan Terbaru
+### Added
+- **Layanan Boutique & Konveksi**: Integrasi penuh untuk kategori layanan baru, termasuk form tambah/edit di dashboard admin, tampilan katalog publik yang dinamis, dan dukungan backend.
+- **Sentralisasi Kontak WhatsApp**: Objek `WA_CONTACTS` didefinisikan secara terpusat untuk mengelola nomor WhatsApp per layanan, meningkatkan konsistensi dan kemudahan pembaruan.
+
+### Fixed
+- **Visibilitas Tombol Login**: Memperbaiki masalah tombol login yang tidak terlihat pada navigasi utama.
+- **Konsistensi Nomor WhatsApp**: Memastikan semua tautan dan fallback nomor WhatsApp di seluruh platform (hero section, katalog percetakan, biro jasa, FAB) menggunakan nomor yang sesuai dari `WA_CONTACTS`.
+- **Default WhatsApp Percetakan**: Mengisi otomatis nomor WhatsApp di form tambah/edit produk percetakan untuk efisiensi admin.
