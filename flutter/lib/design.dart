@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'config.dart';
 
 class WebDesignView extends StatelessWidget {
   const WebDesignView({
@@ -157,7 +158,7 @@ class WebDesignView extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Rp $harga',
+                                      AppConfig.formatCurrency(harga),
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w800,

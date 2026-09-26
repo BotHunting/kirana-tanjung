@@ -225,12 +225,13 @@ Perubahan yang dikerjakan pada hari ini:
 - Menambahkan preview dan cetak Surat Kuasa berdasarkan data kendaraan.
 - Menambahkan validasi `flutter analyze` dan pemeriksaan sintaks `node --check script/Code.js`.
 
-## 9. Pembaruan Terbaru
-### Added
-- **Layanan Boutique & Konveksi**: Integrasi penuh untuk kategori layanan baru, termasuk form tambah/edit di dashboard admin, tampilan katalog publik yang dinamis, dan dukungan backend.
-- **Sentralisasi Kontak WhatsApp**: Objek `WA_CONTACTS` didefinisikan secara terpusat untuk mengelola nomor WhatsApp per layanan, meningkatkan konsistensi dan kemudahan pembaruan.
-
-### Fixed
-- **Visibilitas Tombol Login**: Memperbaiki masalah tombol login yang tidak terlihat pada navigasi utama.
-- **Konsistensi Nomor WhatsApp**: Memastikan semua tautan dan fallback nomor WhatsApp di seluruh platform (hero section, katalog percetakan, biro jasa, FAB) menggunakan nomor yang sesuai dari `WA_CONTACTS`.
-- **Default WhatsApp Percetakan**: Mengisi otomatis nomor WhatsApp di form tambah/edit produk percetakan untuk efisiensi admin.
+## 9. Pembaruan Terbaru (v1.1.1)
+### Fitur & Perbaikan Baru:
+- **Secret Login Tersembunyi (Logo 3x Klik)**: Tombol login visual di navigasi utama telah dihilangkan dan diganti dengan pemicu rahasia (klik logo 3 kali dalam jeda 2 detik) untuk menjaga kerapian estetika web dan aplikasi.
+- **Integrasi Penuh Boutique & Konveksi**: Database (7 kolom non-ID murni berbasis `rowIndex`), menu admin CRUD dashboard, dan rendering katalog publik interaktif di Flutter serta Web kini telah sepenuhnya terintegrasi.
+- **Standardisasi Mata Uang Rupiah Terpusat**: Penambahan fungsi helper format Rupiah `formatCurrency` terpusat untuk memisahkan nominal angka dan mencegah penulisan dobel simbol mata uang di Android & Web.
+- **Perbaikan Bug Overflow & Unbounded Constraints**:
+  - Mengubah layout tombol aksi admin menjadi Grid 2x2 responsif untuk mencegah pemotongan teks (*bottom overflow*).
+  - Menambahkan batasan tinggi dimensi (`SizedBox` height 180) pada pemrosesan `CatalogIcon` di menu Boutique untuk mengatasi error layar putih (*unbounded height crash*).
+  - Optimasi `childAspectRatio: 1.8` dan `FittedBox` skala teks pada StatTile Dashboard beranda.
+- **Pembersihan Kode Redundant**: Menghapus file duplikat `lib/item.dart` untuk menyatukan manajemen state dashboard terpusat di `lib/dashboard.dart`.

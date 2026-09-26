@@ -11,7 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'config.dart';
 import 'kuasa.dart';
 import 'design.dart';
-import 'konveksi.dart'; // Import the new KonveksiView
+import 'boutique.dart'; // Import the new BoutiqueView
 import 'percetakan.dart';
 import 'dashboard.dart';
 
@@ -83,6 +83,7 @@ class _HomeShellState extends State<HomeShell> {
   final data = <String, List<dynamic>>{
     'desain': [],
     'percetakan': [],
+    'boutique': [],
     'biroJasa': [],
   };
   int selectedIndex = 0;
@@ -140,6 +141,7 @@ class _HomeShellState extends State<HomeShell> {
       setState(() {
         data['desain'] = processedData['desain']!;
         data['percetakan'] = processedData['percetakan']!;
+        data['boutique'] = processedData['boutique']!;
         data['biroJasa'] = processedData['biroJasa']!;
         loading = false;
       });
@@ -392,9 +394,9 @@ class _HomeShellState extends State<HomeShell> {
               selectedIcon: Icon(Icons.directions_car),
               label: 'Biro Jasa'),
           const NavigationDestination(
-              icon: Icon(Icons.shopping_bag_outlined), // New icon for Konveksi
+              icon: Icon(Icons.shopping_bag_outlined), // New icon for Boutique
               selectedIcon: Icon(Icons.shopping_bag),
-              label: 'Konveksi'), // New navigation item
+              label: 'Boutique'), // New navigation item
           if (loggedIn)
             const NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),
@@ -497,13 +499,17 @@ class _HomeShellState extends State<HomeShell> {
         );
       case 3:
         return _JasaPage(items: data['biroJasa']!);
-      case 4: // New case for KonveksiView
-        return const KonveksiView();
+      case 4:
+        return KonveksiView(
+          items: data['boutique']!,
+          onRefresh: fetchData,
+        );
       case 5:
         return AdminPage(
           name: userName ?? 'Admin',
           desain: data['desain']!,
           percetakan: data['percetakan']!,
+          boutique: data['boutique']!,
           biroJasa: data['biroJasa']!,
           currentVersion: _currentVersion,
           latestVersion: _latestVersion,
@@ -518,6 +524,7 @@ class _HomeShellState extends State<HomeShell> {
         return _HomePage(
           desain: data['desain']!,
           percetakan: data['percetakan']!,
+          boutique: data['boutique']!,
           biroJasa: data['biroJasa']!,
           onNavigate: (index) => setState(() => selectedIndex = index),
           userName: userName,
@@ -560,8 +567,10 @@ class _HomeShellState extends State<HomeShell> {
   Future<void> _confirmDelete(String sheetName, dynamic item) async {
     final title = sheetName == 'Biro Jasa'
         ? appValue(item, 'nomor_kendaraan', fallback: 'data ini')
-        : appValue(item, sheetName == 'Desain' ? 'nama' : 'deskripsi',
-            fallback: 'data ini');
+        : sheetName == 'Boutique'
+            ? appValue(item, 'judul', fallback: 'data ini')
+            : appValue(item, sheetName == 'Desain' ? 'nama' : 'deskripsi',
+                fallback: 'data ini');
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -633,12 +642,14 @@ class _HomePage extends StatelessWidget {
   const _HomePage(
       {required this.desain,
       required this.percetakan,
+      required this.boutique,
       required this.biroJasa,
       required this.onNavigate,
       this.userName});
 
   final List<dynamic> desain;
   final List<dynamic> percetakan;
+  final List<dynamic> boutique;
   final List<dynamic> biroJasa;
   final ValueChanged<int> onNavigate;
   final String? userName;
@@ -652,28 +663,34 @@ class _HomePage extends StatelessWidget {
         if (userName != null) _WelcomeBanner(name: userName!),
         _HeroPanel(onExplore: () => onNavigate(1)),
         const SizedBox(height: 24),
-        Row(
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1.8,
           children: [
-            Expanded(
-                child: StatTile(
-                    value: '${desain.length}',
-                    label: 'Project',
-                    icon: Icons.language,
-                    color: const Color(0xFF1769FF))),
-            const SizedBox(width: 10),
-            Expanded(
-                child: StatTile(
-                    value: '${percetakan.length}',
-                    label: 'Produk',
-                    icon: Icons.print,
-                    color: const Color(0xFF6556D9))),
-            const SizedBox(width: 10),
-            Expanded(
-                child: StatTile(
-                    value: '${biroJasa.length}',
-                    label: 'Berkas',
-                    icon: Icons.directions_car,
-                    color: const Color(0xFF0C9B77))),
+            StatTile(
+                value: '${desain.length}',
+                label: 'Project Desain',
+                icon: Icons.language,
+                color: const Color(0xFF1769FF)),
+            StatTile(
+                value: '${percetakan.length}',
+                label: 'Produk Cetak',
+                icon: Icons.print,
+                color: const Color(0xFF6556D9)),
+            StatTile(
+                value: '${boutique.length}',
+                label: 'Boutique',
+                icon: Icons.shopping_bag_outlined,
+                color: const Color(0xFFBE185D)),
+            StatTile(
+                value: '${biroJasa.length}',
+                label: 'Berkas Jasa',
+                icon: Icons.directions_car,
+                color: const Color(0xFF0C9B77)),
           ],
         ),
         const SizedBox(height: 32),
@@ -692,6 +709,13 @@ class _HomePage extends StatelessWidget {
             title: 'Percetakan',
             description: 'Kebutuhan cetak untuk identitas bisnis Anda.',
             onTap: () => onNavigate(2)),
+        _ServiceTile(
+            icon: Icons.shopping_bag_outlined,
+            color: const Color(0xFFBE185D),
+            title: 'Boutique & Konveksi',
+            description:
+                'Pemesanan pakaian, seragam, dan layanan boutique premium.',
+            onTap: () => onNavigate(4)),
         _ServiceTile(
             icon: Icons.description_outlined,
             color: const Color(0xFF0C9B77),
@@ -803,20 +827,29 @@ class StatTile extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFFE7EBF2))),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Icon(icon, color: color, size: 17),
-        const SizedBox(height: 10),
-        Text(value,
-            style: const TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF172033))),
-        Text(label,
-            style: const TextStyle(
-                fontSize: 10,
-                color: Color(0xFF8993A4),
-                fontWeight: FontWeight.w600))
-      ]));
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 17),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value,
+                  style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF172033))),
+            ),
+            const SizedBox(height: 2),
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF8993A4),
+                    fontWeight: FontWeight.w600))
+          ]));
 }
 
 class _SectionHeading extends StatelessWidget {
@@ -1601,6 +1634,15 @@ Map<String, List<dynamic>> _parseAndNormalize(String text) {
       'linkgambar',
       'tag',
       'whatsapp',
+      'status',
+    ]),
+    'boutique': _normaliseRows(decoded['boutique'], const [
+      'judul',
+      'kategori',
+      'deskripsi',
+      'harga',
+      'min_order',
+      'gambar_url',
       'status',
     ]),
     'percetakan': _normaliseRows(decoded['percetakan'], const [

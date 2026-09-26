@@ -1,13 +1,13 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppConfig {
-  static String appVersion = '1.0.3';
+  static String appVersion = '1.1.1';
 
   static const String updateApiUrl =
       'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
 
   static const String databaseUrl =
-      'https://script.google.com/macros/s/AKfycbzwJz5NMOBnkuT_LaQD82845M7hoWA7EiuezNEWUQ35Hibn-WF2UXv2HCFyh5GvOh03/exec';
+      'https://script.google.com/macros/s/AKfycbwY1qsADToSSGTEV2EqXAl1PiNxRJZ8_vzyWCX077-RrBwzYtXGQfAbGOhSL4rFmWDb/exec';
 
   // Daftar Kontak WhatsApp Resmi Per Kategori
   static const String waDesainSistem = '6281290320438'; // Desain & Web System
@@ -40,6 +40,32 @@ class AppConfig {
       final packageInfo = await PackageInfo.fromPlatform();
       appVersion = packageInfo.version;
     } catch (_) {}
+  }
+
+  // Helper Standardisasi & Format Rupiah Terpusat
+  static String formatCurrency(String? value) {
+    if (value == null || value.trim().isEmpty || value == '-') return '-';
+    final cleaned = value.trim();
+
+    // Jika sudah mengandung simbol Rp secara manual dari database, langsung kembalikan
+    if (cleaned.toLowerCase().contains('rp')) return cleaned;
+
+    final numOnly = cleaned.replaceAll(RegExp(r'\D'), '');
+    final parsed = int.tryParse(numOnly);
+    if (parsed != null && parsed > 0) {
+      final buffer = StringBuffer();
+      final str = parsed.toString();
+      int count = 0;
+      for (int i = str.length - 1; i >= 0; i--) {
+        buffer.write(str[i]);
+        count++;
+        if (count % 3 == 0 && i != 0) {
+          buffer.write('.');
+        }
+      }
+      return 'Rp ${buffer.toString().split('').reversed.join('')}';
+    }
+    return cleaned; // Fallback untuk teks non-numerik seperti "NEGO" atau "GRATIS"
   }
 
   // Helper Menghitung Sisa Hari Masa Aktif

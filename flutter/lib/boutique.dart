@@ -11,7 +11,7 @@ class KonveksiView extends StatelessWidget {
     required this.onRefresh,
   });
 
-  final List<Map<String, dynamic>> items;
+  final List<dynamic> items;
   final Future<void> Function() onRefresh;
 
   void _kirimPesanWA(Map<String, dynamic> item) async {
@@ -30,7 +30,9 @@ class KonveksiView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeItems = items.where((item) {
-      final status = (item['status'] ?? 'AKTIF').toString().toUpperCase();
+      if (item is! Map) return false;
+      final statusVal = (item['status'] ?? '').toString().trim().toUpperCase();
+      final status = statusVal.isEmpty ? 'AKTIF' : statusVal;
       return status != 'DITOLAK' && status != 'SEMBUNYIKAN (ARSIPKAN)';
     }).toList();
 
@@ -47,7 +49,7 @@ class KonveksiView extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         itemCount: activeItems.length,
         itemBuilder: (context, index) {
-          final item = activeItems[index];
+          final item = activeItems[index] as Map<String, dynamic>;
           final isBoutique = (item['kategori'] ?? '')
               .toString()
               .toLowerCase()
@@ -74,10 +76,14 @@ class KonveksiView extends StatelessWidget {
                     item['gambar_url'].toString().isNotEmpty) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: CatalogIcon(
-                      value: item['gambar_url'],
-                      size: double.infinity,
-                      enableZoom: true,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 180,
+                      child: CatalogIcon(
+                        value: item['gambar_url'],
+                        size: 180,
+                        enableZoom: true,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),

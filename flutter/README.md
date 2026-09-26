@@ -6,7 +6,7 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
 
 ---
 
-### Versi Aplikasi: `1.0.3`
+### Versi Aplikasi: `1.1.1`
 
 ### Fitur Utama:
 
@@ -27,6 +27,15 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
 -   **Cetak Dokumen**:
     -   Generasi dan pratinjau PDF Surat Kuasa untuk layanan biro jasa.
     -   Fungsionalitas cetak langsung melalui `printing` package.
+
+---
+
+### Catatan Perubahan (v1.1.1):
+- **Mekanisme Secret Login**: Menghilangkan tombol login visual, beralih ke pemicu 3x klik logo untuk membuka gerbang login.
+- **Katalog Boutique & Konveksi**: Implementasi reaktivitas state dan UI list dinamis bebas crash menggunakan batasan tinggi gambar absolut (180px).
+- **Fix UI Overflow**: Restrukturisasi tombol CRUD admin menjadi Grid 2x2, serta penyesuaian rasio aspek StatTile Dashboard beranda.
+- **Format Rupiah Dinamis**: Helper mata uang pintar terpusat di `AppConfig` untuk standardisasi format nominal data numerik dari Google Sheets.
+- **Refaktor & Clean Code**: Penghapusan total file redundant `lib/item.dart` dan penggabungan logika form penyeleksi status/kategori ke dalam `lib/dashboard.dart`.
 
 ---
 

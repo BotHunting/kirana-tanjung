@@ -10,6 +10,7 @@ class AdminPage extends StatefulWidget {
     required this.name,
     required this.desain,
     required this.percetakan,
+    required this.boutique,
     required this.biroJasa,
     required this.currentVersion,
     required this.latestVersion,
@@ -24,6 +25,7 @@ class AdminPage extends StatefulWidget {
   final String name;
   final List<dynamic> desain;
   final List<dynamic> percetakan;
+  final List<dynamic> boutique;
   final List<dynamic> biroJasa;
   final String currentVersion;
   final String? latestVersion;
@@ -102,10 +104,33 @@ class _AdminPageState extends State<AdminPage>
     );
   }
 
+  Widget _buildActionBtn({
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      icon: Icon(icon, size: 16),
+      label: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: ListView(
         key: const ValueKey('admin'),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
@@ -149,33 +174,48 @@ class _AdminPageState extends State<AdminPage>
             ],
           ),
           const SizedBox(height: 14),
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => widget.onAdd('Desain'),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Tambah Desain'),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionBtn(
+                      title: 'Tambah Desain',
+                      icon: Icons.add,
+                      onTap: () => widget.onAdd('Desain'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionBtn(
+                      title: 'Tambah Cetak',
+                      icon: Icons.add,
+                      onTap: () => widget.onAdd('Percetakan'),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => widget.onAdd('Percetakan'),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Tambah Cetak'),
-                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionBtn(
+                      title: 'Tambah Boutique',
+                      icon: Icons.add,
+                      onTap: () => widget.onAdd('Boutique'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionBtn(
+                      title: 'Tambah Biro Jasa',
+                      icon: Icons.add,
+                      onTap: () => widget.onAdd('Biro Jasa'),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => widget.onAdd('Biro Jasa'),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Tambah Biro Jasa'),
-            ),
           ),
           const SizedBox(height: 20),
           TextField(
@@ -204,6 +244,13 @@ class _AdminPageState extends State<AdminPage>
             const SizedBox(width: 10),
             Expanded(
                 child: StatTile(
+                    value: '${widget.boutique.length}',
+                    label: 'Boutique',
+                    icon: Icons.shopping_bag_outlined,
+                    color: const Color(0xFFBE185D))),
+            const SizedBox(width: 10),
+            Expanded(
+                child: StatTile(
                     value: '${widget.biroJasa.length}',
                     label: 'Jasa',
                     icon: Icons.directions_car,
@@ -215,9 +262,10 @@ class _AdminPageState extends State<AdminPage>
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: const Color(0xFFE7EBF2))),
-            child: const TabBar(tabs: [
+            child: const TabBar(isScrollable: true, tabs: [
               Tab(text: 'Desain'),
               Tab(text: 'Cetak'),
+              Tab(text: 'Boutique'),
               Tab(text: 'Jasa')
             ]),
           ),
@@ -238,6 +286,15 @@ class _AdminPageState extends State<AdminPage>
                   titleKey: 'deskripsi',
                   statusKey: 'status',
                   sheetName: 'Percetakan',
+                  onEdit: widget.onEdit,
+                  onDelete: widget.onDelete,
+                  onPrintKuasa: widget.onPrintKuasa,
+                  query: query),
+              AdminDataList(
+                  items: widget.boutique,
+                  titleKey: 'judul',
+                  statusKey: 'status',
+                  sheetName: 'Boutique',
                   onEdit: widget.onEdit,
                   onDelete: widget.onDelete,
                   onPrintKuasa: widget.onPrintKuasa,
@@ -287,15 +344,24 @@ class AdminDataList extends StatelessWidget {
           ? ['nama', 'deskripsi', 'tag', 'status']
           : sheetName == 'Percetakan'
               ? ['deskripsi', 'harga', 'status']
-              : [
-                  'layanan',
-                  'nama',
-                  'merek',
-                  'type',
-                  'nomor_kendaraan',
-                  'deskripsi',
-                  'durasi'
-                ];
+              : sheetName == 'Boutique'
+                  ? [
+                      'judul',
+                      'kategori',
+                      'deskripsi',
+                      'harga',
+                      'min_order',
+                      'status'
+                    ]
+                  : [
+                      'layanan',
+                      'nama',
+                      'merek',
+                      'type',
+                      'nomor_kendaraan',
+                      'deskripsi',
+                      'durasi'
+                    ];
       return appSearches(item, query, fields);
     }).toList();
 
@@ -351,6 +417,18 @@ class AdminDataList extends StatelessWidget {
                       height: 42,
                       child: CatalogIcon(
                         value: appValue(item, 'linkgambar'),
+                        status: appValue(item, statusKey),
+                        size: 42,
+                        enableZoom: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ] else if (sheetName == 'Boutique') ...[
+                    SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: CatalogIcon(
+                        value: appValue(item, 'gambar_url'),
                         status: appValue(item, statusKey),
                         size: 42,
                         enableZoom: true,
@@ -563,6 +641,17 @@ class _EditDataSheetState extends State<EditDataSheet> {
     if (widget.sheetName == 'Percetakan') {
       return ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'];
     }
+    if (widget.sheetName == 'Boutique') {
+      return [
+        'judul',
+        'kategori',
+        'deskripsi',
+        'harga',
+        'min_order',
+        'gambar_url',
+        'status'
+      ];
+    }
     return [
       'layanan',
       'nama',
@@ -591,6 +680,12 @@ class _EditDataSheetState extends State<EditDataSheet> {
       if (widget.sheetName == 'Percetakan')
         'status': _choiceValue(
             appValue(widget.item, 'status'), ['AKTIF', 'DIARSIPKAN'], 'AKTIF'),
+      if (widget.sheetName == 'Boutique')
+        'kategori': _choiceValue(appValue(widget.item, 'kategori'),
+            ['BOUTIQUE', 'KONVEKSI'], 'BOUTIQUE'),
+      if (widget.sheetName == 'Boutique')
+        'status': _choiceValue(
+            appValue(widget.item, 'status'), ['AKTIF', 'DITOLAK'], 'AKTIF'),
       if (widget.sheetName == 'Biro Jasa')
         'layanan': _choiceValue(appValue(widget.item, 'layanan'),
             ['KIR', 'SAMSAT', 'REKOM'], 'KIR'),
@@ -733,6 +828,12 @@ class _EditDataSheetState extends State<EditDataSheet> {
     }
     if (widget.sheetName == 'Percetakan' && field == 'status') {
       return ['AKTIF', 'DIARSIPKAN'];
+    }
+    if (widget.sheetName == 'Boutique' && field == 'status') {
+      return ['AKTIF', 'DITOLAK'];
+    }
+    if (widget.sheetName == 'Boutique' && field == 'kategori') {
+      return ['BOUTIQUE', 'KONVEKSI'];
     }
     if (widget.sheetName == 'Biro Jasa' && field == 'layanan') {
       return ['KIR', 'SAMSAT', 'REKOM'];
