@@ -6,8 +6,6 @@
       WEB</button>
     <button onclick="switchTab('formPrint', this)"
       class="tab-btn px-8 py-3 rounded-xl text-[10px] font-800 tracking-widest transition-all">PERCETAKAN</button>
-    <button onclick="switchTab('formBoutique', this)"
-      class="tab-btn px-8 py-3 rounded-xl text-[10px] font-800 tracking-widest transition-all">BOUTIQUE</button>
     <button onclick="switchTab('formJasa', this)"
       class="tab-btn px-8 py-3 rounded-xl text-[10px] font-800 tracking-widest transition-all">BIRO JASA</button>
   </div>
@@ -95,57 +93,6 @@
         <button type="submit"
           class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">SIMPAN
           PRODUK</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="formBoutique" class="admin-form hidden bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
-    <h3 class="text-xl font-bold mb-6 flex items-center"><i class="fas fa-shirt mr-3 text-pink-600"></i> Tambah Produk Boutique</h3>
-    <form id="fBoutique" onsubmit="handleForm(event, 'Boutique', 'fBoutique')" class="grid md:grid-cols-2 gap-6">
-      <div class="space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Judul Produk</label>
-        <input type="text" id="btq-judul" name="judul" oninput="this.value = this.value.toUpperCase()" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500 uppercase">
-      </div>
-      <div class="space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Kategori</label>
-        <select id="btq-kategori" name="kategori" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500 appearance-none cursor-pointer font-bold uppercase">
-          <option value="KONVEKSI">KONVEKSI</option>
-          <option value="BOUTIQUE">BOUTIQUE</option>
-        </select>
-      </div>
-      <div class="space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Harga (Mulai Rp... / Pcs)</label>
-        <input type="text" id="btq-harga" name="harga" oninput="this.value = this.value.toUpperCase()" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500 uppercase">
-      </div>
-      <div class="space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Min. Order</label>
-        <input type="text" id="btq-min-order" name="min_order" oninput="this.value = this.value.toUpperCase()" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500 uppercase">
-      </div>
-      <div class="space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Gambar URL</label>
-        <input type="url" id="btq-gambar-url" name="gambar_url" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500">
-      </div>
-      <div class="space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Status</label>
-        <select id="btq-status" name="status" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500 appearance-none cursor-pointer font-bold uppercase">
-          <option value="SELESAI">TAMPILKAN DI KATALOG</option>
-          <option value="DITOLAK">SEMBUNYIKAN (ARSIPKAN)</option>
-        </select>
-      </div>
-      <div class="md:col-span-2 space-y-2">
-        <label class="text-[10px] font-bold text-slate-400 uppercase">Deskripsi</label>
-        <textarea id="btq-deskripsi" name="deskripsi" oninput="this.value = this.value.toUpperCase()" required
-          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-500 h-24 uppercase"></textarea>
-      </div>
-      <div class="md:col-span-2">
-        <button type="submit"
-          class="w-full bg-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-pink-700 transition">SIMPAN PRODUK</button>
       </div>
     </form>
   </div>
