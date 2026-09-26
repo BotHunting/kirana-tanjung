@@ -826,7 +826,7 @@
         if (isCardLayout) {
           const noResultEl = document.createElement('div');
           noResultEl.className = 'no-result-row w-full text-center text-slate-400 py-10 italic';
-          noResultEl.innerHTML = `Produk tidak ditemukan untuk pencarian '${input.value}'.`;
+          noResultEl.textContent = `Produk tidak ditemukan untuk pencarian '${input.value}'.`;
           container.appendChild(noResultEl);
         } else {
           const colCount = container.querySelector('tr:first-child > td')?.length || 1;
@@ -835,7 +835,7 @@
           const cell = noResultRow.insertCell();
           cell.colSpan = colCount;
           cell.className = 'text-center text-slate-400 py-10 italic';
-          cell.innerHTML = `Data tidak ditemukan untuk pencarian '${input.value}'.`;
+          cell.textContent = `Data tidak ditemukan untuk pencarian '${input.value}'.`;
         }
       }
     }
