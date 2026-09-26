@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart'; // Added for ef
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'config.dart';
 import 'kuasa.dart';
 import 'design.dart';
@@ -244,11 +245,16 @@ class _HomeShellState extends State<HomeShell> {
                   style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.bold, fontSize: 12, color: ink)),
               const SizedBox(height: 6),
-              Text(changelog,
-                  style: GoogleFonts.plusJakartaSans(
+              MarkdownBody(
+                data: changelog,
+                styleSheet: MarkdownStyleSheet(
+                  p: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: const Color(0xFF64748B),
-                      height: 1.5)),
+                      height: 1.5),
+                  strong: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ],
           ),
         ),

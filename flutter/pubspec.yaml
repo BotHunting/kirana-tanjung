@@ -16,6 +16,7 @@ dependencies:
   pdf: ^3.10.0
   printing: ^5.11.0
   package_info_plus: ^8.0.0
+  flutter_markdown: ^0.7.2
 
 dev_dependencies:
   flutter_test:
