@@ -66,6 +66,14 @@
 </head>
 
 <body class="mesh-bg text-slate-900">
+  <?
+    var WA_CONTACTS = {
+      desain: '6281290320438',
+      percetakan: '6281233223830',
+      boutique: '6281938929455',
+      jasa: '6281290320438'
+    };
+  ?>
 
   <nav class="fixed w-full z-50 glass" id="mainNav">
     <div class="max-w-7xl mx-auto px-6">
@@ -82,6 +90,7 @@
             <a href="javascript:void(0)" onclick="navigateToSection('portfolio')" class="hover:text-blue-600 transition-all">Portfolio</a>
             <a href="javascript:void(0)" onclick="navigateToSection('web')" class="hover:text-blue-600 transition-all">Web Design</a>
             <a href="javascript:void(0)" onclick="navigateToSection('print')" class="hover:text-blue-600 transition-all">Percetakan</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('boutique')" class="hover:text-blue-600 transition-all">Boutique</a>
             <a href="javascript:void(0)" onclick="navigateToSection('jasa')" class="hover:text-blue-600 transition-all">Biro Jasa</a>
             <a id="desktopNavDashboard" href="javascript:void(0)" onclick="showDashboardView()" class="hidden hover:text-blue-600 transition-all font-bold text-blue-600">Dashboard</a>
           </div>
@@ -110,6 +119,7 @@
         <a href="javascript:void(0)" onclick="navigateToSection('portfolio', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Portfolio</a>
         <a href="javascript:void(0)" onclick="navigateToSection('web', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Web Design</a>
         <a href="javascript:void(0)" onclick="navigateToSection('print', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Percetakan</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('boutique', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Boutique</a>
         <a href="javascript:void(0)" onclick="navigateToSection('jasa', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Biro Jasa</a>
         <a id="mobileNavDashboard" href="javascript:void(0)" onclick="showDashboardView(true)" class="hidden text-blue-600 font-bold hover:text-blue-700 transition-all py-2 text-sm">Dashboard</a>
         <div class="border-t border-slate-200 pt-5 mt-3 space-y-4">
@@ -132,7 +142,7 @@
       <p class="text-slate-400 max-w-2xl mx-auto mb-12 text-lg font-medium leading-relaxed">Layanan profesional dari CV. Kirana Tanjung Pelakar untuk transformasi bisnis, pengembangan sistem, dan pengurusan dokumen legalitas Anda.</p>
       <div class="flex flex-wrap justify-center gap-5">
         <button onclick="navigateToSection('portfolio')" class="bg-slate-900 text-white px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all hover:-translate-y-1 active:scale-95 uppercase">Jelajahi Karya</button>
-        <a href="https://wa.me/6281290320438" target="_blank" class="bg-white text-slate-800 border-2 border-slate-100 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
+        <a href="https://wa.me/<?= WA_CONTACTS.desain ?>" target="_blank" class="bg-white text-slate-800 border-2 border-slate-100 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
       </div>
     </section>
 
@@ -289,7 +299,7 @@
               var iconValue = item.ikon || '';
               var isImageIcon = /^(https?:\/\/|data:image)/i.test(iconValue);
 
-              var waNumRaw = item.whatsapp || '6281290320438';
+              var waNumRaw = item.whatsapp || WA_CONTACTS.percetakan;
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
               var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
           ?>
@@ -308,6 +318,63 @@
                 <span class="bg-emerald-50 text-emerald-700 border-emerald-100 px-4 py-1.5 rounded-lg text-[10px] font-800 border shadow-sm uppercase tracking-wider">
                   TERSEDIA
                 </span>
+                <a href="https://wa.me/<?= cleanedWa ?>?text=<?= waMessage ?>" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-full text-[10px] font-bold hover:bg-green-600 transition shadow-lg shadow-green-100 flex items-center gap-1.5 justify-center">
+                  <i class="fab fa-whatsapp"></i>
+                  <span>ORDER</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <? } ?>
+        </div>
+      </section>
+
+      <section id="boutique">
+        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-pink-600 pl-4">Katalog Layanan Boutique & Konveksi</h2>
+        <div class="mb-8 relative">
+          <input type="text" id="searchBoutique" onkeyup="filterPublicTable('searchBoutique', 'containerBoutique')" placeholder="Cari produk boutique..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition font-medium text-sm">
+          <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        </div>
+        <div id="containerBoutique" class="flex overflow-x-auto space-x-6 pb-6 -mx-6 px-6" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9;">
+          <? for(var i=0; i < publicBoutique.length; i++) { 
+              var item = publicBoutique[i];
+              var status = (item.status || 'AKTIF').toUpperCase();
+
+              if (status === 'DITOLAK' || status === 'SEMBUNYIKAN (ARSIPKAN)') continue;
+
+              var price = item.harga;
+              var formattedPrice = '-';
+              if (price) {
+                var num = parseInt(String(price).replace(/\D/g, ''), 10);
+                if (!isNaN(num) && num > 0) {
+                  formattedPrice = 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
+                } else {
+                  formattedPrice = price;
+                }
+              }
+
+              var imgUrl = item.gambar_url || '';
+              var isImage = /^(https?:\/\/|data:image)/i.test(imgUrl);
+
+              var waNumRaw = WA_CONTACTS.boutique;
+              var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
+              var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan boutique: ' + item.judul);
+          ?>
+          <div class="card-item group bg-white rounded-3xl shadow-lg border border-slate-100 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
+            <div class="h-40 bg-pink-50 flex items-center justify-center text-pink-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImage) { ?>onclick="openImagePreview('<?= imgUrl ?>', '<?= item.judul ?>')"<? } ?>>
+              <? if (isImage) { ?>
+                <img src="<?= imgUrl ?>" alt="Ikon <?= item.judul ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>';">
+              <? } else { ?>
+                <i class="fas fa-tshirt"></i>
+              <? } ?>
+            </div>
+            <div class="p-6 flex flex-col flex-grow">
+              <span class="text-[9px] font-extrabold text-pink-600 tracking-widest uppercase mb-1"><?= item.kategori || 'BOUTIQUE' ?></span>
+              <h4 class="font-800 text-slate-800 uppercase tracking-tight mb-2 flex-grow"><?= item.judul ?></h4>
+              <p class="text-slate-400 text-xs font-medium italic mb-2 line-clamp-2"><?= item.deskripsi ?></p>
+              <p class="text-pink-600 font-bold text-lg mb-4"><?= formattedPrice ?></p>
+              <div class="flex justify-between items-center mt-auto">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Min: <?= item.min_order || '1 Pcs' ?></span>
                 <a href="https://wa.me/<?= cleanedWa ?>?text=<?= waMessage ?>" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-full text-[10px] font-bold hover:bg-green-600 transition shadow-lg shadow-green-100 flex items-center gap-1.5 justify-center">
                   <i class="fab fa-whatsapp"></i>
                   <span>ORDER</span>
@@ -344,7 +411,7 @@
                 ?>
                 <?
                   var waMessageJasa = encodeURIComponent('Halo, saya ingin bertanya mengenai status layanan ' + item.layanan + ' untuk kendaraan ' + item.nomor_kendaraan + ' atas nama ' + item.nama + '.');
-                  var adminWa = '6281290320438'; // Hardcoded admin number for public inquiries
+                  var adminWa = WA_CONTACTS.jasa; // Hardcoded admin number for public inquiries
                 ?>
                 <tr class="hover:bg-blue-50/30 transition-colors">
                   <td class="px-8 py-6">
@@ -421,6 +488,7 @@
           <div class="flex p-1.5 bg-slate-100 rounded-2xl text-[10px] font-800 uppercase tracking-widest text-slate-500">
             <button onclick="switchLogTab('logDesain', this)" class="log-tab-btn active-log-tab px-6 py-2 rounded-xl transition-all">Desain</button>
             <button onclick="switchLogTab('logPrint', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Percetakan</button>
+            <button onclick="switchLogTab('logBoutique', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Boutique</button>
             <button onclick="switchLogTab('logJasa', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Biro Jasa</button>
           </div>
         </div>
@@ -445,6 +513,15 @@
               <tr><th class="px-6 py-4">Produk</th><th class="px-6 py-4">Harga</th><th class="px-6 py-4">Ikon</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
             </thead>
             <tbody id="tbodyPrint" class="divide-y divide-slate-50 text-xs font-medium text-slate-600"></tbody>
+          </table>
+        </div>
+
+        <div id="logBoutique" class="log-content hidden overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <tr><th class="px-6 py-4">Judul</th><th class="px-6 py-4">Kategori</th><th class="px-6 py-4">Deskripsi</th><th class="px-6 py-4">Harga</th><th class="px-6 py-4">Min. Order</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
+            </thead>
+            <tbody id="tbodyBoutique" class="divide-y divide-slate-50 text-xs font-medium text-slate-600"></tbody>
           </table>
         </div>
 
@@ -544,7 +621,7 @@
       <i class="fas fa-arrow-up"></i>
     </button>
     <!-- WhatsApp FAB -->
-    <a href="https://wa.me/6281290320438" target="_blank" class="h-16 w-16 bg-green-500 text-white rounded-full shadow-2xl shadow-green-200 flex items-center justify-center hover:bg-green-600 transition-all transform hover:-translate-y-1">
+    <a href="https://wa.me/<?= WA_CONTACTS.desain ?>" target="_blank" class="h-16 w-16 bg-green-500 text-white rounded-full shadow-2xl shadow-green-200 flex items-center justify-center hover:bg-green-600 transition-all transform hover:-translate-y-1">
       <i class="fab fa-whatsapp text-4xl"></i>
     </a>
   </div>
@@ -767,6 +844,8 @@
         activeTbodyId = 'tbodyDesain';
       } else if (!document.getElementById('logPrint').classList.contains('hidden')) {
         activeTbodyId = 'tbodyPrint';
+      } else if (!document.getElementById('logBoutique').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyBoutique';
       } else if (!document.getElementById('logJasa').classList.contains('hidden')) {
         activeTbodyId = 'tbodyJasa';
       }
@@ -902,6 +981,34 @@
         });
         document.getElementById('tbodyPrint').innerHTML = hPrint || '<tr><td colspan="5" class="p-8 text-center text-slate-400">Tidak ada data percetakan</td></tr>';
 
+        // Render Boutique
+        let hBoutique = '';
+        (data.boutique || []).sort((a, b) => b.row_index - a.row_index).forEach(item => {
+          let statusText = (item.status || 'AKTIF').toUpperCase();
+          let statusClass = statusText === 'DITOLAK' || statusText === 'SEMBUNYIKAN (ARSIPKAN)' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-green-50 text-green-700 border-green-100';
+          
+          hBoutique += `
+            <tr class="hover:bg-slate-50/50 transition">
+              <td class="px-6 py-5 font-bold text-slate-800">${item.judul || '-'}</td>
+              <td class="px-6 py-5"><span class="bg-pink-50 text-pink-600 px-3 py-1 rounded-lg font-bold text-[9px] uppercase">${item.kategori || 'BOUTIQUE'}</span></td>
+              <td class="px-6 py-5 italic text-slate-400 max-w-sm break-words">${item.deskripsi || ''}</td>
+              <td class="px-6 py-5 font-bold text-pink-600 whitespace-nowrap">${formatCurrency(item.harga)}</td>
+              <td class="px-6 py-5 text-slate-700 whitespace-nowrap">${item.min_order || '1 Pcs'}</td>
+              <td class="px-6 py-5 whitespace-nowrap">
+                <span class="${statusClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-wide">
+                  ${statusText}
+                </span>
+              </td>
+              <td class="px-6 py-5 text-center whitespace-nowrap">
+                <div class="flex items-center justify-center space-x-3">
+                  <button onclick='openEditModal("Boutique", ${item.row_index})' class="text-pink-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
+                  ${item.gambar_url ? `<button onclick="openImagePreview('${item.gambar_url}', '${item.judul}')" class="text-indigo-500 hover:scale-110 transition" title="Lihat Gambar"><i class="fas fa-image text-lg"></i></button>` : ''}
+                </div>
+              </td>
+            </tr>`;
+        });
+        document.getElementById('tbodyBoutique').innerHTML = hBoutique || '<tr><td colspan="7" class="p-8 text-center text-slate-400">Tidak ada data boutique</td></tr>';
+
         // Render Biro Jasa
         let hJasa = '';
         (data.biroJasa || []).sort((a, b) => {
@@ -1034,6 +1141,7 @@ Terima kasih.`;
       const fieldConfig = {
         "Desain": ['nama', 'tag', 'linkgambar', 'deskripsi', 'whatsapp', 'status'],
         "Percetakan": ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'],
+        "Boutique": ['judul', 'kategori', 'deskripsi', 'harga', 'min_order', 'gambar_url', 'status'],
         "Biro Jasa": ['layanan', 'nama', 'merek', 'type', 'nomor_kendaraan', 'deskripsi', 'durasi', 'aktif', 'whatsapp', 'foto_stnk']
       };
 
@@ -1049,6 +1157,20 @@ Terima kasih.`;
           for (const optValue in options) {
             inputField += `<option value="${optValue}" ${value === optValue ? 'selected' : ''}>${options[optValue]}</option>`;
           }
+          inputField += `</select>`;
+        } else if (key === 'status' && sheetName === "Boutique") {
+          const options = { "AKTIF": "TAMPILKAN DI KATALOG", "DITOLAK": "SEMBUNYIKAN (ARSIPKAN)" };
+          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          for (const optValue in options) {
+            inputField += `<option value="${optValue}" ${value === optValue ? 'selected' : ''}>${options[optValue]}</option>`;
+          }
+          inputField += `</select>`;
+        } else if (key === 'kategori' && sheetName === "Boutique") {
+          const options = ["BOUTIQUE", "KONVEKSI"];
+          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          options.forEach(opt => {
+            inputField += `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`;
+          });
           inputField += `</select>`;
         } else if ((key === 'status' && sheetName === "Desain") || (key === 'durasi' && sheetName === "Biro Jasa")) {
           const options = ["ON PROCESS", "SELESAI", "DITOLAK"];
@@ -1066,7 +1188,7 @@ Terima kasih.`;
           inputField += `</select>`;
         } else if (key === 'aktif' && sheetName === "Biro Jasa") {
           inputField = `<input type="date" name="${key}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
-        } else if (key === 'foto_stnk' || key === 'linkgambar') {
+        } else if (key === 'foto_stnk' || key === 'linkgambar' || key === 'gambar_url') {
           inputField = `<input type="url" name="${key}" value="${value}" placeholder="https://..." class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else if (key === 'ikon') {
           inputField = `<input type="text" name="${key}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
@@ -1175,7 +1297,7 @@ Terima kasih.`;
       
       rawData.forEach((v, k) => {
         // Jangan ubah kapitalisasi untuk nama sheet, index baris, dan URL gambar/stnk
-        if (k === 'sheet_name' || k === 'row_index' || k === 'foto_stnk' || k === 'linkgambar' || k === 'ikon') {
+        if (k === 'sheet_name' || k === 'row_index' || k === 'foto_stnk' || k === 'linkgambar' || k === 'gambar_url' || k === 'ikon') {
           formData[k] = v;
         } else {
           formData[k] = typeof v === 'string' ? v.toUpperCase() : v;
@@ -1214,50 +1336,52 @@ Terima kasih.`;
 
     // --- Auto-Scroll for Print Catalog (Seamless Marquee Loop) ---
     document.addEventListener('DOMContentLoaded', function() {
-      const scrollContainer = document.getElementById('containerPercetakan');
-      const searchInput = document.getElementById('searchPrint');
-      
-      if (!scrollContainer || !searchInput || scrollContainer.children.length === 0) {
-        return;
-      }
-
-      // 1. Seamless Cloning: Duplicate items for an infinite loop effect.
-      const originalItems = Array.from(scrollContainer.children);
-      originalItems.forEach(item => {
-        const clone = item.cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true'); // Hide clones from screen readers
-        scrollContainer.appendChild(clone);
-      });
-
-      let isPaused = false;
-      let animationFrameId;
-
-      function autoScroll() {
-        if (!isPaused && scrollContainer.scrollWidth > scrollContainer.clientWidth) {
-          // 2. Smooth Infinite Scroll
-          scrollContainer.scrollLeft += 0.5; // Atur kecepatan di sini
-
-          // When the scroll reaches the start of the cloned items, reset it.
-          const originalContentWidth = scrollContainer.scrollWidth / 2;
-          if (scrollContainer.scrollLeft >= originalContentWidth) {
-            scrollContainer.scrollLeft -= originalContentWidth;
-          }
+      ['containerPercetakan', 'containerBoutique'].forEach(id => {
+        const scrollContainer = document.getElementById(id);
+        const searchInput = document.getElementById(id === 'containerPercetakan' ? 'searchPrint' : 'searchBoutique');
+        
+        if (!scrollContainer || !searchInput || scrollContainer.children.length === 0) {
+          return;
         }
+
+        // 1. Seamless Cloning: Duplicate items for an infinite loop effect.
+        const originalItems = Array.from(scrollContainer.children);
+        originalItems.forEach(item => {
+          const clone = item.cloneNode(true);
+          clone.setAttribute('aria-hidden', 'true'); // Hide clones from screen readers
+          scrollContainer.appendChild(clone);
+        });
+
+        let isPaused = false;
+        let animationFrameId;
+
+        function autoScroll() {
+          if (!isPaused && scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+            // 2. Smooth Infinite Scroll
+            scrollContainer.scrollLeft += 0.5; // Atur kecepatan di sini
+
+            // When the scroll reaches the start of the cloned items, reset it.
+            const originalContentWidth = scrollContainer.scrollWidth / 2;
+            if (scrollContainer.scrollLeft >= originalContentWidth) {
+              scrollContainer.scrollLeft -= originalContentWidth;
+            }
+          }
+          animationFrameId = requestAnimationFrame(autoScroll);
+        }
+
+        // 3. Interactive Pause
+        function startAutoScroll() { isPaused = false; }
+        function stopAutoScroll() { isPaused = true; }
+
+        scrollContainer.addEventListener('mouseenter', stopAutoScroll);
+        scrollContainer.addEventListener('touchstart', stopAutoScroll, { passive: true });
+        scrollContainer.addEventListener('mouseleave', startAutoScroll);
+        scrollContainer.addEventListener('touchend', startAutoScroll);
+        searchInput.addEventListener('focus', stopAutoScroll);
+        searchInput.addEventListener('blur', startAutoScroll);
+
         animationFrameId = requestAnimationFrame(autoScroll);
-      }
-
-      // 3. Interactive Pause
-      function startAutoScroll() { isPaused = false; }
-      function stopAutoScroll() { isPaused = true; }
-
-      scrollContainer.addEventListener('mouseenter', stopAutoScroll);
-      scrollContainer.addEventListener('touchstart', stopAutoScroll, { passive: true });
-      scrollContainer.addEventListener('mouseleave', startAutoScroll);
-      scrollContainer.addEventListener('touchend', startAutoScroll);
-      searchInput.addEventListener('focus', stopAutoScroll);
-      searchInput.addEventListener('blur', startAutoScroll);
-
-      animationFrameId = requestAnimationFrame(autoScroll);
+      });
     });
 
     // --- Back to Top Button ---

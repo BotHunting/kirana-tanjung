@@ -48,6 +48,7 @@ function doGet(e) {
   const template = HtmlService.createTemplateFromFile('index');
   template.publicDesain = getSheetData(ss, "Desain");
   template.publicPercetakan = getSheetData(ss, "Percetakan");
+  template.publicBoutique = getSheetData(ss, "Boutique");
   template.publicBiroJasa = getSheetData(ss, "Biro Jasa");
 
   return template.evaluate()
@@ -146,6 +147,8 @@ function addDataToSheet(sheetName, formData) {
       rowData = [timestamp, formData.nama, formData.deskripsi, formData.linkgambar, formData.tag, formData.whatsapp, formData.status];
     } else if (sheetName === "Percetakan") {
       rowData = [timestamp, formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status];
+    } else if (sheetName === "Boutique") {
+      rowData = [formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status];
     } else if (sheetName === "Biro Jasa") {
       rowData = [timestamp, formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk];
     } else {
@@ -194,6 +197,9 @@ function updateDataInSheet(sheetName, rowIndex, formData) {
     } else if (sheetName.toLowerCase() === "percetakan") {
       rowData = [[formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status]];
       sheet.getRange(row, 2, 1, 5).setValues(rowData);
+    } else if (sheetName.toLowerCase() === "boutique") {
+      rowData = [[formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status]];
+      sheet.getRange(row, 1, 1, 7).setValues(rowData);
     } else if (sheetName.toLowerCase() === "biro jasa") {
       rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk]];
       sheet.getRange(row, 2, 1, 10).setValues(rowData);
@@ -218,6 +224,7 @@ function getAllDataForDashboard() {
   return {
     desain: getSheetData(ss, "Desain"),
     percetakan: getSheetData(ss, "Percetakan"),
+    boutique: getSheetData(ss, "Boutique"),
     biroJasa: getSheetData(ss, "Biro Jasa")
   };
 }
