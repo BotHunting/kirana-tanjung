@@ -109,7 +109,7 @@
           <img src="https://raw.githubusercontent.com/BotHunting/kirana-tanjung/refs/heads/main/www/Kirana.png" alt="Kirana Tanjung Logo" class="h-10 w-10 object-contain">
           <div class="flex flex-col">
             <span class="text-xl font-900 tracking-tighter uppercase leading-none">NATALA <span class="text-blue-600 dark:text-blue-400">STUDIO</span></span>
-            <span class="text-[8px] font-extrabold text-slate-400 dark:text-slate-500 tracking-[0.25em] uppercase mt-0.5 leading-none">by Kirana Tanjung</span>
+            <span class="text-[8px] font-extrabold text-slate-400 dark:text-slate-500 tracking-[0.15em] uppercase mt-0.5 leading-none">by Kirana Tanjung Pelakar</span>
           </div>
         </div>
 
@@ -172,7 +172,7 @@
       <p class="text-slate-400 dark:text-slate-300 max-w-2xl mx-auto mb-12 text-lg font-medium leading-relaxed">Layanan profesional dari <strong>Natala Studio</strong> (CV. Kirana Tanjung Pelakar) untuk akselerasi bisnis, produksi media cetak/fashion, dan pengurusan dokumen legalitas kendaraan Anda.</p>
       <div class="flex flex-wrap justify-center gap-5">
         <button onclick="navigateToSection('portfolio')" class="bg-slate-900 text-white px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all hover:-translate-y-1 active:scale-95 uppercase">Jelajahi Karya</button>
-        <a href="https://wa.me/<?= WA_CONTACTS.desain ?>" target="_blank" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white border-2 border-slate-100 dark:border-slate-800 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
+        <a href="https://wa.me/<?= WA_CONTACTS.desain ?>?text=<?= encodeURIComponent('Halo Natala Studio, saya ingin konsultasi pengurusan dokumen') ?>" target="_blank" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white border-2 border-slate-100 dark:border-slate-800 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
       </div>
     </section>
 
@@ -354,10 +354,10 @@
 
               var waNumRaw = item.whatsapp || WA_CONTACTS.percetakan;
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
-              var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
+              var waMessage = encodeURIComponent('Halo Natala Studio, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
           ?>
           <div class="card-item group bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
-            <div class="h-40 bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-indigo-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImageIcon) { ?>onclick="openImagePreview('<?= iconValue ?>', '<?= item.deskripsi ?>')"<? } ?>>
+            <div class="h-40 bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-indigo-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImageIcon) { ?>onclick="openProductDetailModal('<?= escapeHtml(item.deskripsi) ?>', 'PERCETAKAN', '<?= escapeHtml(iconValue) ?>', '<?= escapeHtml(item.keterangan || 'Layanan percetakan premium berkualitas tinggi dengan hasil cetak detail presisi tinggi.') ?>', '<?= escapeHtml(formattedPrice) ?>', '<?= escapeHtml(item.min_order || '1 Pcs') ?>', '<?= cleanedWa ?>')"<? } ?>>
               <? if (isImageIcon) { ?>
                 <img src="<?= iconValue ?>" alt="Ikon <?= item.deskripsi ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-image\'></i>';">
               <? } else { ?>
@@ -368,8 +368,8 @@
               <h4 class="font-800 text-slate-800 dark:text-slate-100 uppercase tracking-tight mb-2 flex-grow"><?= item.deskripsi ?></h4>
               <p class="text-indigo-600 dark:text-indigo-400 font-bold text-lg mb-4"><?= formattedPrice ?></p>
               <div class="flex justify-between items-center mt-auto">
-                <span class="bg-emerald-50 text-emerald-700 border-emerald-100 px-4 py-1.5 rounded-lg text-[10px] font-800 border shadow-sm uppercase tracking-wider">
-                  TERSEDIA
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                  Min: <?= item.min_order || '1 Pcs' ?>
                 </span>
                 <a href="https://wa.me/<?= cleanedWa ?>?text=<?= waMessage ?>" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-full text-[10px] font-bold hover:bg-green-600 transition shadow-lg shadow-green-100 flex items-center gap-1.5 justify-center">
                   <i class="fab fa-whatsapp"></i>
@@ -411,10 +411,10 @@
 
               var waNumRaw = WA_CONTACTS.boutique;
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
-              var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan boutique: ' + item.judul);
+              var waMessage = encodeURIComponent('Halo Natala Studio, saya tertarik dengan layanan boutique: ' + item.judul);
           ?>
           <div class="card-item group bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
-            <div class="h-40 bg-pink-50 dark:bg-slate-800 flex items-center justify-center text-pink-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImage) { ?>onclick="openImagePreview('<?= imgUrl ?>', '<?= item.judul ?>')"<? } ?>>
+            <div class="h-40 bg-pink-50 dark:bg-slate-800 flex items-center justify-center text-pink-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImage) { ?>onclick="openProductDetailModal('<?= escapeHtml(item.judul) ?>', '<?= escapeHtml(item.kategori || 'BOUTIQUE') ?>', '<?= escapeHtml(imgUrl) ?>', '<?= escapeHtml(item.deskripsi) ?>', '<?= escapeHtml(formattedPrice) ?>', '<?= escapeHtml(item.min_order || '1 Pcs') ?>', '<?= cleanedWa ?>')"<? } ?>>
               <? if (isImage) { ?>
                 <img src="<?= imgUrl ?>" alt="Ikon <?= item.judul ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>';">
               <? } else { ?>
@@ -463,7 +463,7 @@
                    var statusClass = status === 'SELESAI' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : status === 'DITOLAK' ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-blue-50 text-blue-700 border-blue-100';
                 ?>
                 <?
-                  var waMessageJasa = encodeURIComponent('Halo, saya ingin bertanya mengenai status layanan ' + item.layanan + ' untuk kendaraan ' + item.nomor_kendaraan + ' atas nama ' + item.nama + '.');
+                  var waMessageJasa = encodeURIComponent('Halo Natala Studio, saya ingin bertanya mengenai status layanan ' + item.layanan + ' untuk kendaraan ' + item.nomor_kendaraan + ' atas nama ' + item.nama + '.');
                   var adminWa = WA_CONTACTS.jasa; // Hardcoded admin number for public inquiries
                 ?>
                 <tr class="hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-colors border-b border-slate-50 dark:border-slate-800">
@@ -563,7 +563,7 @@
         <div id="logPrint" class="log-content hidden overflow-x-auto">
           <table class="w-full text-left dark:text-slate-300">
             <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              <tr><th class="px-6 py-4">Produk</th><th class="px-6 py-4">Harga</th><th class="px-6 py-4">Ikon</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
+                <tr><th class="px-6 py-4">Produk</th><th class="px-6 py-4">Harga</th><th class="px-6 py-4">Min. Order</th><th class="px-6 py-4">Ikon</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
             </thead>
             <tbody id="tbodyPrint" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
           </table>
@@ -612,6 +612,47 @@
             <button type="submit" id="btnUpdate" class="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition">Simpan Perubahan</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal (Split 2 Kolom) -->
+  <div id="productDetailModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6 dark:text-slate-100">
+    <div class="absolute inset-0 modal-backdrop" onclick="closeProductDetailModal()"></div>
+    <div class="bg-white dark:bg-slate-900 w-full max-w-3xl max-h-[90vh] rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col border border-slate-100 dark:border-slate-800">
+      <div class="p-6 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850 shrink-0">
+        <h4 id="pdmTitle" class="font-extrabold text-slate-850 dark:text-white uppercase tracking-wider text-xs truncate mr-4">Detail Produk</h4>
+        <button onclick="closeProductDetailModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <div class="overflow-y-auto p-6 sm:p-8 flex-grow">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="flex items-center justify-center bg-slate-50 dark:bg-slate-950 rounded-[2rem] overflow-hidden h-64 sm:h-80 border border-slate-100 dark:border-slate-800">
+            <img id="pdmImage" src="" alt="Pratinjau Produk" class="w-full h-full object-cover">
+          </div>
+          <div class="flex flex-col justify-between gap-6">
+            <div class="space-y-4">
+              <span id="pdmCategory" class="inline-block bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 text-[10px] font-800 px-4 py-1.5 rounded-full tracking-widest uppercase">Kategori</span>
+              <div class="space-y-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Deskripsi:</label>
+                <p id="pdmDescription" class="text-xs font-semibold text-slate-600 dark:text-slate-300 leading-relaxed max-h-40 overflow-y-auto pr-2"></p>
+              </div>
+              <div class="grid grid-cols-2 gap-4 pt-2">
+                <div class="space-y-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Harga:</label>
+                  <div id="pdmPrice" class="text-lg font-extrabold text-pink-600 dark:text-pink-400">Rp -</div>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Min. Order:</label>
+                  <div id="pdmMinOrder" class="text-[10px] font-extrabold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl w-fit uppercase">1 Pcs</div>
+                </div>
+              </div>
+            </div>
+            <a id="pdmWaBtn" href="#" target="_blank" class="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-bold text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition transform active:scale-95 shadow-lg shadow-green-100 dark:shadow-none">
+              <i class="fab fa-whatsapp text-lg"></i>
+              <span>Pesan via WhatsApp</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -684,7 +725,8 @@
   </div>
 
   <footer class="py-20 text-center text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] no-print">
-    &copy; <span id="currentYear">2024</span> NATALA STUDIO by CV. KIRANA TANJUNG PELAKAR | ALL RIGHTS RESERVED
+    &copy; <span id="currentYear">2026</span> NATALA STUDIO. ALL RIGHTS RESERVED.<br>
+    <span class="text-[8px] text-slate-400 dark:text-slate-500 tracking-widest mt-1 block">by Kirana Tanjung Pelakar</span>
   </footer>
 
   <script>
@@ -736,6 +778,13 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function decodeHTMLEntities(str) {
+      if (!str) return '';
+      const parser = new DOMParser();
+      const dom = parser.parseFromString(str, 'text/html');
+      return dom.body.textContent || str;
     }
 
     // --- View Management ---
@@ -803,6 +852,11 @@
               if (el) el.classList.add('hidden');
             });
             document.getElementById('welcomeName').querySelector('span').innerText = "Halo, " + res.nama;
+            window.currentUserSession = {
+              nama: res.nama,
+              nik: res.nik,
+              alamat: res.alamat
+            };
             renderAdminTable();
           } else {
           err.innerText = res ? res.message : "Terjadi kesalahan pada server.";
@@ -1046,8 +1100,14 @@
 
         hPrint += `
           <tr class="hover:bg-slate-50/50 transition">
-            <td class="px-6 py-5 font-bold text-slate-800">${item.deskripsi || '-'}</td>
+            <td class="px-6 py-5">
+              <div class="font-bold text-slate-800">${escapeHTML(item.deskripsi || '-')}</div>
+              <div class="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1 mt-1 font-medium max-w-xs break-words" title="${escapeHTML(item.keterangan || '')}">
+                ${escapeHTML(item.keterangan) || 'BELUM ADA KETERANGAN'}
+              </div>
+            </td>
             <td class="px-6 py-5 text-indigo-600 font-bold whitespace-nowrap">${formatCurrency(item.harga)}</td>
+            <td class="px-6 py-5 text-slate-700 whitespace-nowrap">${escapeHTML(item.min_order || '1 Pcs')}</td>
             <td class="px-6 py-5 text-center">
               ${(() => {
                 const ikon = (item.ikon || '').trim();
@@ -1243,7 +1303,7 @@ Terima kasih.`;
       // Mendefinisikan urutan dan daftar field yang akan ditampilkan di modal
       const fieldConfig = {
         "Desain": ['nama', 'tag', 'linkgambar', 'deskripsi', 'whatsapp', 'status'],
-        "Percetakan": ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'],
+        "Percetakan": ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status', 'keterangan', 'min_order'],
         "Boutique": ['judul', 'kategori', 'deskripsi', 'harga', 'min_order', 'gambar_url', 'status'],
         "Biro Jasa": ['layanan', 'nama', 'merek', 'type', 'nomor_kendaraan', 'deskripsi', 'durasi', 'aktif', 'whatsapp', 'foto_stnk', 'gps_koordinat']
       };
@@ -1315,6 +1375,27 @@ Terima kasih.`;
       document.getElementById('editModal').classList.add('hidden');
     }
 
+    function openProductDetailModal(title, category, src, description, price, minOrder, waContact) {
+      if (!src) return;
+      const decodedTitle = decodeHTMLEntities(title);
+      const decodedDesc = decodeHTMLEntities(description);
+      document.getElementById('pdmTitle').innerText = decodedTitle || 'Detail Produk';
+      document.getElementById('pdmCategory').innerText = category || 'PRODUK';
+      document.getElementById('pdmImage').src = src;
+      document.getElementById('pdmDescription').innerText = decodedDesc || 'Layanan profesional dengan jaminan kualitas terbaik.';
+      document.getElementById('pdmPrice').innerText = price || 'Nego';
+      document.getElementById('pdmMinOrder').innerText = minOrder || '1 Pcs';
+      const cleanPhone = fixWA(waContact || '6281290320438');
+      const waMessage = encodeURIComponent(`Halo Natala Studio, saya tertarik untuk memesan produk:\n\n* ${decodedTitle} (${category})\n* Harga: ${price}\n* Min. Order: ${minOrder}\n\nMohon informasi ketersediaan dan proses pemesanan selanjutnya. Terima kasih.`);
+      document.getElementById('pdmWaBtn').href = `https://wa.me/${cleanPhone}?text=${waMessage}`;
+      document.getElementById('productDetailModal').classList.remove('hidden');
+    }
+
+    function closeProductDetailModal() {
+      document.getElementById('productDetailModal').classList.add('hidden');
+      document.getElementById('pdmImage').src = '';
+    }
+
     function openImagePreview(src, title) {
       if (!src) return;
       document.getElementById('imagePreviewImg').src = src;
@@ -1349,6 +1430,18 @@ Terima kasih.`;
           if (document.getElementById('skNamaPemilik')) document.getElementById('skNamaPemilik').innerText = nama || '-';
           if (document.getElementById('skNoUji')) document.getElementById('skNoUji').innerText = noUji || '-';
           if (document.getElementById('skMerkType')) document.getElementById('skMerkType').innerText = merkType || '-';
+          
+          // Inject data Penerima Kuasa dari user yang sedang login
+          const sessionUser = window.currentUserSession || {};
+          if (sessionUser.nama && document.getElementById('skPenerimaNama')) {
+            document.getElementById('skPenerimaNama').innerText = sessionUser.nama;
+          }
+          if (sessionUser.nik && document.getElementById('skPenerimaNik')) {
+            document.getElementById('skPenerimaNik').innerText = sessionUser.nik;
+          }
+          if (sessionUser.alamat && document.getElementById('skPenerimaAlamat')) {
+            document.getElementById('skPenerimaAlamat').innerText = sessionUser.alamat;
+          }
           
           // Inject Tanggal Hari Ini
           if (document.getElementById('skTanggal')) {

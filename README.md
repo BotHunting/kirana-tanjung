@@ -127,6 +127,8 @@ Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sh
 | ikon | Kelas ikon FontAwesome (e.g., `fa-print`). |
 | whatsapp | Nomor WhatsApp pemesanan. |
 | status | Ketersediaan layanan. |
+| keterangan | Deskripsi lengkap/uraian spesifikasi teknis produk. |
+| min_order | Batas minimum pemesanan produk (e.g., 50 Pcs). |
 
 ### 5.3. Sheet: `Boutique`
 | Nama Kolom | Keterangan |
@@ -225,7 +227,15 @@ Perubahan yang dikerjakan pada hari ini:
 - Menambahkan preview dan cetak Surat Kuasa berdasarkan data kendaraan.
 - Menambahkan validasi `flutter analyze` dan pemeriksaan sintaks `node --check script/Code.js`.
 
-## 9. Pembaruan Terbaru (v1.1.1)
+## 9. Pembaruan Terbaru (v1.1.2)
+### Fitur & Perbaikan Baru:
+- **Dinamisasi Dokumen Surat Tugas (Surat Kuasa)**: Identitas Penerima Kuasa (`Nama`, `NIK`, `Alamat`) di dokumen `kuasa.html` kini dievaluasi dan disuntikkan secara dinamis berdasarkan data profil pengguna yang sedang login aktif dari sheet `Users`.
+- **Pop-up Detail Produk 2 Kolom**: Mengganti modal pratinjau gambar statis dengan komponen modal interaktif responsif (Grid 2 kolom) yang menampilkan kategori, deskripsi lengkap produk, harga terformat, batas minimal order, dan tombol interaksi WhatsApp otomatis.
+- **Penanganan Double-Escaping HTML Entity**: Menambahkan fungsi dekoder aman berbasis standar Web API `DOMParser` (`decodeHTMLEntities`) untuk membersihkan gangguan tampilan teks raw entity seperti `&AMP;` atau `&quot;` pada judul dan deskripsi produk.
+- **Ekspansi Form & CRUD Database Percetakan**: Sinkronisasi penuh 7 kolom data non-ID pada backend Apps Script (`Code.js`), dashboard editor (`dashboard.html`), dan database explorer (`index.html`) untuk mendukung kolom baru `keterangan` (Kolom G) dan `min_order` (Kolom H).
+- **Branding Resmi Natala Studio**: Menyeragamkan seluruh aset visual, sub-brand teks, template pesan WhatsApp, dan hak cipta di footer situs di bawah bendera **Natala Studio by Kirana Tanjung Pelakar**.
+
+### Pembaruan Sebelumnya (v1.1.1)
 ### Fitur & Perbaikan Baru:
 - **Secret Login Tersembunyi (Logo 3x Klik)**: Tombol login visual di navigasi utama telah dihilangkan dan diganti dengan pemicu rahasia (klik logo 3 kali dalam jeda 2 detik) untuk menjaga kerapian estetika web dan aplikasi.
 - **Integrasi Penuh Boutique & Konveksi**: Database (7 kolom non-ID murni berbasis `rowIndex`), menu admin CRUD dashboard, dan rendering katalog publik interaktif di Flutter serta Web kini telah sepenuhnya terintegrasi.

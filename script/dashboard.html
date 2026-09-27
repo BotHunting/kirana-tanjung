@@ -79,6 +79,11 @@
           class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
       <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Min. Order</label>
+        <input type="text" name="min_order" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
+      </div>
+      <div class="space-y-2">
         <label class="text-[10px] font-bold text-slate-400 uppercase">No. Whatsapp</label>
         <input type="text" name="whatsapp" value="6281233223830" required
           class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500">
@@ -90,6 +95,11 @@
           <option value="SELESAI">TAMPILKAN DI KATALOG</option>
           <option value="DITOLAK">SEMBUNYIKAN (ARSIPKAN)</option>
         </select>
+      </div>
+      <div class="md:col-span-2 space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Keterangan / Deskripsi Lengkap</label>
+        <textarea name="keterangan" oninput="this.value = this.value.toUpperCase()" required
+          class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-500 h-24 uppercase"></textarea>
       </div>
       <div class="md:col-span-2">
         <button type="submit"

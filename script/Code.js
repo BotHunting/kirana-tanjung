@@ -40,7 +40,10 @@ function doGet(e) {
     return HtmlService.createHtmlOutput(getKuasaHtml(
       e.parameter.nama,
       e.parameter.nomor_uji,
-      e.parameter.merk_type
+      e.parameter.merk_type,
+      e.parameter.penerima_nama,
+      e.parameter.penerima_nik,
+      e.parameter.penerima_alamat
     )).setTitle('Surat Kuasa Kirana Tanjung');
   }
 
@@ -115,6 +118,8 @@ function checkLogin(username, password) {
         return {
           success: true,
           nama: userData[i][2],
+          nik: userData[i][3] || '',
+          alamat: userData[i][4] || '',
         };
       }
     }
@@ -178,7 +183,7 @@ function addDataToSheet(sheetName, formData) {
     if (sheetName === "Desain") {
       rowData = [timestamp, formData.nama, formData.deskripsi, formData.linkgambar, formData.tag, formData.whatsapp, formData.status];
     } else if (sheetName === "Percetakan") {
-      rowData = [timestamp, formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status];
+      rowData = [timestamp, formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status, formData.keterangan, formData.min_order];
     } else if (sheetName === "Boutique") {
       rowData = [formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status];
     } else if (sheetName === "Biro Jasa") {
@@ -227,8 +232,8 @@ function updateDataInSheet(sheetName, rowIndex, formData) {
       rowData = [[formData.nama, formData.deskripsi, formData.linkgambar, formData.tag, formData.whatsapp, formData.status]];
       sheet.getRange(row, 2, 1, 6).setValues(rowData);
     } else if (sheetName.toLowerCase() === "percetakan") {
-      rowData = [[formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status]];
-      sheet.getRange(row, 2, 1, 5).setValues(rowData);
+      rowData = [[formData.deskripsi, formData.harga, formData.ikon, formData.whatsapp, formData.status, formData.keterangan, formData.min_order]];
+      sheet.getRange(row, 2, 1, 7).setValues(rowData);
     } else if (sheetName.toLowerCase() === "boutique") {
       rowData = [[formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status]];
       sheet.getRange(row, 1, 1, 7).setValues(rowData);
@@ -262,7 +267,7 @@ function getAllDataForDashboard() {
 }
 
 // Fungsi untuk memanggil & menyajikan file kuasa.html
-function getKuasaHtml(nama, nomorUji, merkType) {
+function getKuasaHtml(nama, nomorUji, merkType, penerimaNama, penerimaNik, penerimaAlamat) {
   let html = HtmlService.createHtmlOutputFromFile('kuasa').getContent();
   
   // Penggantian aman menggunakan fungsi callback agar terhindar dari manipulasi regex ($&, $1)
@@ -282,6 +287,24 @@ function getKuasaHtml(nama, nomorUji, merkType) {
     '<span id="skTanggal"></span>',
     () => '<span id="skTanggal">' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMMM yyyy') + '</span>'
   );
+  if (penerimaNama) {
+    html = html.replace(
+      '<span id="skPenerimaNama">MOHAMMAD SYAHRI</span>',
+      () => '<span id="skPenerimaNama">' + escapeHtml(penerimaNama) + '</span>'
+    );
+  }
+  if (penerimaNik) {
+    html = html.replace(
+      '<span id="skPenerimaNik">9203015308670001</span>',
+      () => '<span id="skPenerimaNik">' + escapeHtml(penerimaNik) + '</span>'
+    );
+  }
+  if (penerimaAlamat) {
+    html = html.replace(
+      '<span id="skPenerimaAlamat">Jl. Ky Syahlan 1 No. 7, Ds. Manyarejo, Kec. Manyar, Kab. Gresik</span>',
+      () => '<span id="skPenerimaAlamat">' + escapeHtml(penerimaAlamat) + '</span>'
+    );
+  }
   return html;
 }
 
