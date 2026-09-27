@@ -208,6 +208,16 @@
           class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500">
       </div>
       <div class="md:col-span-2 space-y-2">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">Koordinat GPS (Otomatis)</label>
+        <div class="flex gap-2">
+          <input type="text" name="gps_koordinat" id="jasaGps" placeholder="Mencari lokasi..." readonly
+            class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 font-medium">
+          <button type="button" onclick="getGPSLocation()" class="px-6 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold text-xs flex items-center gap-2 transition shrink-0">
+            <i class="fas fa-map-marker-alt"></i> Deteksi GPS
+          </button>
+        </div>
+      </div>
+      <div class="md:col-span-2 space-y-2">
         <label class="text-[10px] font-800 text-slate-500 uppercase tracking-widest ml-1">Link Foto STNK (URL)</label>
         <input type="url" name="foto_stnk" placeholder="https://..." required
           class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500 font-medium">
@@ -275,5 +285,26 @@
       btn.disabled = false;
       btn.innerText = originalText;
     }).addDataToSheet(sheetName, formData);
+  }
+
+  function getGPSLocation() {
+    const gpsInput = document.getElementById('jasaGps');
+    if (navigator.geolocation) {
+      gpsInput.placeholder = "Menghubungkan ke satelit...";
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          gpsInput.value = `${lat},${lon}`;
+        },
+        (error) => {
+          alert("Gagal mendeteksi lokasi: " + error.message);
+          gpsInput.placeholder = "Gagal mendeteksi lokasi otomatis";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      alert("Browser Anda tidak mendukung deteksi GPS.");
+    }
   }
 </script>

@@ -90,20 +90,52 @@ function checkLogin(username, password) {
   if (!userSheet) {
     return { success: false, message: "Sheet Users tidak ditemukan." };
   }
-  const userData = userSheet.getDataRange().getValues();
-  const inputUsername = String(username || '').trim();
+  
+  const inputUsername = String(username || '').trim().toLowerCase();
   const inputPassword = String(password || '');
   
+  const cache = CacheService.getScriptCache();
+  const lockKey = "lock_" + inputUsername;
+  const attemptKey = "attempts_" + inputUsername;
+  
+  if (cache.get(lockKey)) {
+    return { success: false, message: "Terlalu banyak percobaan gagal. Akun dikunci sementara (5 menit)." };
+  }
+
+  const userData = userSheet.getDataRange().getValues();
+  const hashedInput = hashPassword(inputPassword);
+  
   for (let i = 1; i < userData.length; i++) {
-    if (String(userData[i][0]).trim() === inputUsername && String(userData[i][1]) === inputPassword) {
-      return {
-        success: true,
-        nama: userData[i][2],
-        // Kamu bisa kirim data tambahan khusus admin di sini jika perlu
-      };
+    const dbUsername = String(userData[i][0]).trim().toLowerCase();
+    const dbPassword = String(userData[i][1]).trim();
+    
+    if (dbUsername === inputUsername) {
+      if (dbPassword === inputPassword || dbPassword === hashedInput) {
+        cache.remove(attemptKey);
+        return {
+          success: true,
+          nama: userData[i][2],
+        };
+      }
     }
   }
+
+  let attempts = parseInt(cache.get(attemptKey) || "0", 10) + 1;
+  if (attempts >= 5) {
+    cache.put(lockKey, "locked", 300);
+    cache.remove(attemptKey);
+    return { success: false, message: "Terlalu banyak percobaan gagal. Akun dikunci selama 5 menit." };
+  } else {
+    cache.put(attemptKey, String(attempts), 600);
+  }
   return { success: false, message: "Akses Ditolak! Cek kembali Username/Password." };
+}
+
+function hashPassword(password) {
+  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, password, Utilities.Charset.UTF_8);
+  return digest.map(function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('');
 }
 
 function getSheetData(ss, sheetName) {
@@ -150,7 +182,7 @@ function addDataToSheet(sheetName, formData) {
     } else if (sheetName === "Boutique") {
       rowData = [formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status];
     } else if (sheetName === "Biro Jasa") {
-      rowData = [timestamp, formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk];
+      rowData = [timestamp, formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, formData.gps_koordinat];
     } else {
       throw new Error("Sheet tidak didukung: " + sheetName);
     }
@@ -201,8 +233,8 @@ function updateDataInSheet(sheetName, rowIndex, formData) {
       rowData = [[formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status]];
       sheet.getRange(row, 1, 1, 7).setValues(rowData);
     } else if (sheetName.toLowerCase() === "biro jasa") {
-      rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk]];
-      sheet.getRange(row, 2, 1, 10).setValues(rowData);
+      rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, formData.gps_koordinat]];
+      sheet.getRange(row, 2, 1, 11).setValues(rowData);
     } else {
       throw new Error("Sheet tidak didukung: " + sheetName);
     }
@@ -232,19 +264,24 @@ function getAllDataForDashboard() {
 // Fungsi untuk memanggil & menyajikan file kuasa.html
 function getKuasaHtml(nama, nomorUji, merkType) {
   let html = HtmlService.createHtmlOutputFromFile('kuasa').getContent();
+  
+  // Penggantian aman menggunakan fungsi callback agar terhindar dari manipulasi regex ($&, $1)
   html = html.replace(
     '<span id="skNamaPemilik" class="font-bold text-slate-900">-</span>',
-    '<span id="skNamaPemilik" class="font-bold text-slate-900">' + escapeHtml(nama || '-') + '</span>'
+    () => '<span id="skNamaPemilik" class="font-bold text-slate-900">' + escapeHtml(nama || '-') + '</span>'
   );
   html = html.replace(
     '<span id="skNoUji" class="font-semibold text-slate-800">-</span>',
-    '<span id="skNoUji" class="font-semibold text-slate-800">' + escapeHtml(nomorUji || '-') + '</span>'
+    () => '<span id="skNoUji" class="font-semibold text-slate-800">' + escapeHtml(nomorUji || '-') + '</span>'
   );
   html = html.replace(
     '<span id="skMerkType" class="font-semibold text-slate-800">-</span>',
-    '<span id="skMerkType" class="font-semibold text-slate-800">' + escapeHtml(merkType || '-') + '</span>'
+    () => '<span id="skMerkType" class="font-semibold text-slate-800">' + escapeHtml(merkType || '-') + '</span>'
   );
-  html = html.replace('<span id="skTanggal"></span>', '<span id="skTanggal">' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMMM yyyy') + '</span>');
+  html = html.replace(
+    '<span id="skTanggal"></span>',
+    () => '<span id="skTanggal">' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMMM yyyy') + '</span>'
+  );
   return html;
 }
 

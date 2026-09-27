@@ -5,6 +5,11 @@
   <base target="_top">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     /* Optimization: Override Font Awesome's font-display to 'swap' to prevent render-blocking. */
@@ -32,14 +37,33 @@
   </style>
   <style>
     :root { --primary: #2563eb; --accent: #7c3aed; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; background-color: #f8fafc; }
-    .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; background-color: #f8fafc; transition: background-color 0.5s ease, color 0.5s ease; }
+    .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); transition: background 0.5s ease, border-color 0.5s ease; }
+    .dark .glass { background: rgba(15, 23, 42, 0.75); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Global Smooth Theme Transition for Content Elements */
+    h1, h2, h3, h4, p, span, i, a, button, input, select, table, th, td {
+      transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+    }
+    
+    /* Dark Mode Global Overrides */
+    .dark body { background-color: #0f172a; color: #f8fafc; }
+    .dark .card-modern { background-color: #1e293b !important; border-color: rgba(51, 65, 85, 0.5) !important; }
+    .dark .card-modern:hover { border-color: rgba(59, 130, 246, 0.4) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .dark .text-slate-800 { color: #f1f5f9 !important; }
+    .dark .text-slate-600 { color: #cbd5e1 !important; }
+    
     .hidden-view { display: none; }
     .gradient-text { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
     .mesh-bg { 
       background-color: #f8fafc;
       background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%), 
                         radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.05) 0px, transparent 50%);
+    }
+    .dark .mesh-bg {
+      background-color: #0f172a;
+      background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%), 
+                        radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.15) 0px, transparent 50%);
     }
     .view-transition { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -49,13 +73,15 @@
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
     .modal-backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
-    .card-modern { border: 1px solid rgba(226, 232, 240, 0.8); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-modern { border: 1px solid rgba(226, 232, 240, 0.8); transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     .card-modern:hover { transform: translateY(-8px); border-color: rgba(37, 99, 235, 0.3); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); }
     
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
+    .dark ::-webkit-scrollbar-track { background: #1e293b; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .dark ::-webkit-scrollbar-thumb { background: #475569; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
     /* Print-specific styles */
@@ -75,26 +101,33 @@
     };
   ?>
 
-  <nav class="fixed w-full z-50 glass" id="mainNav">
+  <nav class="fixed w-full z-50 glass dark:text-white" id="mainNav">
     <div class="max-w-7xl mx-auto px-6">
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
         <div id="brand-logo" class="flex items-center space-x-3 cursor-pointer" onclick="showPublicView()">
           <img src="https://raw.githubusercontent.com/BotHunting/kirana-tanjung/refs/heads/main/www/Kirana.png" alt="Kirana Tanjung Logo" class="h-10 w-10 object-contain">
-          <span class="text-xl font-800 tracking-tighter uppercase">KIRANA <span class="text-blue-600">TANJUNG</span></span>
+          <div class="flex flex-col">
+            <span class="text-xl font-900 tracking-tighter uppercase leading-none">NATALA <span class="text-blue-600 dark:text-blue-400">STUDIO</span></span>
+            <span class="text-[8px] font-extrabold text-slate-400 dark:text-slate-500 tracking-[0.25em] uppercase mt-0.5 leading-none">by Kirana Tanjung</span>
+          </div>
         </div>
 
         <!-- Desktop Nav & Auth -->
         <div class="hidden md:flex items-center space-x-10">
-          <div class="flex space-x-8 text-[11px] font-800 uppercase tracking-[0.15em] text-slate-500">
-            <a href="javascript:void(0)" onclick="navigateToSection('portfolio')" class="hover:text-blue-600 transition-all">Portfolio</a>
-            <a href="javascript:void(0)" onclick="navigateToSection('web')" class="hover:text-blue-600 transition-all">Web Design</a>
-            <a href="javascript:void(0)" onclick="navigateToSection('print')" class="hover:text-blue-600 transition-all">Percetakan</a>
-            <a href="javascript:void(0)" onclick="navigateToSection('boutique')" class="hover:text-blue-600 transition-all">Boutique</a>
-            <a href="javascript:void(0)" onclick="navigateToSection('jasa')" class="hover:text-blue-600 transition-all">Biro Jasa</a>
-            <a id="desktopNavDashboard" href="javascript:void(0)" onclick="showDashboardView()" class="hidden hover:text-blue-600 transition-all font-bold text-blue-600">Dashboard</a>
+          <div class="flex space-x-8 text-[11px] font-800 uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">
+            <a href="javascript:void(0)" onclick="navigateToSection('portfolio')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-all">Portfolio</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('web')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-all">Web Design</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('print')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-all">Percetakan</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('boutique')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-all">Boutique</a>
+            <a href="javascript:void(0)" onclick="navigateToSection('jasa')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-all">Biro Jasa</a>
+            <a id="desktopNavDashboard" href="javascript:void(0)" onclick="showDashboardView()" class="hidden hover:text-blue-600 dark:hover:text-blue-400 transition-all font-bold text-blue-600 dark:text-blue-400">Dashboard</a>
           </div>
           <div class="flex items-center space-x-4">
+            <!-- Theme Toggle Button -->
+            <button onclick="toggleTheme()" class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 p-2.5 rounded-full transition-all" title="Toggle Theme">
+              <i id="themeIconDesktop" class="fas fa-moon text-lg"></i>
+            </button>
             <button id="desktopBtnLogout" onclick="logout()" class="hidden bg-red-50 text-red-600 px-6 py-2.5 rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition">
               <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
             </button>
@@ -102,8 +135,11 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <div class="md:hidden">
-          <button id="mobileMenuBtn" class="text-slate-800 hover:text-blue-600 focus:outline-none p-2">
+        <div class="md:hidden flex items-center space-x-2">
+          <button onclick="toggleTheme()" class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 p-2" title="Toggle Theme">
+            <i id="themeIconMobile" class="fas fa-moon text-xl"></i>
+          </button>
+          <button id="mobileMenuBtn" class="text-slate-800 dark:text-white hover:text-blue-600 focus:outline-none p-2">
             <i id="mobileMenuIcon" class="fas fa-bars text-2xl"></i>
           </button>
         </div>
@@ -111,14 +147,14 @@
     </div>
 
     <!-- Mobile Menu Panel -->
-    <div id="mobileMenu" class="hidden md:hidden bg-white/90 backdrop-blur-lg border-t border-slate-200">
+    <div id="mobileMenu" class="hidden md:hidden bg-white/90 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800">
       <div class="px-6 pt-4 pb-6 space-y-3">
-        <a href="javascript:void(0)" onclick="navigateToSection('portfolio', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Portfolio</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('web', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Web Design</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('print', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Percetakan</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('boutique', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Boutique</a>
-        <a href="javascript:void(0)" onclick="navigateToSection('jasa', true)" class="block text-slate-600 font-bold hover:text-blue-600 transition-all py-2 text-sm">Biro Jasa</a>
-        <a id="mobileNavDashboard" href="javascript:void(0)" onclick="showDashboardView(true)" class="hidden text-blue-600 font-bold hover:text-blue-700 transition-all py-2 text-sm">Dashboard</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('portfolio', true)" class="block text-slate-600 dark:text-slate-300 font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-all py-2 text-sm">Portfolio</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('web', true)" class="block text-slate-600 dark:text-slate-300 font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-all py-2 text-sm">Web Design</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('print', true)" class="block text-slate-600 dark:text-slate-300 font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-all py-2 text-sm">Percetakan</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('boutique', true)" class="block text-slate-600 dark:text-slate-300 font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-all py-2 text-sm">Boutique</a>
+        <a href="javascript:void(0)" onclick="navigateToSection('jasa', true)" class="block text-slate-600 dark:text-slate-300 font-bold hover:text-blue-600 dark:hover:text-blue-400 transition-all py-2 text-sm">Biro Jasa</a>
+        <a id="mobileNavDashboard" href="javascript:void(0)" onclick="showDashboardView(true)" class="hidden text-blue-600 dark:text-blue-400 font-bold hover:text-blue-700 transition-all py-2 text-sm">Dashboard</a>
         <div class="border-t border-slate-200 pt-5 mt-3 space-y-4">
           <button id="mobileBtnLogout" onclick="logout(true)" class="hidden w-full bg-red-50 text-red-600 px-6 py-3 rounded-xl text-sm font-bold border border-red-100 hover:bg-red-100 transition">
             <i class="fas fa-sign-out-alt mr-2"></i> LOGOUT
@@ -130,13 +166,13 @@
 
   <main id="publicView" class="view-transition pt-20">
     <section class="py-24 px-6 text-center">
-      <h1 class="text-5xl md:text-7xl font-800 mb-6 tracking-tight leading-tight">
-        Solusi <span class="italic font-light text-slate-400">Digital</span> & <br><span class="gradient-text px-2">Administrasi Kendaraan</span>
+      <h1 class="text-5xl md:text-7xl font-800 mb-6 tracking-tight leading-tight dark:text-white">
+        Solusi <span class="italic font-light text-slate-400 dark:text-slate-500">Digital</span> & <br><span class="gradient-text px-2">Administrasi Kendaraan</span>
       </h1>
-      <p class="text-slate-400 max-w-2xl mx-auto mb-12 text-lg font-medium leading-relaxed">Layanan profesional dari CV. Kirana Tanjung Pelakar untuk transformasi bisnis, pengembangan sistem, dan pengurusan dokumen legalitas Anda.</p>
+      <p class="text-slate-400 dark:text-slate-300 max-w-2xl mx-auto mb-12 text-lg font-medium leading-relaxed">Layanan profesional dari <strong>Natala Studio</strong> (CV. Kirana Tanjung Pelakar) untuk akselerasi bisnis, produksi media cetak/fashion, dan pengurusan dokumen legalitas kendaraan Anda.</p>
       <div class="flex flex-wrap justify-center gap-5">
         <button onclick="navigateToSection('portfolio')" class="bg-slate-900 text-white px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all hover:-translate-y-1 active:scale-95 uppercase">Jelajahi Karya</button>
-        <a href="https://wa.me/<?= WA_CONTACTS.desain ?>" target="_blank" class="bg-white text-slate-800 border-2 border-slate-100 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
+        <a href="https://wa.me/<?= WA_CONTACTS.desain ?>" target="_blank" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white border-2 border-slate-100 dark:border-slate-800 px-10 py-5 rounded-[2rem] font-800 text-xs tracking-[0.2em] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all hover:-translate-y-1 active:scale-95 uppercase">Konsultasi WA</a>
       </div>
     </section>
 
@@ -146,13 +182,13 @@
       <section id="portfolio" class="pt-16">
         <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
           <div class="max-w-2xl">
-            <h2 class="text-sm font-800 text-blue-600 uppercase tracking-[0.4em] mb-4">Featured Showcase</h2>
-            <h3 class="text-5xl font-800 tracking-tighter text-slate-900 leading-[1.1]">Karya Pilihan <br><span class="gradient-text">Lintas Layanan</span></h3>
+            <h2 class="text-sm font-800 text-blue-600 dark:text-blue-400 uppercase tracking-[0.4em] mb-4">Featured Showcase</h2>
+            <h3 class="text-5xl font-800 tracking-tighter text-slate-900 dark:text-white leading-[1.1]">Karya Pilihan <br><span class="gradient-text">Lintas Layanan</span></h3>
           </div>
-          <p class="text-slate-400 font-medium max-w-xs text-sm leading-relaxed">Pilihan solusi terbaik yang telah kami kerjakan untuk klien eksklusif kami di seluruh Indonesia.</p>
+          <p class="text-slate-400 dark:text-slate-400 font-medium max-w-xs text-sm leading-relaxed">Pilihan solusi terbaik yang telah kami kerjakan untuk klien eksklusif kami di seluruh Indonesia.</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Item 1: Web -->
           <div class="group bg-white rounded-[3rem] overflow-hidden card-modern flex flex-col h-full">
             <div class="relative h-72 overflow-hidden">
@@ -221,19 +257,42 @@
               </div>
             </div>
           </div>
+
+            <!-- Item 4: Boutique & Konveksi -->
+            <div class="group bg-white rounded-[3rem] overflow-hidden card-modern flex flex-col h-full">
+              <div class="relative h-72 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=75&w=400" 
+                     srcset="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=75&w=400 400w, https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=75&w=800 800w"
+                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                     loading="lazy"
+                     alt="Pakaian butik dan konveksi kualitas tinggi"
+                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700">
+                <div class="absolute top-6 left-6">
+                  <span class="bg-pink-600 text-white text-[9px] font-800 px-4 py-2 rounded-full tracking-[0.2em] uppercase shadow-xl">Boutique & Konveksi</span>
+                </div>
+              </div>
+              <div class="p-10 flex flex-col flex-grow">
+                <h4 class="text-2xl font-800 text-slate-800 mb-4 tracking-tight uppercase">Premium Fashion & Corporate Uniforms</h4>
+                <p class="text-slate-600 text-sm font-medium leading-relaxed mb-8">Produksi pakaian custom kualitas tinggi, seragam kerja instansi, dan busana eksklusif dengan pilihan bahan premium terbaik.</p>
+                <div class="mt-auto flex justify-between items-center pt-6 border-t border-slate-50">
+                  <span class="text-[10px] font-800 text-slate-400 tracking-widest uppercase">Status: Active Production</span>
+                  <i class="fas fa-arrow-right text-pink-600 group-hover:translate-x-2 transition-transform"></i>
+                </div>
+              </div>
+            </div>
         </div>
       </section>
       
       <section id="web">
-        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-blue-600 pl-4">Status Project Desain & Sistem</h2>
+        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-blue-600 pl-4 dark:text-white">Status Project Desain & Sistem</h2>
         <div class="mb-8 relative">
-          <input type="text" id="searchDesain" onkeyup="filterPublicTable('searchDesain', 'publicTbodyDesain')" placeholder="Cari berdasarkan nama project atau deskripsi..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-medium text-sm">
+          <input type="text" id="searchDesain" onkeyup="filterPublicTable('searchDesain', 'publicTbodyDesain')" placeholder="Cari berdasarkan nama project atau deskripsi..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-medium text-sm dark:text-white">
           <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
-        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden card-modern">
+        <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-850 overflow-hidden card-modern">
           <div class="overflow-auto max-h-[520px]">
-            <table class="w-full text-left border-collapse">
-              <thead class="bg-slate-50/50 text-[10px] font-800 uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
+            <table class="w-full text-left border-collapse dark:text-slate-300">
+              <thead class="bg-slate-50/50 dark:bg-slate-800/50 text-[10px] font-800 uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800">
                 <tr>
                   <th class="px-10 py-6">Project / Client</th>
                   <th class="px-10 py-6">Kategori</th>
@@ -245,7 +304,7 @@
                 <? for(var i=0; i < publicDesain.length; i++) { 
                    var status = publicDesain[i].status || 'ON PROCESS';
                 ?>
-                <tr class="hover:bg-blue-50/30 transition-colors">
+                <tr class="hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-colors border-b border-slate-50 dark:border-slate-800">
                   <td class="px-10 py-6">
                     <div class="font-800 text-slate-800 uppercase tracking-tight"><?= publicDesain[i].nama ?></div>
                   </td>
@@ -267,9 +326,9 @@
       </section>
 
       <section id="print">
-        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-indigo-600 pl-4">Katalog Layanan Percetakan</h2>
+        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-indigo-600 pl-4 dark:text-white">Katalog Layanan Percetakan</h2>
         <div class="mb-8 relative">
-          <input type="text" id="searchPrint" onkeyup="filterPublicTable('searchPrint', 'containerPercetakan')" placeholder="Cari produk percetakan..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition font-medium text-sm">
+          <input type="text" id="searchPrint" onkeyup="filterPublicTable('searchPrint', 'containerPercetakan')" placeholder="Cari produk percetakan..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition font-medium text-sm dark:text-white">
           <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
         <div id="containerPercetakan" class="flex overflow-x-auto space-x-6 pb-6 -mx-6 px-6" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9;">
@@ -297,8 +356,8 @@
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
               var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan percetakan: ' + item.deskripsi);
           ?>
-          <div class="card-item group bg-white rounded-3xl shadow-lg border border-slate-100 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
-            <div class="h-40 bg-indigo-50 flex items-center justify-center text-indigo-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImageIcon) { ?>onclick="openImagePreview('<?= iconValue ?>', '<?= item.deskripsi ?>')"<? } ?>>
+          <div class="card-item group bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
+            <div class="h-40 bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-indigo-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImageIcon) { ?>onclick="openImagePreview('<?= iconValue ?>', '<?= item.deskripsi ?>')"<? } ?>>
               <? if (isImageIcon) { ?>
                 <img src="<?= iconValue ?>" alt="Ikon <?= item.deskripsi ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-image\'></i>';">
               <? } else { ?>
@@ -306,8 +365,8 @@
               <? } ?>
             </div>
             <div class="p-6 flex flex-col flex-grow">
-              <h4 class="font-800 text-slate-800 uppercase tracking-tight mb-2 flex-grow"><?= item.deskripsi ?></h4>
-              <p class="text-indigo-600 font-bold text-lg mb-4"><?= formattedPrice ?></p>
+              <h4 class="font-800 text-slate-800 dark:text-slate-100 uppercase tracking-tight mb-2 flex-grow"><?= item.deskripsi ?></h4>
+              <p class="text-indigo-600 dark:text-indigo-400 font-bold text-lg mb-4"><?= formattedPrice ?></p>
               <div class="flex justify-between items-center mt-auto">
                 <span class="bg-emerald-50 text-emerald-700 border-emerald-100 px-4 py-1.5 rounded-lg text-[10px] font-800 border shadow-sm uppercase tracking-wider">
                   TERSEDIA
@@ -324,9 +383,9 @@
       </section>
 
       <section id="boutique">
-        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-pink-600 pl-4">Katalog Layanan Boutique & Konveksi</h2>
+        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-pink-600 pl-4 dark:text-white">Katalog Layanan Boutique & Konveksi</h2>
         <div class="mb-8 relative">
-          <input type="text" id="searchBoutique" onkeyup="filterPublicTable('searchBoutique', 'containerBoutique')" placeholder="Cari produk boutique..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition font-medium text-sm">
+          <input type="text" id="searchBoutique" onkeyup="filterPublicTable('searchBoutique', 'containerBoutique')" placeholder="Cari produk boutique..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition font-medium text-sm dark:text-white">
           <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
         <div id="containerBoutique" class="flex overflow-x-auto space-x-6 pb-6 -mx-6 px-6" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9;">
@@ -354,8 +413,8 @@
               var cleanedWa = String(waNumRaw).replace(/\D/g, '').replace(/^0/, '62').replace(/^(?!62)/, '62');
               var waMessage = encodeURIComponent('Halo, saya tertarik dengan layanan boutique: ' + item.judul);
           ?>
-          <div class="card-item group bg-white rounded-3xl shadow-lg border border-slate-100 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
-            <div class="h-40 bg-pink-50 flex items-center justify-center text-pink-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImage) { ?>onclick="openImagePreview('<?= imgUrl ?>', '<?= item.judul ?>')"<? } ?>>
+          <div class="card-item group bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800 w-72 shrink-0 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" style="display: flex;">
+            <div class="h-40 bg-pink-50 dark:bg-slate-800 flex items-center justify-center text-pink-300 text-5xl relative overflow-hidden cursor-pointer" <? if (isImage) { ?>onclick="openImagePreview('<?= imgUrl ?>', '<?= item.judul ?>')"<? } ?>>
               <? if (isImage) { ?>
                 <img src="<?= imgUrl ?>" alt="Ikon <?= item.judul ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>';">
               <? } else { ?>
@@ -364,9 +423,9 @@
             </div>
             <div class="p-6 flex flex-col flex-grow">
               <span class="text-[9px] font-extrabold text-pink-600 tracking-widest uppercase mb-1"><?= item.kategori || 'BOUTIQUE' ?></span>
-              <h4 class="font-800 text-slate-800 uppercase tracking-tight mb-2 flex-grow"><?= item.judul ?></h4>
+                <h4 class="font-800 text-slate-800 dark:text-slate-100 uppercase tracking-tight mb-2 flex-grow"><?= item.judul ?></h4>
               <p class="text-slate-400 text-xs font-medium italic mb-2 line-clamp-2"><?= item.deskripsi ?></p>
-              <p class="text-pink-600 font-bold text-lg mb-4"><?= formattedPrice ?></p>
+                <p class="text-pink-600 dark:text-pink-400 font-bold text-lg mb-4"><?= formattedPrice ?></p>
               <div class="flex justify-between items-center mt-auto">
                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Min: <?= item.min_order || '1 Pcs' ?></span>
                 <a href="https://wa.me/<?= cleanedWa ?>?text=<?= waMessage ?>" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded-full text-[10px] font-bold hover:bg-green-600 transition shadow-lg shadow-green-100 flex items-center gap-1.5 justify-center">
@@ -381,15 +440,15 @@
       </section>
 
       <section id="jasa">
-        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-green-500 pl-4">Status Layanan Biro Jasa</h2>
+        <h2 class="text-2xl font-800 mb-6 uppercase tracking-tighter italic border-l-4 border-green-500 pl-4 dark:text-white">Status Layanan Biro Jasa</h2>
         <div class="mb-8 relative">
-          <input type="text" id="searchJasa" onkeyup="filterPublicTable('searchJasa', 'publicTbodyJasa')" placeholder="Cari berdasarkan No. Kendaraan atau Nama Pemilik..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition font-medium text-sm">
+          <input type="text" id="searchJasa" onkeyup="filterPublicTable('searchJasa', 'publicTbodyJasa')" placeholder="Cari berdasarkan No. Kendaraan atau Nama Pemilik..." autocomplete="off" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition font-medium text-sm dark:text-white">
           <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
-        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden mb-10 card-modern">
+        <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden mb-10 card-modern">
           <div class="overflow-auto max-h-[420px]">
-            <table class="w-full text-left border-collapse">
-              <thead class="bg-slate-50/50 text-[10px] font-800 uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
+            <table class="w-full text-left border-collapse dark:text-slate-300">
+              <thead class="bg-slate-50/50 dark:bg-slate-800/50 text-[10px] font-800 uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800">
                 <tr>
                   <th class="px-8 py-6">Layanan / No. Kendaraan</th>
                   <th class="px-8 py-6">Nama Pemilik</th>
@@ -407,7 +466,7 @@
                   var waMessageJasa = encodeURIComponent('Halo, saya ingin bertanya mengenai status layanan ' + item.layanan + ' untuk kendaraan ' + item.nomor_kendaraan + ' atas nama ' + item.nama + '.');
                   var adminWa = WA_CONTACTS.jasa; // Hardcoded admin number for public inquiries
                 ?>
-                <tr class="hover:bg-blue-50/30 transition-colors">
+                <tr class="hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-colors border-b border-slate-50 dark:border-slate-800">
                   <td class="px-8 py-6">
                     <div class="font-800 text-slate-800 uppercase tracking-tight"><?= item.layanan ?></div>
                     <div class="nomor-kendaraan text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-widest" data-original="<?= item.nomor_kendaraan ?>"><?= item.nomor_kendaraan ?></div>
@@ -435,38 +494,38 @@
     </div>
   </main>
 
-  <div id="loginView" class="hidden-view view-transition pt-40 px-6 min-h-screen">
-    <div class="max-w-md mx-auto bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100">
+  <div id="loginView" class="hidden-view view-transition pt-40 px-6 min-h-screen dark:text-slate-100">
+    <div class="max-w-md mx-auto bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800">
       <div class="text-center mb-10">
         <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-2xl mx-auto mb-4">
           <i class="fas fa-shield-alt"></i>
         </div>
         <h2 class="text-3xl font-800 tracking-tighter uppercase">PORTAL <span class="text-blue-600">LOGIN</span></h2>
-        <p class="text-slate-400 text-sm mt-2 font-medium">Panel Manajemen CV. Kirana Tanjung</p>
+        <p class="text-slate-400 text-sm mt-2 font-medium">Panel Manajemen Natala Studio</p>
       </div>
       <div class="space-y-5">
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
-          <input type="text" id="userInput" placeholder="Masukkan username" autocomplete="username" class="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
+          <input type="text" id="userInput" placeholder="Masukkan username" autocomplete="username" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 dark:text-white border-none focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
         </div>
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
-          <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password" class="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
+          <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password" class="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 dark:text-white border-none focus:ring-2 focus:ring-blue-500 outline-none transition font-medium">
         </div>
         <button onclick="prosesLogin()" id="btnSubmitLogin" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition transform active:scale-95">
           MASUK SEKARANG
         </button>
-        <button onclick="showPublicView()" class="w-full text-slate-400 text-xs font-bold uppercase tracking-widest mt-4 hover:text-slate-600 transition">Kembali Ke Beranda</button>
+        <button onclick="showPublicView()" class="w-full text-slate-400 text-xs font-bold uppercase tracking-widest mt-4 hover:text-slate-600 dark:hover:text-slate-200 transition">Kembali Ke Beranda</button>
         <p id="errorMsg" class="text-center text-red-500 text-[10px] font-bold uppercase tracking-widest mt-4"></p>
       </div>
     </div>
   </div>
 
-  <div id="dashboardView" class="hidden-view view-transition pt-32 px-6">
+  <div id="dashboardView" class="hidden-view view-transition pt-32 px-6 dark:text-slate-100">
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
         <h2 class="text-3xl font-800 tracking-tighter uppercase">MANAJEMEN <span class="text-blue-600">DATABASE</span></h2>
-        <div id="welcomeName" class="text-sm font-bold text-slate-500 bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center">
+        <div id="welcomeName" class="text-sm font-bold text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center">
           <i class="fas fa-user-circle mr-2 text-blue-600 text-lg"></i>
           <span></span>
         </div>
@@ -476,10 +535,10 @@
         <?!= include('dashboard'); ?>
       </div>
 
-      <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden mb-20">
-        <div class="p-8 border-b bg-white flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-850 overflow-hidden mb-20">
+        <div class="p-8 border-b dark:border-slate-850 bg-white dark:bg-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
           <h3 class="font-800 text-slate-800 uppercase text-sm tracking-widest">Database Explorer</h3>
-          <div class="flex p-1.5 bg-slate-100 rounded-2xl text-[10px] font-800 uppercase tracking-widest text-slate-500">
+          <div class="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-800 uppercase tracking-widest text-slate-500 dark:text-slate-400">
             <button onclick="switchLogTab('logDesain', this)" class="log-tab-btn active-log-tab px-6 py-2 rounded-xl transition-all">Desain</button>
             <button onclick="switchLogTab('logPrint', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Percetakan</button>
             <button onclick="switchLogTab('logBoutique', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Boutique</button>
@@ -487,44 +546,44 @@
           </div>
         </div>
 
-        <div class="p-6 bg-slate-50 border-b border-slate-100 relative">
-          <input type="text" id="searchAdmin" onkeyup="filterAdminTable()" placeholder="Cari data di tabel aktif..." autocomplete="off" class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-medium text-sm">
+        <div class="p-6 bg-slate-50 dark:bg-slate-850 border-b border-slate-100 dark:border-slate-800 relative">
+          <input type="text" id="searchAdmin" onkeyup="filterAdminTable()" placeholder="Cari data di tabel aktif..." autocomplete="off" class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-medium text-sm dark:text-white">
           <i class="fas fa-search absolute left-10 top-1/2 -translate-y-1/2 text-slate-400"></i>
         </div>
         
         <div id="logDesain" class="log-content overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <table class="w-full text-left dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               <tr><th class="px-6 py-4">Project</th><th class="px-6 py-4">Tag</th><th class="px-6 py-4">Deskripsi</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
             </thead>
-            <tbody id="tbodyDesain" class="divide-y divide-slate-50 text-xs font-medium text-slate-600"></tbody>
+            <tbody id="tbodyDesain" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
           </table>
         </div>
 
         <div id="logPrint" class="log-content hidden overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <table class="w-full text-left dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               <tr><th class="px-6 py-4">Produk</th><th class="px-6 py-4">Harga</th><th class="px-6 py-4">Ikon</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
             </thead>
-            <tbody id="tbodyPrint" class="divide-y divide-slate-50 text-xs font-medium text-slate-600"></tbody>
+            <tbody id="tbodyPrint" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
           </table>
         </div>
 
         <div id="logBoutique" class="log-content hidden overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <table class="w-full text-left dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               <tr><th class="px-6 py-4">Judul</th><th class="px-6 py-4">Kategori</th><th class="px-6 py-4">Deskripsi</th><th class="px-6 py-4">Harga</th><th class="px-6 py-4">Min. Order</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-center">Aksi</th></tr>
             </thead>
-            <tbody id="tbodyBoutique" class="divide-y divide-slate-50 text-xs font-medium text-slate-600"></tbody>
+            <tbody id="tbodyBoutique" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
           </table>
         </div>
 
         <div id="logJasa" class="log-content hidden overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <table class="w-full text-left dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               <tr><th class="px-4 py-4">Layanan / No. Kendaran</th><th class="px-4 py-4">Nama</th><th class="px-4 py-4">Merek</th><th class="px-4 py-4">Type</th><th class="px-4 py-4">Deskripsi</th><th class="px-4 py-4 whitespace-nowrap">Progres</th><th class="px-4 py-4 whitespace-nowrap">Masa Aktif</th><th class="px-4 py-4">Status</th><th class="px-4 py-4">STNK</th><th class="px-4 py-4 text-center">Aksi</th></tr>
             </thead>
-            <tbody id="tbodyJasa" class="divide-y divide-slate-50 text-xs font-medium text-slate-600"></tbody>
+            <tbody id="tbodyJasa" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
           </table>
         </div>
 
@@ -537,10 +596,10 @@
   </div>
 
   <!-- Edit Modal -->
-  <div id="editModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6">
+  <div id="editModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6 dark:text-slate-100">
     <div class="absolute inset-0 modal-backdrop" onclick="closeEditModal()"></div>
-    <div class="bg-white w-full max-w-xl max-h-[90vh] sm:max-h-[85vh] rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col">
-      <div class="p-5 sm:p-8 border-b flex justify-between items-center bg-slate-50 shrink-0">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-xl max-h-[90vh] sm:max-h-[85vh] rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col">
+      <div class="p-5 sm:p-8 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850 shrink-0">
         <h4 id="editTitle" class="font-bold text-slate-800 uppercase tracking-widest text-xs">Edit Data</h4>
         <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 p-2 -mr-2"><i class="fas fa-times text-lg"></i></button>
       </div>
@@ -550,7 +609,7 @@
           <input type="hidden" name="sheet_name" id="editSheetName">
           <div id="editFields" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           <div class="pt-4">
-            <button type="submit" id="btnUpdate" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition">Simpan Perubahan</button>
+            <button type="submit" id="btnUpdate" class="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition">Simpan Perubahan</button>
           </div>
         </form>
       </div>
@@ -558,10 +617,10 @@
   </div>
 
   <!-- Image Preview Modal -->
-  <div id="imagePreviewModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
+  <div id="imagePreviewModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6 dark:text-slate-100">
     <div class="absolute inset-0 modal-backdrop" onclick="closeImagePreview()"></div>
-    <div class="bg-white w-auto max-w-3xl max-h-[80vh] rounded-2xl shadow-2xl relative z-10 overflow-hidden flex flex-col">
-      <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+    <div class="bg-white dark:bg-slate-900 w-auto max-w-3xl max-h-[80vh] rounded-2xl shadow-2xl relative z-10 overflow-hidden flex flex-col">
+      <div class="p-4 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850">
         <h4 id="imagePreviewTitle" class="font-bold text-slate-600 text-sm truncate mr-4"></h4>
         <button onclick="closeImagePreview()" class="text-slate-400 hover:text-slate-600 shrink-0"><i class="fas fa-times"></i></button>
       </div>
@@ -611,7 +670,7 @@
   <!-- Floating Action Buttons -->
   <div class="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-4 no-print">
     <!-- Back to Top -->
-    <button id="backToTopBtn" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="hidden h-14 w-14 bg-white/80 backdrop-blur-lg text-slate-700 rounded-full shadow-lg border border-slate-200/80 hover:bg-slate-50 hover:text-blue-600 transition-all transform hover:-translate-y-1">
+    <button id="backToTopBtn" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="hidden h-14 w-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg text-slate-700 dark:text-slate-200 rounded-full shadow-lg border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-blue-600 transition-all transform hover:-translate-y-1">
       <i class="fas fa-arrow-up"></i>
     </button>
     <!-- WhatsApp FAB -->
@@ -625,7 +684,7 @@
   </div>
 
   <footer class="py-20 text-center text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] no-print">
-    &copy; <span id="currentYear">2024</span> CV. KIRANA TANJUNG PELAKAR | ALL RIGHTS RESERVED
+    &copy; <span id="currentYear">2024</span> NATALA STUDIO by CV. KIRANA TANJUNG PELAKAR | ALL RIGHTS RESERVED
   </footer>
 
   <script>
@@ -642,6 +701,41 @@
     function closeMobileMenu() {
       mobileMenu.classList.add('hidden');
       mobileMenuIcon.className = 'fas fa-bars text-2xl';
+    }
+
+    // --- Dark/Light Mode Management ---
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const useDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      
+      document.documentElement.classList.toggle('dark', useDark);
+      updateThemeIcons(useDark);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateThemeIcons(isDark);
+    }
+
+    function updateThemeIcons(isDark) {
+      const iconDesktop = document.getElementById('themeIconDesktop');
+      const iconMobile = document.getElementById('themeIconMobile');
+      if (iconDesktop) iconDesktop.className = isDark ? 'fas fa-sun text-lg text-amber-400' : 'fas fa-moon text-lg';
+      if (iconMobile) iconMobile.className = isDark ? 'fas fa-sun text-xl text-amber-400' : 'fas fa-moon text-xl';
+    }
+    document.addEventListener('DOMContentLoaded', initTheme);
+
+    // --- Client-Side XSS Protection Sanitizer ---
+    function escapeHTML(str) {
+      if (str === undefined || str === null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // --- View Management ---
@@ -904,17 +998,17 @@
           const waNum = item.whatsapp || item.wa || item.no_whatsapp || item.no_wa || '';
           hDesain += `
             <tr class="hover:bg-slate-50/50 transition">
-              <td class="px-6 py-5 font-bold text-slate-800">${item.nama || '-'}</td>
-              <td class="px-6 py-5"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-bold text-[9px] uppercase">${item.tag || 'Web'}</span></td>
-              <td class="px-6 py-5 italic text-slate-400 max-w-sm break-words">${item.deskripsi || ''}</td>
+              <td class="px-6 py-5 font-bold text-slate-800">${escapeHTML(item.nama)}</td>
+              <td class="px-6 py-5"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-bold text-[9px] uppercase">${escapeHTML(item.tag)}</span></td>
+              <td class="px-6 py-5 italic text-slate-400 max-w-sm break-words">${escapeHTML(item.deskripsi)}</td>
               <td class="px-6 py-5 whitespace-nowrap">
                 <span class="${item.status === 'SELESAI' ? 'bg-green-50 text-green-700 border-green-100' : item.status === 'DITOLAK' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-blue-50 text-blue-700 border-blue-100'} px-3 py-1 rounded-full text-[9px] font-bold border italic tracking-wide">
-                  ${item.status || 'ON PROCESS'}
+                  ${escapeHTML(item.status || 'ON PROCESS')}
                 </span>
               </td>
               <td class="px-6 py-5 text-center whitespace-nowrap">
                 <div class="flex items-center justify-center space-x-3">
-                  <button onclick='openEditModal("Desain", ${item.row_index})' class="text-blue-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
+                  <button onclick="openEditModal('Desain', ${item.row_index})" class="text-blue-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
                   <a href="https://wa.me/${fixWA(waNum)}" target="_blank" class="text-green-500 hover:scale-110 transition ${waNum ? '' : 'hidden'}" title="Hubungi WA"><i class="fab fa-whatsapp text-lg"></i></a>
                 </div>
               </td>
@@ -974,12 +1068,12 @@
             </td>
             <td class="px-6 py-5 whitespace-nowrap">
               <span class="${statusClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-wide">
-                ${statusText}
+                ${escapeHTML(statusText)}
               </span>
             </td>
             <td class="px-6 py-5 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-3">
-                <button onclick='openEditModal("Percetakan", ${item.row_index})' class="text-indigo-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
+                <button onclick="openEditModal('Percetakan', ${item.row_index})" class="text-indigo-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
                 <a href="https://wa.me/${fixWA(waNum)}" target="_blank" class="text-green-500 hover:scale-110 transition ${waNum ? '' : 'hidden'}" title="Hubungi WA"><i class="fab fa-whatsapp text-lg"></i></a>
               </div>
             </td>
@@ -995,20 +1089,20 @@
           
           hBoutique += `
             <tr class="hover:bg-slate-50/50 transition">
-              <td class="px-6 py-5 font-bold text-slate-800">${item.judul || '-'}</td>
-              <td class="px-6 py-5"><span class="bg-pink-50 text-pink-600 px-3 py-1 rounded-lg font-bold text-[9px] uppercase">${item.kategori || 'BOUTIQUE'}</span></td>
-              <td class="px-6 py-5 italic text-slate-400 max-w-sm break-words">${item.deskripsi || ''}</td>
-              <td class="px-6 py-5 font-bold text-pink-600 whitespace-nowrap">${formatCurrency(item.harga)}</td>
-              <td class="px-6 py-5 text-slate-700 whitespace-nowrap">${item.min_order || '1 Pcs'}</td>
+              <td class="px-6 py-5 font-bold text-slate-800">${escapeHTML(item.judul)}</td>
+              <td class="px-6 py-5"><span class="bg-pink-50 text-pink-600 px-3 py-1 rounded-lg font-bold text-[9px] uppercase">${escapeHTML(item.kategori || 'BOUTIQUE')}</span></td>
+              <td class="px-6 py-5 italic text-slate-400 max-w-sm break-words">${escapeHTML(item.deskripsi)}</td>
+              <td class="px-6 py-5 font-bold text-pink-600 whitespace-nowrap">${escapeHTML(formatCurrency(item.harga))}</td>
+              <td class="px-6 py-5 text-slate-700 whitespace-nowrap">${escapeHTML(item.min_order || '1 Pcs')}</td>
               <td class="px-6 py-5 whitespace-nowrap">
                 <span class="${statusClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-wide">
-                  ${statusText}
+                  ${escapeHTML(statusText)}
                 </span>
               </td>
               <td class="px-6 py-5 text-center whitespace-nowrap">
                 <div class="flex items-center justify-center space-x-3">
-                  <button onclick='openEditModal("Boutique", ${item.row_index})' class="text-pink-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
-                  ${item.gambar_url ? `<button onclick="openImagePreview('${item.gambar_url}', '${item.judul}')" class="text-indigo-500 hover:scale-110 transition" title="Lihat Gambar"><i class="fas fa-image text-lg"></i></button>` : ''}
+                  <button onclick="openEditModal('Boutique', ${item.row_index})" class="text-pink-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
+                  ${item.gambar_url ? `<button onclick="openImagePreview('${escapeHTML(item.gambar_url)}', '${escapeHTML(item.judul)}')" class="text-indigo-500 hover:scale-110 transition" title="Lihat Gambar"><i class="fas fa-image text-lg"></i></button>` : ''}
                 </div>
               </td>
             </tr>`;
@@ -1079,23 +1173,25 @@ Masa aktif uji berkala akan berakhir pada tanggal ${item.aktif || 'N/A'}.
 Mohon untuk dapat melakukan perpanjangan sebelum waktunya.
 Terima kasih.`;
           const waLink = `https://wa.me/${fixWA(waNum)}?text=${encodeURIComponent(message)}`;
+          const gpsCoords = item.gps_koordinat || '';
+          const mapsLink = gpsCoords ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gpsCoords)}" target="_blank" class="text-blue-500 hover:scale-110 transition" title="Lihat Lokasi di Maps"><i class="fas fa-map-marked-alt text-lg"></i></a>` : '';
 
           hJasa += `
           <tr class="hover:bg-slate-50/50 transition ${rowHighlightClass}">
             <td class="px-4 py-5">
-              <div class="font-bold text-slate-800 uppercase">${item.layanan || '-'}</div>
-              <div class="text-[9px] font-bold text-blue-600 mt-0.5 uppercase tracking-widest">${item.nomor_kendaraan || '-'}</div>
+              <div class="font-bold text-slate-800 uppercase">${escapeHTML(item.layanan)}</div>
+              <div class="text-[9px] font-bold text-blue-600 mt-0.5 uppercase tracking-widest">${escapeHTML(item.nomor_kendaraan)}</div>
             </td>
-            <td class="px-4 py-5 text-slate-700">${item.nama || '-'}</td>
-            <td class="px-4 py-5 text-slate-700">${item.merek || '-'}</td>
-            <td class="px-4 py-5 text-slate-700">${item.type || '-'}</td>
-            <td class="px-4 py-5 text-slate-400 text-[10px] italic max-w-xs break-words">${item.deskripsi || '-'}</td>
+            <td class="px-4 py-5 text-slate-700">${escapeHTML(item.nama)}</td>
+            <td class="px-4 py-5 text-slate-700">${escapeHTML(item.merek)}</td>
+            <td class="px-4 py-5 text-slate-700">${escapeHTML(item.type)}</td>
+            <td class="px-4 py-5 text-slate-400 text-[10px] italic max-w-xs break-words">${escapeHTML(item.deskripsi)}</td>
             <td class="px-4 py-5 whitespace-nowrap">
-              <span class="bg-green-50 text-green-700 px-4 py-1 rounded-full text-[9px] font-bold border border-green-100 italic tracking-wide">${item.durasi || 'Proses'}</span>
+              <span class="bg-green-50 text-green-700 px-4 py-1 rounded-full text-[9px] font-bold border border-green-100 italic tracking-wide">${escapeHTML(item.durasi || 'Proses')}</span>
             </td>
             <td class="px-4 py-5 text-slate-500 font-bold whitespace-nowrap">${formattedDate}</td>
             <td class="px-4 py-5 whitespace-nowrap">
-              <span class="${statusAutoClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-tighter">${statusAuto}</span>
+              <span class="${statusAutoClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-tighter">${escapeHTML(statusAuto)}</span>
             </td>
             <td class="px-4 py-5 whitespace-nowrap">
               ${item.foto_stnk ? 
@@ -1106,13 +1202,14 @@ Terima kasih.`;
             <td class="px-4 py-5 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-3">
                 <button 
-                  onclick='previewKuasa("${item.nama_pemilik || item.nama_konsumen || item.nama}", "${item.no_uji || item.nomor_kendaraan || '-'}", "${item.merk_type || item.kendaraan || ((item.merek || '') + ' / ' + (item.type || '')) || '-'}")' 
+                  onclick="previewKuasa('${escapeHTML(item.nama_pemilik || item.nama_konsumen || item.nama)}', '${escapeHTML(item.no_uji || item.nomor_kendaraan || '-')}', '${escapeHTML(item.merk_type || item.kendaraan || ((item.merek || '') + ' / ' + (item.type || '')) || '-')}')" 
                   class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition flex items-center gap-1" 
                   title="Cetak Surat Kuasa">
                   <i class="fas fa-file-pdf"></i> Kuasa
                 </button>
-                <button onclick='openEditModal("Biro Jasa", ${item.row_index})' class="text-green-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>                
-                <button onclick="previewStnk('${item.foto_stnk}')" class="text-indigo-500 hover:scale-110 transition ${item.foto_stnk ? '' : 'hidden'}" title="Lihat STNK"><i class="fas fa-image text-lg"></i></button>
+                <button onclick="openEditModal('Biro Jasa', ${item.row_index})" class="text-green-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>                
+                ${mapsLink}
+                <button onclick="previewStnk('${escapeHTML(item.foto_stnk)}')" class="text-indigo-500 hover:scale-110 transition ${item.foto_stnk ? '' : 'hidden'}" title="Lihat STNK"><i class="fas fa-image text-lg"></i></button>
                 <a href="${waLink}" target="_blank" class="text-green-500 hover:scale-110 transition ${waNum ? '' : 'hidden'}" title="Kirim Pengingat via WA"><i class="fab fa-whatsapp text-lg"></i></a>
               </div>
             </td>
@@ -1148,63 +1245,65 @@ Terima kasih.`;
         "Desain": ['nama', 'tag', 'linkgambar', 'deskripsi', 'whatsapp', 'status'],
         "Percetakan": ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'],
         "Boutique": ['judul', 'kategori', 'deskripsi', 'harga', 'min_order', 'gambar_url', 'status'],
-        "Biro Jasa": ['layanan', 'nama', 'merek', 'type', 'nomor_kendaraan', 'deskripsi', 'durasi', 'aktif', 'whatsapp', 'foto_stnk']
+        "Biro Jasa": ['layanan', 'nama', 'merek', 'type', 'nomor_kendaraan', 'deskripsi', 'durasi', 'aktif', 'whatsapp', 'foto_stnk', 'gps_koordinat']
       };
 
       const fieldsToShow = fieldConfig[sheetName] || Object.keys(item).filter(k => k !== 'row_index' && k !== 'timestamp');
 
       fieldsToShow.forEach(key => {
-        const value = item[key] || '';
+        const value = escapeHTML(item[key] || '');
         let inputField = '';
 
         if (key === 'status' && sheetName === "Percetakan") {
           const options = { "SELESAI": "TAMPILKAN DI KATALOG", "DITOLAK": "SEMBUNYIKAN (ARSIPKAN)" };
-          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          inputField = `<select name="${escapeHTML(key)}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
           for (const optValue in options) {
-            inputField += `<option value="${optValue}" ${value === optValue ? 'selected' : ''}>${options[optValue]}</option>`;
+            inputField += `<option value="${escapeHTML(optValue)}" ${value === optValue ? 'selected' : ''}>${escapeHTML(options[optValue])}</option>`;
           }
           inputField += `</select>`;
         } else if (key === 'status' && sheetName === "Boutique") {
           const options = { "AKTIF": "TAMPILKAN DI KATALOG", "DITOLAK": "SEMBUNYIKAN (ARSIPKAN)" };
-          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          inputField = `<select name="${escapeHTML(key)}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
           for (const optValue in options) {
-            inputField += `<option value="${optValue}" ${value === optValue ? 'selected' : ''}>${options[optValue]}</option>`;
+            inputField += `<option value="${escapeHTML(optValue)}" ${value === optValue ? 'selected' : ''}>${escapeHTML(options[optValue])}</option>`;
           }
           inputField += `</select>`;
         } else if (key === 'kategori' && sheetName === "Boutique") {
           const options = ["BOUTIQUE", "KONVEKSI"];
-          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          inputField = `<select name="${escapeHTML(key)}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
           options.forEach(opt => {
-            inputField += `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`;
+            inputField += `<option value="${escapeHTML(opt)}" ${value === opt ? 'selected' : ''}>${escapeHTML(opt)}</option>`;
           });
           inputField += `</select>`;
         } else if ((key === 'status' && sheetName === "Desain") || (key === 'durasi' && sheetName === "Biro Jasa")) {
           const options = ["ON PROCESS", "SELESAI", "DITOLAK"];
-          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          inputField = `<select name="${escapeHTML(key)}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
           options.forEach(opt => {
-            inputField += `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`;
+            inputField += `<option value="${escapeHTML(opt)}" ${value === opt ? 'selected' : ''}>${escapeHTML(opt)}</option>`;
           });
           inputField += `</select>`;
         } else if (key === 'layanan' && sheetName === "Biro Jasa") {
           const options = ["KIR", "SAMSAT", "REKOM"];
-          inputField = `<select name="${key}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
+          inputField = `<select name="${escapeHTML(key)}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold appearance-none cursor-pointer uppercase">`;
           options.forEach(opt => {
-            inputField += `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`;
+            inputField += `<option value="${escapeHTML(opt)}" ${value === opt ? 'selected' : ''}>${escapeHTML(opt)}</option>`;
           });
           inputField += `</select>`;
         } else if (key === 'aktif' && sheetName === "Biro Jasa") {
-          inputField = `<input type="date" name="${key}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
+          inputField = `<input type="date" name="${escapeHTML(key)}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else if (key === 'foto_stnk' || key === 'linkgambar' || key === 'gambar_url') {
-          inputField = `<input type="url" name="${key}" value="${value}" placeholder="https://..." class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
+          inputField = `<input type="url" name="${escapeHTML(key)}" value="${value}" placeholder="https://..." class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
+        } else if (key === 'gps_koordinat') {
+          inputField = `<input type="text" name="${escapeHTML(key)}" value="${value}" placeholder="Latitude,Longitude" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else if (key === 'ikon') {
-          inputField = `<input type="text" name="${key}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
+          inputField = `<input type="text" name="${escapeHTML(key)}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else {
-          inputField = `<input type="text" name="${key}" value="${value}" oninput="this.value = this.value.toUpperCase()" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold uppercase">`;
+          inputField = `<input type="text" name="${escapeHTML(key)}" value="${value}" oninput="this.value = this.value.toUpperCase()" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold uppercase">`;
         }
 
         html += `
           <div class="space-y-1">
-            <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${key.replace(/_/g, ' ')}</label>
+            <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${escapeHTML(key.replace(/_/g, ' '))}</label>
             ${inputField}
           </div>`;
       });
@@ -1270,7 +1369,7 @@ Terima kasih.`;
     }
 
     function previewStnk(url) {
-      if (!url) return;
+      if (!url || !/^(https?:\/\/)/i.test(url)) return;
       const modal = document.getElementById('modalPreviewStnk');
       const container = document.getElementById('containerStnk');
       const btnCetak = document.getElementById('btnCetakStnk');
