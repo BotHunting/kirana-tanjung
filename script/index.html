@@ -1233,8 +1233,6 @@ Masa aktif uji berkala akan berakhir pada tanggal ${item.aktif || 'N/A'}.
 Mohon untuk dapat melakukan perpanjangan sebelum waktunya.
 Terima kasih.`;
           const waLink = `https://wa.me/${fixWA(waNum)}?text=${encodeURIComponent(message)}`;
-          const gpsCoords = item.gps_koordinat || '';
-          const mapsLink = gpsCoords ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gpsCoords)}" target="_blank" class="text-blue-500 hover:scale-110 transition" title="Lihat Lokasi di Maps"><i class="fas fa-map-marked-alt text-lg"></i></a>` : '';
 
           hJasa += `
           <tr class="hover:bg-slate-50/50 transition ${rowHighlightClass}">
@@ -1268,7 +1266,6 @@ Terima kasih.`;
                   <i class="fas fa-file-pdf"></i> Kuasa
                 </button>
                 <button onclick="openEditModal('Biro Jasa', ${item.row_index})" class="text-green-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>                
-                ${mapsLink}
                 <button onclick="previewStnk('${escapeHTML(item.foto_stnk)}')" class="text-indigo-500 hover:scale-110 transition ${item.foto_stnk ? '' : 'hidden'}" title="Lihat STNK"><i class="fas fa-image text-lg"></i></button>
                 <a href="${waLink}" target="_blank" class="text-green-500 hover:scale-110 transition ${waNum ? '' : 'hidden'}" title="Kirim Pengingat via WA"><i class="fab fa-whatsapp text-lg"></i></a>
               </div>
@@ -1305,7 +1302,7 @@ Terima kasih.`;
         "Desain": ['nama', 'tag', 'linkgambar', 'deskripsi', 'whatsapp', 'status'],
         "Percetakan": ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status', 'keterangan', 'min_order'],
         "Boutique": ['judul', 'kategori', 'deskripsi', 'harga', 'min_order', 'gambar_url', 'status'],
-        "Biro Jasa": ['layanan', 'nama', 'merek', 'type', 'nomor_kendaraan', 'deskripsi', 'durasi', 'aktif', 'whatsapp', 'foto_stnk', 'gps_koordinat']
+        "Biro Jasa": ['layanan', 'nama', 'merek', 'type', 'nomor_kendaraan', 'deskripsi', 'durasi', 'aktif', 'whatsapp', 'foto_stnk']
       };
 
       const fieldsToShow = fieldConfig[sheetName] || Object.keys(item).filter(k => k !== 'row_index' && k !== 'timestamp');
@@ -1353,8 +1350,6 @@ Terima kasih.`;
           inputField = `<input type="date" name="${escapeHTML(key)}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else if (key === 'foto_stnk' || key === 'linkgambar' || key === 'gambar_url') {
           inputField = `<input type="url" name="${escapeHTML(key)}" value="${value}" placeholder="https://..." class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
-        } else if (key === 'gps_koordinat') {
-          inputField = `<input type="text" name="${escapeHTML(key)}" value="${value}" placeholder="Latitude,Longitude" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else if (key === 'ikon') {
           inputField = `<input type="text" name="${escapeHTML(key)}" value="${value}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium">`;
         } else {

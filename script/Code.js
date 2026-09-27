@@ -187,7 +187,7 @@ function addDataToSheet(sheetName, formData) {
     } else if (sheetName === "Boutique") {
       rowData = [formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status];
     } else if (sheetName === "Biro Jasa") {
-      rowData = [timestamp, formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, formData.gps_koordinat];
+      rowData = [timestamp, formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, ""];
     } else {
       throw new Error("Sheet tidak didukung: " + sheetName);
     }
@@ -238,7 +238,7 @@ function updateDataInSheet(sheetName, rowIndex, formData) {
       rowData = [[formData.judul, formData.kategori, formData.deskripsi, formData.harga, formData.min_order, formData.gambar_url, formData.status]];
       sheet.getRange(row, 1, 1, 7).setValues(rowData);
     } else if (sheetName.toLowerCase() === "biro jasa") {
-      rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, formData.gps_koordinat]];
+      rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, ""]];
       sheet.getRange(row, 2, 1, 11).setValues(rowData);
     } else {
       throw new Error("Sheet tidak didukung: " + sheetName);

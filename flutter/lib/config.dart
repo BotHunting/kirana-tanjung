@@ -7,7 +7,7 @@ class AppConfig {
       'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
 
   static const String databaseUrl =
-      'https://script.google.com/macros/s/AKfycbx8yy9a7pkJ-3lnlYSq_8G-lbe4B-FlGzUBZmZ2X4LHt13zgUY2QJTpb4HCkzix-d9Y/exec';
+      'https://script.google.com/macros/s/AKfycbzeak96oIfBuXnTXevAkwo28A0n1rZT5nNYJ73T8C24TxaVbvb0grk_d42epMe62-XW/exec';
 
   // Daftar Kontak WhatsApp Resmi Per Kategori
   static const String waDesainSistem = '6281290320438'; // Desain & Web System
@@ -70,7 +70,8 @@ class AppConfig {
 
   // Helper Menghitung Sisa Hari Masa Aktif
   static ({int sisa, bool isExpired, bool isWarning, bool isValid}) getSisaHari(
-      String? tanggalStr) {
+    String? tanggalStr,
+  ) {
     if (tanggalStr == null || tanggalStr.trim().isEmpty) {
       return (sisa: 999, isExpired: false, isWarning: false, isValid: false);
     }
@@ -90,14 +91,15 @@ class AppConfig {
         'sep': '09',
         'okt': '10',
         'nov': '11',
-        'des': '12'
+        'des': '12',
       };
 
       final parts = sanitizedStr.split(' ');
       if (parts.length == 3) {
         final day = parts[0].padLeft(2, '0');
         final bulanLower = parts[1].toLowerCase();
-        final month = bulanMap[bulanLower] ??
+        final month =
+            bulanMap[bulanLower] ??
             bulanMap[bulanLower.substring(0, 3)] ??
             '01';
         final year = parts[2];
