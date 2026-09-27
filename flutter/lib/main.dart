@@ -92,6 +92,8 @@ class _HomeShellState extends State<HomeShell> {
   String? errorMessage;
   bool loggedIn = false;
   String? userName;
+  String? userNik;
+  String? userAlamat;
   String _webSearchQuery = '';
   String _searchCetakQuery = '';
   String _currentVersion = AppConfig.appVersion;
@@ -288,7 +290,9 @@ class _HomeShellState extends State<HomeShell> {
     if (result == null || !mounted) return;
     setState(() {
       loggedIn = true;
-      userName = result.name; // Keep existing userName logic
+      userName = result.name;
+      userNik = result.nik;
+      userAlamat = result.alamat;
       selectedIndex = 5;
     });
     _showMessage('Selamat datang, ${result.name}');
@@ -340,6 +344,8 @@ class _HomeShellState extends State<HomeShell> {
     setState(() {
       loggedIn = false;
       userName = null;
+      userNik = null;
+      userAlamat = null;
       selectedIndex = 0;
     });
     _showMessage('Anda sudah keluar dari dashboard.');
@@ -631,8 +637,13 @@ class _HomeShellState extends State<HomeShell> {
               Navigator.pop(context); // Tutup modal ringkasan
               showDialog(
                 context: context,
-                builder: (context) =>
-                    ModalKuasaViewer(item: item as Map<String, dynamic>),
+                builder: (context) => ModalKuasaViewer(
+                  item: item as Map<String, dynamic>,
+                  penerimaNama: userName ?? 'MOHAMMAD SYAHRI',
+                  penerimaNik: userNik ?? '9203015308670001',
+                  penerimaAlamat: userAlamat ??
+                      'Jl. Ky Syahlan 1 No. 7, Ds. Manyarejo, Kec. Manyar, Kab. Gresik',
+                ),
               );
             },
             icon: const Icon(Icons.print_outlined),
@@ -1420,8 +1431,11 @@ class _ErrorState extends StatelessWidget {
 }
 
 class LoginResult {
-  const LoginResult({required this.name});
+  const LoginResult(
+      {required this.name, required this.nik, required this.alamat});
   final String name;
+  final String nik;
+  final String alamat;
 }
 
 class LoginPage extends StatefulWidget {
@@ -1471,7 +1485,10 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pop(
             context,
             LoginResult(
-                name: (result['nama'] ?? usernameController.text).toString()));
+              name: (result['nama'] ?? usernameController.text).toString(),
+              nik: (result['nik'] ?? '').toString(),
+              alamat: (result['alamat'] ?? '').toString(),
+            ));
       } else {
         setState(() {
           submitting = false;
@@ -1641,6 +1658,8 @@ Map<String, List<dynamic>> _parseAndNormalize(String text) {
       'tag',
       'whatsapp',
       'status',
+      'keterangan',
+      'min_order',
     ]),
     'boutique': _normaliseRows(decoded['boutique'], const [
       'judul',

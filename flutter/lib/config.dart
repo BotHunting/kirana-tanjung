@@ -1,7 +1,7 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppConfig {
-  static String appVersion = '1.1.1';
+  static String appVersion = '1.1.2';
 
   static const String updateApiUrl =
       'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
@@ -98,8 +98,7 @@ class AppConfig {
       if (parts.length == 3) {
         final day = parts[0].padLeft(2, '0');
         final bulanLower = parts[1].toLowerCase();
-        final month =
-            bulanMap[bulanLower] ??
+        final month = bulanMap[bulanLower] ??
             bulanMap[bulanLower.substring(0, 3)] ??
             '01';
         final year = parts[2];

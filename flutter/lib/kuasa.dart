@@ -4,15 +4,46 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:http/http.dart' as http;
 import 'config.dart';
 
-class ModalKuasaViewer extends StatelessWidget {
-  const ModalKuasaViewer({super.key, required this.item});
+class ModalKuasaViewer extends StatefulWidget {
+  const ModalKuasaViewer({
+    super.key,
+    required this.item,
+    required this.penerimaNama,
+    required this.penerimaNik,
+    required this.penerimaAlamat,
+  });
   final Map<String, dynamic> item;
+  final String penerimaNama;
+  final String penerimaNik;
+  final String penerimaAlamat;
+
+  @override
+  State<ModalKuasaViewer> createState() => _ModalKuasaViewerState();
+}
+
+class _ModalKuasaViewerState extends State<ModalKuasaViewer> {
+  bool _isPrinting = false;
+
+  Future<pw.MemoryImage?> _fetchNetworkImage(String url) async {
+    if (url.trim().isEmpty) return null;
+    try {
+      final response =
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+        return pw.MemoryImage(response.bodyBytes);
+      }
+    } catch (e) {
+      debugPrint('Gagal memuat gambar dari network ($url): $e');
+    }
+    return null;
+  }
 
   String _safeVal(List<String> keys) {
     for (final key in keys) {
-      final v = item[key];
+      final v = widget.item[key];
       if (v != null) {
         final str = v.toString().trim();
         if (str.isNotEmpty) return str;
@@ -21,144 +52,235 @@ class ModalKuasaViewer extends StatelessWidget {
     return '-';
   }
 
+  String _currentFormattedDate() {
+    final now = DateTime.now();
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return '${now.day} ${months[now.month - 1]} ${now.year}';
+  }
+
   Future<void> _handlePrint(String nama, String nomor, String kendaraan) async {
-    final doc = pw.Document();
+    setState(() => _isPrinting = true);
+    try {
+      final fontRegular = await PdfGoogleFonts.plusJakartaSansRegular();
+      final fontBold = await PdfGoogleFonts.plusJakartaSansBold();
+      final logoImage = await _fetchNetworkImage(AppConfig.logoUrl);
+      final materaiImage = await _fetchNetworkImage(AppConfig.materaiUrl);
 
-    // Load font & gambar materai secara asynchronous sebelum render PDF
-    final fontRegular = await PdfGoogleFonts.plusJakartaSansRegular();
-    final fontBold = await PdfGoogleFonts.plusJakartaSansBold();
-    final imageProvider = await networkImage(AppConfig.materaiUrl);
+      pw.TableRow pwRow(String label, String value,
+          {bool isBoldValue = false}) {
+        return pw.TableRow(
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              child: pw.Text(label,
+                  style: pw.TextStyle(font: fontRegular, fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              child: pw.Text(': ',
+                  style: pw.TextStyle(font: fontRegular, fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              child: pw.Text(value,
+                  style: pw.TextStyle(
+                      font: isBoldValue ? fontBold : fontRegular,
+                      fontSize: 10)),
+            ),
+          ],
+        );
+      }
 
-    doc.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return pw.Padding(
-            padding: const pw.EdgeInsets.all(32),
-            child: pw.Column(
+      final doc = pw.Document();
+
+      doc.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          build: (pw.Context context) {
+            return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Center(
-                  child: pw.Column(
-                    children: [
-                      pw.Text('CV. KIRANA TANJUNG PELAKAR',
-                          style: pw.TextStyle(font: fontBold, fontSize: 16)),
-                      pw.SizedBox(height: 4),
-                      pw.Text(
-                          'Konsultan Teknologi Informasi & Layanan Transportasi Terpadu',
-                          style: pw.TextStyle(font: fontRegular, fontSize: 10)),
-                      pw.Text(
-                          'Alamat: Jl. Ky Syahlan 1 No. 9, Ds. Manyarejo, Kec. Manyar, Kab. Gresik',
-                          style: pw.TextStyle(font: fontRegular, fontSize: 9)),
-                      pw.SizedBox(height: 12),
-                      pw.Divider(thickness: 1.5, color: PdfColors.black),
-                    ],
-                  ),
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    if (logoImage != null)
+                      pw.Image(logoImage, width: 50, height: 50)
+                    else
+                      pw.SizedBox(width: 50, height: 50),
+                    pw.SizedBox(width: 12),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('CV. KIRANA TANJUNG PELAKAR',
+                            style: pw.TextStyle(font: fontBold, fontSize: 13)),
+                        pw.Text(
+                            'Konsultan Teknologi Informasi & Layanan Transportasi Terpadu',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 8.5)),
+                        pw.Text(
+                            'Alamat: Jl. Ky Syahlan 1 No. 7, Ds. Manyarejo, Kec. Manyar, Kab. Gresik',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 7.5)),
+                        pw.Text(
+                            'Telepon: 081290320438 | Email: bot.hunting101@gmail.com | Website: https://kirana-tanjung.vercel.app/',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 7.5)),
+                      ],
+                    ),
+                  ],
                 ),
-                pw.SizedBox(height: 16),
+                pw.SizedBox(height: 4),
+                pw.Divider(thickness: 1.5, color: PdfColors.black),
+                pw.SizedBox(height: 10),
                 pw.Center(
-                  child: pw.Text('SURAT TUGAS PENGURUSAN',
+                  child: pw.Text('SURAT KUASA',
                       style: pw.TextStyle(
                           font: fontBold,
-                          fontSize: 14,
+                          fontSize: 13,
                           decoration: pw.TextDecoration.underline)),
                 ),
-                pw.SizedBox(height: 20),
-                pw.Text(
-                  'Yang bertanda tangan di bawah ini memberikan tugas pengurusan kendaraan kepada staff resmi dengan rincian identitas kendaraan sebagai berikut:',
-                  style: pw.TextStyle(
-                      font: fontRegular, fontSize: 11, lineSpacing: 1.5),
+                pw.SizedBox(height: 12),
+                pw.Text('Yang bertanda tangan di bawah ini:',
+                    style: pw.TextStyle(font: fontRegular, fontSize: 9.5)),
+                pw.SizedBox(height: 4),
+                pw.Table(
+                  columnWidths: {
+                    0: const pw.FixedColumnWidth(110),
+                    1: const pw.FixedColumnWidth(10),
+                    2: const pw.FlexColumnWidth(),
+                  },
+                  children: [
+                    pwRow('Nama', 'ADI JUNAIDI', isBoldValue: true),
+                    pwRow('Jabatan', 'DIREKTUR'),
+                    pwRow('Instansi/Perusahaan', 'CV. KIRANA TANJUNG PELAKAR'),
+                    pwRow('NPWP', '31.585.382.0-603.000'),
+                    pwRow('Alamat Kantor',
+                        'Jl. Ky Syahlan 1 No. 7, Ds. Manyarejo, Kec. Manyar, Kab. Gresik'),
+                  ],
                 ),
-                pw.SizedBox(height: 16),
+                pw.SizedBox(height: 6),
+                pw.Text(
+                    'Dalam hal ini bertindak untuk dan atas nama CV. KIRANA TANJUNG PELAKAR.',
+                    style: pw.TextStyle(font: fontRegular, fontSize: 9.5)),
+                pw.SizedBox(height: 8),
+                pw.Text('Dengan ini memberikan tugas kepada:',
+                    style: pw.TextStyle(font: fontRegular, fontSize: 9.5)),
+                pw.SizedBox(height: 4),
+                pw.Table(
+                  columnWidths: {
+                    0: const pw.FixedColumnWidth(110),
+                    1: const pw.FixedColumnWidth(10),
+                    2: const pw.FlexColumnWidth(),
+                  },
+                  children: [
+                    pwRow('Nama', widget.penerimaNama, isBoldValue: true),
+                    pwRow('NIK', widget.penerimaNik),
+                    pwRow('Jabatan', 'Staff Administrasi'),
+                    pwRow('Alamat Kantor', widget.penerimaAlamat),
+                  ],
+                ),
+                pw.SizedBox(height: 8),
+                pw.Text(
+                  'Untuk melakukan pengurusan seluruh administrasi dan dokumen kendaraan bermotor terhadap unit dengan identitas sebagai berikut:',
+                  style: pw.TextStyle(
+                      font: fontRegular, fontSize: 9.5, lineSpacing: 1.3),
+                ),
+                pw.SizedBox(height: 8),
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(12),
+                  padding: const pw.EdgeInsets.all(8),
                   decoration: pw.BoxDecoration(
                     border: pw.Border.all(color: PdfColors.grey300),
                     borderRadius:
-                        const pw.BorderRadius.all(pw.Radius.circular(8)),
+                        const pw.BorderRadius.all(pw.Radius.circular(6)),
                   ),
-                  child: pw.Column(
+                  child: pw.Table(
+                    columnWidths: {
+                      0: const pw.FixedColumnWidth(90),
+                      1: const pw.FixedColumnWidth(10),
+                      2: const pw.FlexColumnWidth(),
+                    },
                     children: [
-                      pw.Row(children: [
-                        pw.SizedBox(
-                            width: 100,
-                            child: pw.Text('Nama Pemilik',
-                                style: pw.TextStyle(
-                                    font: fontRegular, fontSize: 11))),
-                        pw.Text(': ',
-                            style:
-                                pw.TextStyle(font: fontRegular, fontSize: 11)),
-                        pw.Text(nama,
-                            style: pw.TextStyle(font: fontBold, fontSize: 11)),
-                      ]),
-                      pw.SizedBox(height: 8),
-                      pw.Row(children: [
-                        pw.SizedBox(
-                            width: 100,
-                            child: pw.Text('Nomor Uji',
-                                style: pw.TextStyle(
-                                    font: fontRegular, fontSize: 11))),
-                        pw.Text(': ',
-                            style:
-                                pw.TextStyle(font: fontRegular, fontSize: 11)),
-                        pw.Text(nomor,
-                            style:
-                                pw.TextStyle(font: fontRegular, fontSize: 11)),
-                      ]),
-                      pw.SizedBox(height: 8),
-                      pw.Row(children: [
-                        pw.SizedBox(
-                            width: 100,
-                            child: pw.Text('Merk / Type',
-                                style: pw.TextStyle(
-                                    font: fontRegular, fontSize: 11))),
-                        pw.Text(': ',
-                            style:
-                                pw.TextStyle(font: fontRegular, fontSize: 11)),
-                        pw.Text(kendaraan,
-                            style:
-                                pw.TextStyle(font: fontRegular, fontSize: 11)),
-                      ]),
+                      pwRow('Nama Pemilik', nama, isBoldValue: true),
+                      pwRow('Nomor Uji', nomor),
+                      pwRow('Merk / Type', kendaraan),
                     ],
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 10),
                 pw.Text(
-                  'Demikian Surat Tugas ini dibuat dengan sebenarnya untuk dipergunakan dalam proses pengujian berkala kendaraan bermotor sebagaimana mestinya.',
+                  'Petugas yang namanya tersebut di atas berwenang penuh untuk melakukan seluruh rangkaian pengurusan administrasi kendaraan bermotor, meliputi penandatanganan berkas pendaftaran, proses pemeriksaan/cek fisik/pengujian, pembayaran pajak/retribusi/PNBP, serta pengambilan dokumen/bukti resmi hasil pengurusan di lingkungan Kantor Dinas Perhubungan, SAMSAT, maupun instansi terkait. Demikian Surat Tugas ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.',
                   style: pw.TextStyle(
-                      font: fontRegular, fontSize: 11, lineSpacing: 1.5),
+                      font: fontRegular, fontSize: 8.5, lineSpacing: 1.3),
+                  textAlign: pw.TextAlign.justify,
                 ),
                 pw.SizedBox(height: 40),
                 pw.Align(
                   alignment: pw.Alignment.centerRight,
-                  child: pw.Column(
-                    children: [
-                      pw.Text('Gresik, 11 September 2026',
-                          style: pw.TextStyle(font: fontRegular, fontSize: 11)),
-                      pw.SizedBox(height: 4),
-                      pw.Text('Hormat kami,',
-                          style: pw.TextStyle(font: fontRegular, fontSize: 11)),
-                      pw.SizedBox(height: 8),
-                      pw.Image(imageProvider, width: 80, height: 80),
-                      pw.SizedBox(height: 8),
-                      pw.Text('ADI JUNAIDI',
-                          style: pw.TextStyle(font: fontBold, fontSize: 12)),
-                      pw.Text('NIK. 9203015308670001',
-                          style: pw.TextStyle(font: fontRegular, fontSize: 10)),
-                    ],
+                  child: pw.Container(
+                    width: 200,
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        pw.Text('Gresik, ${_currentFormattedDate()}',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 10)),
+                        pw.SizedBox(height: 2),
+                        pw.Text('Hormat kami,',
+                            style: pw.TextStyle(font: fontBold, fontSize: 10)),
+                        pw.SizedBox(height: 4),
+                        if (materaiImage != null)
+                          pw.Image(materaiImage, width: 60, height: 60)
+                        else
+                          pw.SizedBox(width: 60, height: 60),
+                        pw.SizedBox(height: 4),
+                        pw.Text('ADI JUNAIDI',
+                            style: pw.TextStyle(
+                                font: fontBold,
+                                fontSize: 11,
+                                decoration: pw.TextDecoration.underline)),
+                        pw.Text('Direktur',
+                            style:
+                                pw.TextStyle(font: fontRegular, fontSize: 8.5)),
+                      ],
+                    ),
                   ),
                 ),
               ],
-            ),
-          );
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => doc.save(),
-      name: 'Surat_Tugas_${nomor.replaceAll(' ', '_')}',
-    );
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => doc.save(),
+        name: 'Surat_Tugas_${nomor.replaceAll(' ', '_')}',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Gagal mencetak dokumen PDF: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPrinting = false);
+      }
+    }
   }
 
   @override
@@ -199,12 +321,22 @@ class ModalKuasaViewer extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
               ),
               actions: [
-                IconButton(
-                  tooltip: 'Cetak Dokumen',
-                  icon: const Icon(Icons.print, color: Color(0xFF1769FF)),
-                  onPressed: () =>
-                      _handlePrint(namaPemilik, nomorUji, merkType),
-                ),
+                _isPrinting
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Color(0xFF1769FF)),
+                        ),
+                      )
+                    : IconButton(
+                        tooltip: 'Cetak Dokumen',
+                        icon: const Icon(Icons.print, color: Color(0xFF1769FF)),
+                        onPressed: () =>
+                            _handlePrint(namaPemilik, nomorUji, merkType),
+                      ),
               ],
             ),
             body: SingleChildScrollView(
@@ -262,20 +394,35 @@ class ModalKuasaViewer extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Center(
-                        child: Text(
-                          'SURAT TUGAS PENGURUSAN',
+                      Text('Yang bertanda tangan di bawah ini:',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+                              fontSize: 11, color: const Color(0xFF334155))),
+                      const SizedBox(height: 4),
+                      _buildRowDetail('Nama', 'ADI JUNAIDI', isBold: true),
+                      _buildRowDetail('Jabatan', 'DIREKTUR'),
+                      _buildRowDetail(
+                          'Perusahaan', 'CV. KIRANA TANJUNG PELAKAR'),
+                      _buildRowDetail('NPWP', '31.585.382.0-603.000'),
+                      _buildRowDetail('Alamat Kantor',
+                          'Jl. Ky Syahlan 1 No. 7, Ds. Manyarejo, Kec. Manyar, Kab. Gresik'),
+                      const SizedBox(height: 8),
                       Text(
-                        'Yang bertanda tangan di bawah ini memberikan tugas pengurusan kendaraan kepada staff resmi dengan rincian identitas kendaraan sebagai berikut:',
+                          'Dalam hal ini bertindak untuk dan atas nama CV. KIRANA TANJUNG PELAKAR.',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11, color: const Color(0xFF334155))),
+                      const SizedBox(height: 12),
+                      Text('Dengan ini memberikan tugas kepada:',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11, color: const Color(0xFF334155))),
+                      const SizedBox(height: 4),
+                      _buildRowDetail('Nama', widget.penerimaNama,
+                          isBold: true),
+                      _buildRowDetail('NIK', widget.penerimaNik),
+                      _buildRowDetail('Jabatan', 'Staff Administrasi'),
+                      _buildRowDetail('Alamat Kantor', widget.penerimaAlamat),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Untuk melakukan pengurusan seluruh administrasi dan dokumen kendaraan bermotor terhadap unit dengan identitas sebagai berikut:',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: const Color(0xFF334155),
@@ -303,11 +450,12 @@ class ModalKuasaViewer extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Demikian Surat Tugas ini dibuat dengan sebenarnya untuk dipergunakan dalam proses pengujian berkala kendaraan bermotor sebagaimana mestinya.',
+                        'Petugas yang namanya tersebut di atas berwenang penuh untuk melakukan seluruh rangkaian pengurusan administrasi kendaraan bermotor, meliputi penandatanganan berkas pendaftaran, proses pemeriksaan/cek fisik/pengujian, pembayaran pajak/retribusi/PNBP, serta pengambilan dokumen/bukti resmi hasil pengurusan di lingkungan Kantor Dinas Perhubungan, SAMSAT, maupun instansi terkait. Demikian Surat Tugas ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.',
+                        textAlign: TextAlign.justify,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: const Color(0xFF334155),
-                          height: 1.5,
+                          height: 1.4,
                         ),
                       ),
                       const SizedBox(height: 40),
@@ -316,7 +464,7 @@ class ModalKuasaViewer extends StatelessWidget {
                         child: Column(
                           children: [
                             Text(
-                              'Gresik, 11 September 2026',
+                              'Gresik, ${_currentFormattedDate()}',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 color: const Color(0xFF334155),
@@ -353,7 +501,7 @@ class ModalKuasaViewer extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'NIK. 9203015308670001',
+                              'DIREKTUR',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 color: const Color(0xFF64748B),

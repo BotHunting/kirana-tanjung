@@ -639,7 +639,15 @@ class _EditDataSheetState extends State<EditDataSheet> {
       return ['nama', 'deskripsi', 'linkgambar', 'tag', 'whatsapp', 'status'];
     }
     if (widget.sheetName == 'Percetakan') {
-      return ['deskripsi', 'harga', 'ikon', 'whatsapp', 'status'];
+      return [
+        'deskripsi',
+        'harga',
+        'ikon',
+        'whatsapp',
+        'status',
+        'keterangan',
+        'min_order'
+      ];
     }
     if (widget.sheetName == 'Boutique') {
       return [
