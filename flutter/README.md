@@ -6,7 +6,7 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
 
 ---
 
-### Versi Aplikasi: `1.1.1`
+### Versi Aplikasi: `1.1.2`
 
 ### Fitur Utama:
 
@@ -30,6 +30,11 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
 
 ---
 
+### Catatan Perubahan (v1.1.2):
+- **Audit Target SDK (2026)**: Peningkatan build Android ke target API level 36 (Android 16) demi kepatuhan regulasi Google Play Store terbaru tahun 2026.
+- **Penyempurnaan Helper**: Optimalisasi parser format Rupiah dinamis serta pemetaan nama bulan lokal terpusat di `AppConfig`.
+- **Integrasi PWA & Web**: Sinkronisasi asset `web/favicon.png` sebagai ikon global aplikasi.
+
 ### Catatan Perubahan (v1.1.1):
 - **Mekanisme Secret Login**: Menghilangkan tombol login visual, beralih ke pemicu 3x klik logo untuk membuka gerbang login.
 - **Katalog Boutique & Konveksi**: Implementasi reaktivitas state dan UI list dinamis bebas crash menggunakan batasan tinggi gambar absolut (180px).
@@ -45,7 +50,7 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
     -   Pembersihan dependensi tidak terpakai (`webview_flutter`, `web`) untuk reduksi ukuran biner.
     -   Otomatisasi pembersihan impor menggunakan `dart fix --apply`.
 -   **Konfigurasi Build Android**:
-    -   **SDK Version**: `minSdkVersion 21`, `targetSdkVersion 34`, `compileSdkVersion 34`.
+    -   **SDK Version**: `minSdkVersion 21`, `targetSdkVersion 36`, `compileSdkVersion 36` (Kepatuhan Google Play 2026).
     -   **Toolchain Fix**: Penghapusan *hardcoded* `ndkVersion` untuk fleksibilitas compiler.
     -   **JDK Compatibility**: Direkomendasikan menggunakan JDK 17 (JetBrains Runtime) untuk menghindari *restricted method warnings* pada Gradle 8.1.
 -   **Export Produksi**:
