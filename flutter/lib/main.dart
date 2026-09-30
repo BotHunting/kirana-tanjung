@@ -26,11 +26,11 @@ void main() {
   PaintingBinding.instance.imageCache.maximumSizeBytes =
       10 * 1024 * 1024; // 10MB
 
-  runApp(const KiranaTanjungApp());
+  runApp(const NatalaStudioApp());
 }
 
-class KiranaTanjungApp extends StatelessWidget {
-  const KiranaTanjungApp({super.key});
+class NatalaStudioApp extends StatelessWidget {
+  const NatalaStudioApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,7 @@ class KiranaTanjungApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Kirana Tanjung',
+      title: 'Natala Studio',
       theme: theme,
       home: const HomeShell(),
     );
@@ -456,12 +456,32 @@ class _HomeShellState extends State<HomeShell> {
                 ),
               ),
               const SizedBox(width: 10),
-              Text('KIRANA',
-                  style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w800, color: ink, fontSize: 16)),
-              Text(' TANJUNG',
-                  style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w800, color: blue, fontSize: 16)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('NATALA',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.w800,
+                              color: ink,
+                              fontSize: 15)),
+                      Text(' STUDIO',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.w800,
+                              color: blue,
+                              fontSize: 15)),
+                    ],
+                  ),
+                  Text('by Kirana Tanjung',
+                      style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF8993A4),
+                          fontSize: 9)),
+                ],
+              ),
             ],
           ),
         ),
@@ -712,7 +732,8 @@ class _HomePage extends StatelessWidget {
         ),
         const SizedBox(height: 32),
         const _SectionHeading(
-            eyebrow: 'KIRANA TANJUNG', title: 'Solusi untuk kebutuhan Anda'),
+            eyebrow: 'NATALA STUDIO • BY KIRANA TANJUNG',
+            title: 'Solusi untuk kebutuhan Anda'),
         const SizedBox(height: 14),
         _ServiceTile(
             icon: Icons.language,
@@ -782,7 +803,7 @@ class _HeroPanel extends StatelessWidget {
             decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(30)),
-            child: Text('CV. KIRANA TANJUNG PELAKAR',
+            child: Text('NATALA STUDIO • BY KIRANA TANJUNG',
                 style: GoogleFonts.plusJakartaSans(
                     color: const Color(0xFF60A5FA),
                     fontSize: 9,

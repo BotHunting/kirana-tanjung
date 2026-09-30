@@ -281,7 +281,7 @@ class BiroJasaView extends StatelessWidget {
                                             final message =
                                                 'Halo Bapak/Ibu $nama,\n\n'
                                                 'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${item['nomor_kendaraan']}* akan jatuh tempo pada *$masaAktifStr* ($sisaHari hari lagi).\n\n'
-                                                'Segera perpanjang di CV. Kirana Tanjung Pelakar agar tetap aman. Terima kasih!';
+                                                'Segera perpanjang di Natala Studio (by Kirana Tanjung) agar tetap aman. Terima kasih!';
                                             final targetPhone =
                                                 hpPemilik.isNotEmpty
                                                     ? hpPemilik.replaceAll(

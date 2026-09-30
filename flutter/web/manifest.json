@@ -1,11 +1,11 @@
 {
-    "name": "kirana_tanjung",
-    "short_name": "kirana_tanjung",
+    "name": "Natala Studio",
+    "short_name": "Natala Studio",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Natala Studio Management Dashboard (by Kirana Tanjung)",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

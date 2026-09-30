@@ -556,11 +556,9 @@ class AdminJasaRow extends StatelessWidget {
               if (phone.isNotEmpty)
                 GestureDetector(
                   onTap: () async {
-                    final text = Uri.encodeComponent(
-                      'Halo Bapak/Ibu ${appValue(item, 'nama')},\n\n'
-                      'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${appValue(item, 'nomor_kendaraan')}* akan jatuh tempo pada *${appValue(item, 'aktif')}* (${expiry.sisa} hari lagi).\n\n'
-                      'Segera perpanjang di CV. Kirana Tanjung Pelakar. Terima kasih!',
-                    );
+                    final text = 'Halo Bapak/Ibu ${appValue(item, 'nama')},\n\n'
+                        'Menginfokan bahwa masa berlaku $layanan untuk kendaraan *${appValue(item, 'nomor_kendaraan')}* akan jatuh tempo pada *${appValue(item, 'aktif')}* (${expiry.sisa} hari lagi).\n\n'
+                        'Segera perpanjang di Natala Studio (by Kirana Tanjung) agar tetap aman. Terima kasih!';
                     appOpenWhatsApp(phone, text);
                   },
                   child: const Icon(Icons.send_rounded,

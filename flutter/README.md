@@ -1,8 +1,8 @@
-# kirana_tanjung
+# Natala Studio
 
-## Kirana Tanjung Management Dashboard
+## Natala Studio Management Dashboard (by Kirana Tanjung)
 
-Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung Pelakar.
+Aplikasi Flutter teroptimasi untuk manajemen data dan layanan Natala Studio (anak perusahaan CV. Kirana Tanjung Pelakar).
 
 ---
 
@@ -31,6 +31,10 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan CV. Kirana Tanjung
 ---
 
 ### Catatan Perubahan (v1.1.2):
+- **Re-Branding Natala Studio (by Kirana Tanjung)**: Penyelarasan identitas visual dan operasional anak perusahaan pada antarmuka utama, app bar, header, dan template notifikasi WhatsApp pengingat jatuh tempo KIR/SAMSAT. Legalitas korporat tetap terikat pada CV. Kirana Tanjung Pelakar.
+- **Refaktor Root Widget & Multiplatform Title**: Pembaruan kelas aplikasi menjadi `NatalaStudioApp`, konfigurasi `android:label` pada `AndroidManifest.xml`, metadata `web/manifest.json`, `<title>` di `web/index.html`, serta judul jendela desktop di `windows/runner/main.cpp`.
+- **Otomasi Penamaan Build Biner**: Sinkronisasi skrip kompilasi `build_apks.sh` dan `build_apks.ps1` untuk mengekspor artefak APK dengan prefix `Natala-Studio-Kentang`, `Natala-Studio-Medium`, dan `Natala-Studio-Super-Universal`.
+- **Pembersihan Encoding Ganda (Bugfix)**: Menghapus `Uri.encodeComponent` redundan pada pemanggilan WhatsApp di `dashboard.dart` demi kestabilan pesan pada runtime web/browser.
 - **Audit Target SDK (2026)**: Peningkatan build Android ke target API level 36 (Android 16) demi kepatuhan regulasi Google Play Store terbaru tahun 2026.
 - **Penyempurnaan Helper**: Optimalisasi parser format Rupiah dinamis serta pemetaan nama bulan lokal terpusat di `AppConfig`.
 - **Integrasi PWA & Web**: Sinkronisasi asset `web/favicon.png` sebagai ikon global aplikasi.
