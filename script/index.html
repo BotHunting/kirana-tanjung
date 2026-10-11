@@ -5,6 +5,7 @@
   <base target="_top">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class'
@@ -531,6 +532,111 @@
         </div>
       </div>
 
+      <!-- Analytics Dashboard -->
+      <div class="mb-16">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <h3 class="text-2xl font-800 tracking-tighter uppercase text-slate-800 dark:text-white">
+            <i class="fas fa-chart-line text-blue-600 mr-3"></i>Analytics Dashboard
+          </h3>
+          <button onclick="refreshAnalytics()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition flex items-center gap-2 shadow-lg shadow-blue-100">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+          </button>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <i class="fas fa-laptop-code text-xl"></i>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+            </div>
+            <div class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1" id="statTotalDesain">0</div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Project Desain</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <i class="fas fa-print text-xl"></i>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+            </div>
+            <div class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1" id="statTotalPrint">0</div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Produk Percetakan</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-pink-50 dark:bg-pink-900/30 rounded-2xl flex items-center justify-center text-pink-600 dark:text-pink-400">
+                <i class="fas fa-tshirt text-xl"></i>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+            </div>
+            <div class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1" id="statTotalBoutique">0</div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Produk Boutique</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <i class="fas fa-car text-xl"></i>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+            </div>
+            <div class="text-3xl font-extrabold text-slate-800 dark:text-white mb-1" id="statTotalJasa">0</div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Layanan Biro Jasa</div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <!-- Project Status Distribution -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <h4 class="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-widest mb-6">
+              <i class="fas fa-chart-pie text-blue-600 mr-2"></i>Status Distribution
+            </h4>
+            <div class="h-64">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Revenue Estimation -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <h4 class="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-widest mb-6">
+              <i class="fas fa-coins text-green-600 mr-2"></i>Revenue Estimation
+            </h4>
+            <div class="h-64">
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- STNK Expiry Timeline -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <h4 class="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-widest mb-6">
+              <i class="fas fa-calendar-alt text-red-600 mr-2"></i>STNK Expiry Timeline
+            </h4>
+            <div class="h-64">
+              <canvas id="expiryChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Monthly Activity -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-lg card-modern">
+            <h4 class="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-widest mb-6">
+              <i class="fas fa-chart-bar text-purple-600 mr-2"></i>Monthly Activity
+            </h4>
+            <div class="h-64">
+              <canvas id="activityChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="mb-16">
         <?!= include('dashboard'); ?>
       </div>
@@ -538,11 +644,23 @@
       <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-850 overflow-hidden mb-20">
         <div class="p-8 border-b dark:border-slate-850 bg-white dark:bg-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
           <h3 class="font-800 text-slate-800 uppercase text-sm tracking-widest">Database Explorer</h3>
-          <div class="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-800 uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            <button onclick="switchLogTab('logDesain', this)" class="log-tab-btn active-log-tab px-6 py-2 rounded-xl transition-all">Desain</button>
-            <button onclick="switchLogTab('logPrint', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Percetakan</button>
-            <button onclick="switchLogTab('logBoutique', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Boutique</button>
-            <button onclick="switchLogTab('logJasa', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Biro Jasa</button>
+          <div class="flex items-center gap-4">
+            <div class="flex p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-[10px] font-800 uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              <button onclick="switchLogTab('logDesain', this)" class="log-tab-btn active-log-tab px-6 py-2 rounded-xl transition-all">Desain</button>
+              <button onclick="switchLogTab('logPrint', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Percetakan</button>
+              <button onclick="switchLogTab('logBoutique', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Boutique</button>
+              <button onclick="switchLogTab('logJasa', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all">Biro Jasa</button>
+              <button id="tabUsers" onclick="switchLogTab('logUsers', this)" class="log-tab-btn px-6 py-2 rounded-xl transition-all hidden">Users</button>
+            </div>
+            <button onclick="exportCurrentTable()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition flex items-center gap-2 shadow-lg shadow-emerald-100">
+              <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button onclick="openImportModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition flex items-center gap-2 shadow-lg shadow-blue-100">
+              <i class="fas fa-upload"></i> Import CSV
+            </button>
+            <button onclick="openBroadcastModal()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition flex items-center gap-2 shadow-lg shadow-green-100">
+              <i class="fab fa-whatsapp"></i> Broadcast WA
+            </button>
           </div>
         </div>
 
@@ -581,9 +699,18 @@
         <div id="logJasa" class="log-content hidden overflow-x-auto">
           <table class="w-full text-left dark:text-slate-300">
             <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              <tr><th class="px-4 py-4">Layanan / No. Kendaran</th><th class="px-4 py-4">Nama</th><th class="px-4 py-4">Merek</th><th class="px-4 py-4">Type</th><th class="px-4 py-4">Deskripsi</th><th class="px-4 py-4 whitespace-nowrap">Progres</th><th class="px-4 py-4 whitespace-nowrap">Masa Aktif</th><th class="px-4 py-4">Status</th><th class="px-4 py-4">STNK</th><th class="px-4 py-4 text-center">Aksi</th></tr>
+              <tr><th class="px-4 py-4">Layanan / No. Kendaran</th><th class="px-4 py-4">Nama</th><th class="px-4 py-4">Merek</th><th class="px-4 py-4">Type</th><th class="px-4 py-4">Deskripsi</th><th class="px-4 py-4 whitespace-nowrap">Progres</th><th class="px-4 py-4 whitespace-nowrap">Masa Aktif</th><th class="px-4 py-4">Status</th><th class="px-4 py-4">STNK</th><th class="px-4 py-4">Username</th><th class="px-4 py-4 text-center">Aksi</th></tr>
             </thead>
             <tbody id="tbodyJasa" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
+          </table>
+        </div>
+
+        <div id="logUsers" class="log-content hidden overflow-x-auto">
+          <table class="w-full text-left dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <tr><th class="px-6 py-4">Username</th><th class="px-6 py-4">Nama</th><th class="px-6 py-4">NIK</th><th class="px-6 py-4">Alamat</th><th class="px-6 py-4">Role</th><th class="px-6 py-4 text-center">Aksi</th></tr>
+            </thead>
+            <tbody id="tbodyUsers" class="divide-y divide-slate-50 dark:divide-slate-800 text-xs font-medium text-slate-600"></tbody>
           </table>
         </div>
 
@@ -612,6 +739,122 @@
             <button type="submit" id="btnUpdate" class="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition">Simpan Perubahan</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import CSV Modal -->
+  <div id="importModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6 dark:text-slate-100">
+    <div class="absolute inset-0 modal-backdrop" onclick="closeImportModal()"></div>
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col border border-slate-100 dark:border-slate-800">
+      <div class="p-6 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850 shrink-0">
+        <h4 class="font-extrabold text-slate-800 dark:text-white uppercase tracking-wider text-xs">
+          <i class="fas fa-file-csv text-blue-600 mr-2"></i>Import CSV
+        </h4>
+        <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <div class="p-6 flex-grow">
+        <div class="space-y-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Pilih Kategori</label>
+            <select id="importCategory" class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold dark:text-white">
+              <option value="Desain">Desain</option>
+              <option value="Percetakan">Percetakan</option>
+              <option value="Boutique">Boutique</option>
+              <option value="Biro Jasa">Biro Jasa</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Upload File CSV</label>
+            <div class="relative">
+              <input type="file" id="importFile" accept=".csv" class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-xs font-medium dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400">
+            </div>
+            <p class="text-[9px] text-slate-400 mt-2 italic">Hanya file CSV yang diizinkan. Maksimal 5MB.</p>
+          </div>
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+            <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wider">
+              <i class="fas fa-info-circle mr-1"></i>Format CSV:
+            </p>
+            <ul class="text-[9px] text-slate-600 dark:text-slate-400 space-y-1 list-disc list-inside">
+              <li>Gunakan file CSV yang diexport dari sistem ini</li>
+              <li>Baris pertama adalah header (jangan diubah)</li>
+              <li>Data yang sudah ada akan ditambahkan (append)</li>
+              <li>Pastikan format tanggal YYYY-MM-DD untuk field tanggal</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 border-t dark:border-slate-800 bg-slate-50 dark:bg-slate-850 shrink-0">
+        <button onclick="submitImport()" id="btnImport" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 shadow-lg shadow-blue-100">
+          <i class="fas fa-upload"></i> Import Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WA Broadcast Modal -->
+  <div id="broadcastModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6 dark:text-slate-100">
+    <div class="absolute inset-0 modal-backdrop" onclick="closeBroadcastModal()"></div>
+    <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col border border-slate-100 dark:border-slate-800">
+      <div class="p-6 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850 shrink-0">
+        <h4 class="font-extrabold text-slate-800 dark:text-white uppercase tracking-wider text-xs">
+          <i class="fab fa-whatsapp text-green-600 mr-2"></i>Broadcast Pengingat STNK
+        </h4>
+        <button onclick="closeBroadcastModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <div class="p-6 flex-grow overflow-y-auto max-h-[70vh]">
+        <div class="space-y-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Filter Masa Aktif</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <input type="checkbox" id="filterExpired" class="w-4 h-4 text-red-600 rounded">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Expired (H-0)</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <input type="checkbox" id="filterH7" class="w-4 h-4 text-orange-600 rounded">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">H-7 (Kritis)</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <input type="checkbox" id="filterH30" class="w-4 h-4 text-amber-600 rounded">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">H-30 (Warning)</span>
+              </label>
+              <label class="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <input type="checkbox" id="filterNoDate" class="w-4 h-4 text-slate-600 rounded">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Tanpa Tanggal</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Preview Penerima</label>
+            <div id="broadcastPreview" class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 max-h-48 overflow-y-auto">
+              <p class="text-xs text-slate-400 italic">Pilih filter untuk melihat daftar penerima...</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Template Pesan</label>
+            <textarea id="broadcastMessage" rows="4" class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-none outline-none focus:ring-2 focus:ring-green-500 text-xs font-medium dark:text-white resize-none" placeholder="Template pesan akan di-generate otomatis..."></textarea>
+            <p class="text-[9px] text-slate-400 mt-2 italic">Variabel tersedia: {nama}, {no_kendaraan}, {merek}, {type}, {layanan}, {masa_aktif}</p>
+          </div>
+
+          <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+            <p class="text-[10px] font-bold text-green-600 dark:text-green-400 mb-2 uppercase tracking-wider">
+              <i class="fas fa-info-circle mr-1"></i>Catatan:
+            </p>
+            <ul class="text-[9px] text-slate-600 dark:text-slate-400 space-y-1 list-disc list-inside">
+              <li>Pesan akan dikirim menggunakan WhatsApp API</li>
+              <li>Gunakan dengan bijak dan hanya untuk pengingat resmi</li>
+              <li>Rate limit: maksimal 50 pesan per batch</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 border-t dark:border-slate-800 bg-slate-50 dark:bg-slate-850 shrink-0">
+        <button onclick="submitBroadcast()" id="btnBroadcast" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 shadow-lg shadow-green-100">
+          <i class="fab fa-whatsapp"></i> Kirim Broadcast
+        </button>
       </div>
     </div>
   </div>
@@ -780,6 +1023,191 @@
         .replace(/'/g, '&#39;');
     }
 
+    // --- Role-Based Access Control ---
+    const ROLE_PERMISSIONS = {
+      admin: {
+        canViewAnalytics: true,
+        canExportData: true,
+        canImportData: true,
+        canBroadcastWA: true,
+        canEditDesain: true,
+        canEditPrint: true,
+        canEditBoutique: true,
+        canEditJasa: true,
+        canDeleteData: true,
+        canManageUsers: true,
+        canViewDesain: true,
+        canViewPrint: true,
+        canViewBoutique: true,
+        canViewJasa: true
+      },
+      staff: {
+        canViewAnalytics: true,
+        canExportData: true,
+        canImportData: false,
+        canBroadcastWA: true,
+        canEditDesain: true,
+        canEditPrint: true,
+        canEditBoutique: true,
+        canEditJasa: true,
+        canDeleteData: false,
+        canManageUsers: false,
+        canViewDesain: true,
+        canViewPrint: true,
+        canViewBoutique: true,
+        canViewJasa: true
+      },
+      user: {
+        canViewAnalytics: false,
+        canExportData: false,
+        canImportData: false,
+        canBroadcastWA: false,
+        canEditDesain: false,
+        canEditPrint: false,
+        canEditBoutique: false,
+        canEditJasa: false, // Read-only their own data
+        canDeleteData: false,
+        canManageUsers: false,
+        canViewDesain: false,
+        canViewPrint: false,
+        canViewBoutique: false,
+        canViewJasa: true // Only Biro Jasa
+      }
+    };
+
+    function getUserRole() {
+      return window.currentUserSession?.role || 'user';
+    }
+
+    function hasPermission(permission) {
+      const role = getUserRole();
+      return ROLE_PERMISSIONS[role]?.[permission] || false;
+    }
+
+    function applyRolePermissions() {
+      const role = getUserRole();
+      const permissions = ROLE_PERMISSIONS[role];
+
+      // Hide/show Analytics Dashboard
+      const analyticsSection = document.querySelector('.max-w-7xl.mx-auto > div:nth-child(2)'); // Analytics section
+      if (analyticsSection) {
+        analyticsSection.style.display = permissions.canViewAnalytics ? 'block' : 'none';
+      }
+
+      // Hide/show Export button
+      const exportBtn = document.querySelector('button[onclick="exportCurrentTable()"]');
+      if (exportBtn) {
+        exportBtn.style.display = permissions.canExportData ? 'flex' : 'none';
+      }
+
+      // Hide/show Import button
+      const importBtn = document.querySelector('button[onclick="openImportModal()"]');
+      if (importBtn) {
+        importBtn.style.display = permissions.canImportData ? 'flex' : 'none';
+      }
+
+      // Hide/show Broadcast WA button
+      const broadcastBtn = document.querySelector('button[onclick="openBroadcastModal()"]');
+      if (broadcastBtn) {
+        broadcastBtn.style.display = permissions.canBroadcastWA ? 'flex' : 'none';
+      }
+
+      // Show/hide Users tab (only for admin)
+      const tabUsers = document.getElementById('tabUsers');
+      if (tabUsers) {
+        tabUsers.style.display = permissions.canManageUsers ? 'block' : 'none';
+      }
+
+      // Hide/show tabs based on role
+      const tabDesain = document.querySelector('button[onclick="switchLogTab(\'logDesain\', this)"]');
+      const tabPrint = document.querySelector('button[onclick="switchLogTab(\'logPrint\', this)"]');
+      const tabBoutique = document.querySelector('button[onclick="switchLogTab(\'logBoutique\', this)"]');
+      const tabJasa = document.querySelector('button[onclick="switchLogTab(\'logJasa\', this)"]');
+
+      if (tabDesain) tabDesain.style.display = permissions.canViewDesain ? 'block' : 'none';
+      if (tabPrint) tabPrint.style.display = permissions.canViewPrint ? 'block' : 'none';
+      if (tabBoutique) tabBoutique.style.display = permissions.canViewBoutique ? 'block' : 'none';
+      if (tabJasa) tabJasa.style.display = permissions.canViewJasa ? 'block' : 'none';
+
+      // Auto-switch to Biro Jasa tab for user role
+      if (role === 'user' && permissions.canViewJasa) {
+        setTimeout(() => {
+          switchLogTab('logJasa', tabJasa);
+        }, 100);
+      }
+
+      // Hide/edit action buttons in tables based on permissions
+      setTimeout(() => {
+        // Desain table
+        if (!permissions.canEditDesain) {
+          hideEditButtons('tbodyDesain');
+        }
+
+        // Print table
+        if (!permissions.canEditPrint) {
+          hideEditButtons('tbodyPrint');
+        }
+
+        // Boutique table
+        if (!permissions.canEditBoutique) {
+          hideEditButtons('tbodyBoutique');
+        }
+
+        // Jasa table
+        if (!permissions.canEditJasa) {
+          hideEditButtons('tbodyJasa');
+        }
+      }, 500);
+
+      // Show role badge in welcome section
+      const welcomeDiv = document.getElementById('welcomeName');
+      if (welcomeDiv && !welcomeDiv.querySelector('.role-badge')) {
+        const roleBadge = document.createElement('span');
+        roleBadge.className = 'role-badge ml-3 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider';
+        const roleColors = {
+          admin: 'bg-red-100 text-red-700',
+          staff: 'bg-blue-100 text-blue-700',
+          user: 'bg-slate-100 text-slate-700'
+        };
+        roleBadge.className += ' ' + (roleColors[role] || roleColors.user);
+        roleBadge.textContent = role;
+        welcomeDiv.appendChild(roleBadge);
+      }
+    }
+
+    function hideEditButtons(tbodyId) {
+      const tbody = document.getElementById(tbodyId);
+      if (!tbody) return;
+
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const editBtn = row.querySelector('button[onclick*="openEditModal"]');
+        if (editBtn) {
+          editBtn.style.display = 'none';
+        }
+      });
+    }
+
+    function changeUserRole(username, newRole) {
+      if (!confirm(`Ubah role user "${username}" menjadi "${newRole}"?`)) {
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) {
+            showToast(res.message);
+            renderAdminTable(); // Refresh table
+          } else {
+            alert(res.message);
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('Error: ' + err.message);
+        })
+        .updateUserRole(username, newRole, window.currentUserSession?.username);
+    }
+
     function decodeHTMLEntities(str) {
       if (!str) return '';
       const parser = new DOMParser();
@@ -853,10 +1281,13 @@
             });
             document.getElementById('welcomeName').querySelector('span').innerText = "Halo, " + res.nama;
             window.currentUserSession = {
+              username: res.username, // Simpan username
               nama: res.nama,
               nik: res.nik,
-              alamat: res.alamat
+              alamat: res.alamat,
+              role: res.role || 'user'
             };
+            applyRolePermissions();
             renderAdminTable();
           } else {
           err.innerText = res ? res.message : "Terjadi kesalahan pada server.";
@@ -899,13 +1330,520 @@
       document.querySelectorAll('.log-tab-btn').forEach(b => b.classList.remove('active-log-tab'));
       document.getElementById(id).classList.remove('hidden');
       btn.classList.add('active-log-tab');
-      
+
       const searchInput = document.getElementById('searchAdmin');
       if (searchInput) {
         searchInput.value = '';
         filterAdminTable();
       }
+
+      // Render Users table when switching to Users tab
+      if (id === 'logUsers' && window.currentUserSession?.role === 'admin') {
+        renderUsersTable();
+      }
     }
+
+    function renderUsersTable() {
+      if (!window.currentData?.users) return;
+
+      let hUsers = '';
+      (window.currentData.users || []).forEach(item => {
+        const role = (item.role || 'user').toUpperCase();
+        const roleClass = role === 'ADMIN' ? 'bg-red-100 text-red-700' : role === 'STAFF' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700';
+
+        hUsers += `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="px-6 py-5 font-bold text-slate-800">${escapeHTML(item.username || '-')}</td>
+            <td class="px-6 py-5 text-slate-700">${escapeHTML(item.nama || '-')}</td>
+            <td class="px-6 py-5 text-slate-700">${escapeHTML(item.nik || '-')}</td>
+            <td class="px-6 py-5 text-slate-400 text-[10px] italic max-w-xs break-words">${escapeHTML(item.alamat || '-')}</td>
+            <td class="px-6 py-5">
+              <select onchange="changeUserRole('${escapeHTML(item.username)}', this.value)" class="text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg border-none outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${roleClass}">
+                <option value="user" ${role === 'USER' ? 'selected' : ''}>User</option>
+                <option value="staff" ${role === 'STAFF' ? 'selected' : ''}>Staff</option>
+                <option value="admin" ${role === 'ADMIN' ? 'selected' : ''}>Admin</option>
+              </select>
+            </td>
+            <td class="px-6 py-5 text-center">
+              <span class="text-[9px] text-slate-400 italic">Edit via dropdown</span>
+            </td>
+          </tr>`;
+      });
+      document.getElementById('tbodyUsers').innerHTML = hUsers || '<tr><td colspan="6" class="p-8 text-center text-slate-400">Tidak ada data users</td></tr>';
+    }
+
+    function exportCurrentTable() {
+      if (!window.currentData) {
+        alert('Data belum dimuat. Silakan tunggu sebentar.');
+        return;
+      }
+
+      let activeTbodyId = '';
+      let sheetName = '';
+      let data = [];
+      let headers = [];
+
+      if (!document.getElementById('logDesain').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyDesain';
+        sheetName = 'Desain';
+        data = window.currentData.desain || [];
+        headers = ['Project', 'Tag', 'Deskripsi', 'Status', 'WhatsApp'];
+      } else if (!document.getElementById('logPrint').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyPrint';
+        sheetName = 'Percetakan';
+        data = window.currentData.percetakan || [];
+        headers = ['Produk', 'Harga', 'Min. Order', 'Ikon', 'Status', 'Keterangan', 'WhatsApp'];
+      } else if (!document.getElementById('logBoutique').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyBoutique';
+        sheetName = 'Boutique';
+        data = window.currentData.boutique || [];
+        headers = ['Judul', 'Kategori', 'Deskripsi', 'Harga', 'Min. Order', 'Status', 'Gambar URL'];
+      } else if (!document.getElementById('logJasa').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyJasa';
+        sheetName = 'Biro Jasa';
+        data = window.currentData.biroJasa || [];
+        headers = ['Layanan', 'Nama', 'Merek', 'Type', 'No. Kendaraan', 'Deskripsi', 'Progres', 'Masa Aktif', 'Status', 'STNK', 'WhatsApp', 'Username'];
+      } else if (!document.getElementById('logUsers').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyUsers';
+        sheetName = 'Users';
+        data = window.currentData.users || [];
+        headers = ['Username', 'Password', 'Nama', 'NIK', 'Alamat', 'Role'];
+      }
+
+      if (data.length === 0) {
+        alert('Tidak ada data untuk diexport.');
+        return;
+      }
+
+      // Generate CSV content
+      let csvContent = headers.join(',') + '\n';
+
+      data.forEach(item => {
+        let row = [];
+        if (sheetName === 'Desain') {
+          row = [
+            escapeCSV(item.nama || ''),
+            escapeCSV(item.tag || ''),
+            escapeCSV(item.deskripsi || ''),
+            escapeCSV(item.status || ''),
+            escapeCSV(item.whatsapp || '')
+          ];
+        } else if (sheetName === 'Percetakan') {
+          row = [
+            escapeCSV(item.deskripsi || ''),
+            escapeCSV(item.harga || ''),
+            escapeCSV(item.min_order || ''),
+            escapeCSV(item.ikon || ''),
+            escapeCSV(item.status || ''),
+            escapeCSV(item.keterangan || ''),
+            escapeCSV(item.whatsapp || '')
+          ];
+        } else if (sheetName === 'Boutique') {
+          row = [
+            escapeCSV(item.judul || ''),
+            escapeCSV(item.kategori || ''),
+            escapeCSV(item.deskripsi || ''),
+            escapeCSV(item.harga || ''),
+            escapeCSV(item.min_order || ''),
+            escapeCSV(item.status || ''),
+            escapeCSV(item.gambar_url || '')
+          ];
+        } else if (sheetName === 'Biro Jasa') {
+          row = [
+            escapeCSV(item.layanan || ''),
+            escapeCSV(item.nama || ''),
+            escapeCSV(item.merek || ''),
+            escapeCSV(item.type || ''),
+            escapeCSV(item.nomor_kendaraan || ''),
+            escapeCSV(item.deskripsi || ''),
+            escapeCSV(item.durasi || ''),
+            escapeCSV(item.aktif || ''),
+            escapeCSV(item.status || ''),
+            escapeCSV(item.foto_stnk || ''),
+            escapeCSV(item.whatsapp || ''),
+            escapeCSV(item.username || '')
+          ];
+        } else if (sheetName === 'Users') {
+          row = [
+            escapeCSV(item.username || ''),
+            escapeCSV('***'), // Hide password in export
+            escapeCSV(item.nama || ''),
+            escapeCSV(item.nik || ''),
+            escapeCSV(item.alamat || ''),
+            escapeCSV(item.role || 'user')
+          ];
+        }
+        csvContent += row.join(',') + '\n';
+      });
+
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().slice(0, 10);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${sheetName}_backup_${timestamp}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast(`Export ${sheetName} berhasil!`);
+    }
+
+    function escapeCSV(str) {
+      if (!str) return '';
+      str = String(str);
+      // Escape quotes and wrap in quotes if contains comma, quote, or newline
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        str = '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    function openImportModal() {
+      document.getElementById('importModal').classList.remove('hidden');
+      document.getElementById('importFile').value = '';
+    }
+
+    function closeImportModal() {
+      document.getElementById('importModal').classList.add('hidden');
+    }
+
+    function submitImport() {
+      const category = document.getElementById('importCategory').value;
+      const fileInput = document.getElementById('importFile');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Silakan pilih file CSV untuk diimport.');
+        return;
+      }
+
+      if (!file.name.endsWith('.csv')) {
+        alert('File harus berformat CSV.');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('Ukuran file terlalu besar. Maksimal 5MB.');
+        return;
+      }
+
+      const btn = document.getElementById('btnImport');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> MEMPROSES...';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const csvContent = e.target.result;
+        const rows = parseCSV(csvContent);
+
+        if (rows.length < 2) {
+          alert('File CSV tidak valid atau kosong.');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+          return;
+        }
+
+        // Remove header row
+        const header = rows[0];
+        const dataRows = rows.slice(1);
+
+        // Validate header matches expected format
+        const expectedHeaders = {
+          'Desain': ['Project', 'Tag', 'Deskripsi', 'Status', 'WhatsApp'],
+          'Percetakan': ['Produk', 'Harga', 'Min. Order', 'Ikon', 'Status', 'Keterangan', 'WhatsApp'],
+          'Boutique': ['Judul', 'Kategori', 'Deskripsi', 'Harga', 'Min. Order', 'Status', 'Gambar URL'],
+          'Biro Jasa': ['Layanan', 'Nama', 'Merek', 'Type', 'No. Kendaraan', 'Deskripsi', 'Progres', 'Masa Aktif', 'Status', 'STNK', 'WhatsApp']
+        };
+
+        const expected = expectedHeaders[category];
+        const headerMatch = expected.every(h => header.includes(h));
+
+        if (!headerMatch) {
+          alert(`Header CSV tidak sesuai untuk kategori ${category}. Silakan gunakan file yang diexport dari sistem ini.`);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+          return;
+        }
+
+        // Convert rows to objects
+        const importData = dataRows.map(row => {
+          const obj = {};
+          header.forEach((key, index) => {
+            obj[key] = row[index] || '';
+          });
+          return obj;
+        });
+
+        // Send to backend
+        google.script.run
+          .withSuccessHandler(function(res) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+            closeImportModal();
+            showToast(res.message || 'Import berhasil!');
+            renderAdminTable(); // Refresh table
+          })
+          .withFailureHandler(function(err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+            alert('Error: ' + err.message);
+          })
+          .importDataFromCSV(category, importData, window.currentUserSession?.username);
+      };
+
+      reader.onerror = function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-upload"></i> Import Data';
+        alert('Gagal membaca file.');
+      };
+
+      reader.readAsText(file);
+    }
+
+    function parseCSV(csvText) {
+      const rows = [];
+      let currentRow = [];
+      let currentCell = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
+        const nextChar = csvText[i + 1];
+
+        if (inQuotes) {
+          if (char === '"' && nextChar === '"') {
+            currentCell += '"';
+            i++; // Skip next quote
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            currentCell += char;
+          }
+        } else {
+          if (char === '"') {
+            inQuotes = true;
+          } else if (char === ',') {
+            currentRow.push(currentCell);
+            currentCell = '';
+          } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
+            if (char === '\r') i++; // Skip \n
+          } else if (char !== '\r') {
+            currentCell += char;
+          }
+        }
+      }
+
+      // Add last row if exists
+      if (currentCell || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+      }
+
+      return rows;
+    }
+
+    // --- WA Broadcast Functions ---
+    let broadcastRecipients = [];
+
+    function openBroadcastModal() {
+      document.getElementById('broadcastModal').classList.remove('hidden');
+      document.getElementById('broadcastMessage').value = `Halo Bapak/Ibu {nama},
+
+Kami ingin mengingatkan mengenai kendaraan Anda:
+- No. Kendaraan: {no_kendaraan}
+- Merek/Type: {merek} / {type}
+- Layanan: {layanan}
+
+Masa aktif uji berkala akan berakhir pada: {masa_aktif}
+
+Mohon untuk dapat melakukan perpanjangan sebelum waktunya.
+Terima kasih.
+
+Natala Studio - Kirana Tanjung Pelakar`;
+
+      // Reset filters
+      document.getElementById('filterExpired').checked = true;
+      document.getElementById('filterH7').checked = true;
+      document.getElementById('filterH30').checked = false;
+      document.getElementById('filterNoDate').checked = false;
+
+      updateBroadcastPreview();
+    }
+
+    function closeBroadcastModal() {
+      document.getElementById('broadcastModal').classList.add('hidden');
+      broadcastRecipients = [];
+    }
+
+    function updateBroadcastPreview() {
+      if (!window.currentData || !window.currentData.biroJasa) {
+        document.getElementById('broadcastPreview').innerHTML = '<p class="text-xs text-slate-400 italic">Data belum dimuat...</p>';
+        return;
+      }
+
+      const filterExpired = document.getElementById('filterExpired').checked;
+      const filterH7 = document.getElementById('filterH7').checked;
+      const filterH30 = document.getElementById('filterH30').checked;
+      const filterNoDate = document.getElementById('filterNoDate').checked;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      broadcastRecipients = [];
+
+      (window.currentData.biroJasa || []).forEach(item => {
+        if (!item.aktif) {
+          if (filterNoDate && item.whatsapp) {
+            broadcastRecipients.push({
+              ...item,
+              expiryCategory: 'No Date'
+            });
+          }
+          return;
+        }
+
+        const tglAktif = new Date(item.aktif + 'T00:00:00');
+        if (isNaN(tglAktif.getTime())) {
+          if (filterNoDate && item.whatsapp) {
+            broadcastRecipients.push({
+              ...item,
+              expiryCategory: 'Invalid Date'
+            });
+          }
+          return;
+        }
+
+        const diffTime = tglAktif.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0 && filterExpired && item.whatsapp) {
+          broadcastRecipients.push({
+            ...item,
+            expiryCategory: 'Expired'
+          });
+        } else if (diffDays <= 7 && diffDays >= 0 && filterH7 && item.whatsapp) {
+          broadcastRecipients.push({
+            ...item,
+            expiryCategory: 'H-7'
+          });
+        } else if (diffDays <= 30 && diffDays > 7 && filterH30 && item.whatsapp) {
+          broadcastRecipients.push({
+            ...item,
+            expiryCategory: 'H-30'
+          });
+        }
+      });
+
+      // Update preview
+      const previewDiv = document.getElementById('broadcastPreview');
+      if (broadcastRecipients.length === 0) {
+        previewDiv.innerHTML = '<p class="text-xs text-slate-400 italic">Tidak ada penerima yang sesuai filter...</p>';
+      } else {
+        let html = `<p class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">${broadcastRecipients.length} penerima akan dikirimi pesan:</p>`;
+        html += '<div class="space-y-2">';
+        broadcastRecipients.slice(0, 10).forEach(item => {
+          const categoryClass = {
+            'Expired': 'bg-red-100 text-red-700',
+            'H-7': 'bg-orange-100 text-orange-700',
+            'H-30': 'bg-amber-100 text-amber-700',
+            'No Date': 'bg-slate-100 text-slate-700',
+            'Invalid Date': 'bg-slate-100 text-slate-700'
+          }[item.expiryCategory] || 'bg-slate-100 text-slate-700';
+
+          html += `
+            <div class="flex items-center justify-between p-2 bg-white dark:bg-slate-700 rounded-lg">
+              <div class="flex items-center gap-2">
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded ${categoryClass}">${item.expiryCategory}</span>
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">${item.nama || '-'}</span>
+                <span class="text-[10px] text-slate-400">${item.nomor_kendaraan || '-'}</span>
+              </div>
+              <span class="text-[10px] text-green-600 font-bold">${item.whatsapp || '-'}</span>
+            </div>
+          `;
+        });
+
+        if (broadcastRecipients.length > 10) {
+          html += `<p class="text-[10px] text-slate-400 italic mt-2">...dan ${broadcastRecipients.length - 10} lainnya</p>`;
+        }
+
+        html += '</div>';
+        previewDiv.innerHTML = html;
+      }
+    }
+
+    function submitBroadcast() {
+      if (broadcastRecipients.length === 0) {
+        alert('Tidak ada penerima yang dipilih.');
+        return;
+      }
+
+      if (broadcastRecipients.length > 50) {
+        alert('Maksimal 50 pesan per batch. Silakan kurangi filter atau kirim dalam beberapa batch.');
+        return;
+      }
+
+      const messageTemplate = document.getElementById('broadcastMessage').value;
+      if (!messageTemplate.trim()) {
+        alert('Template pesan tidak boleh kosong.');
+        return;
+      }
+
+      if (!confirm(`Anda akan mengirim ${broadcastRecipients.length} pesan WhatsApp. Lanjutkan?`)) {
+        return;
+      }
+
+      const btn = document.getElementById('btnBroadcast');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> MENGIRIM...';
+
+      // Prepare messages
+      const messages = broadcastRecipients.map(item => {
+        let message = messageTemplate
+          .replace(/{nama}/g, item.nama || '')
+          .replace(/{no_kendaraan}/g, item.nomor_kendaraan || '')
+          .replace(/{merek}/g, item.merek || '')
+          .replace(/{type}/g, item.type || '')
+          .replace(/{layanan}/g, item.layanan || '')
+          .replace(/{masa_aktif}/g, item.aktif || 'N/A');
+
+        return {
+          phone: fixWA(item.whatsapp),
+          message: message
+        };
+      });
+
+      // Send to backend
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fab fa-whatsapp"></i> Kirim Broadcast';
+          closeBroadcastModal();
+          showToast(res.message || 'Broadcast berhasil dikirim!');
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fab fa-whatsapp"></i> Kirim Broadcast';
+          alert('Error: ' + err.message);
+        })
+        .sendWABroadcast(messages, window.currentUserSession?.username);
+    }
+
+    // Add event listeners for broadcast filters
+    document.addEventListener('DOMContentLoaded', function() {
+      ['filterExpired', 'filterH7', 'filterH30', 'filterNoDate'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+          checkbox.addEventListener('change', updateBroadcastPreview);
+        }
+      });
+    });
 
     function showToast(msg) {
       const t = document.getElementById('toast');
@@ -992,7 +1930,7 @@
       const input = document.getElementById('searchAdmin');
       if (!input) return;
       const filter = input.value.toUpperCase().trim();
-      
+
       let activeTbodyId = '';
       if (!document.getElementById('logDesain').classList.contains('hidden')) {
         activeTbodyId = 'tbodyDesain';
@@ -1002,14 +1940,16 @@
         activeTbodyId = 'tbodyBoutique';
       } else if (!document.getElementById('logJasa').classList.contains('hidden')) {
         activeTbodyId = 'tbodyJasa';
+      } else if (!document.getElementById('logUsers').classList.contains('hidden')) {
+        activeTbodyId = 'tbodyUsers';
       }
-      
+
       if (!activeTbodyId) return;
-      
+
       const tbody = document.getElementById(activeTbodyId);
       const trs = tbody.getElementsByTagName('tr');
       let foundCount = 0;
-      
+
       const existingNoResult = tbody.querySelector('.no-result-row');
       if (existingNoResult) {
         existingNoResult.remove();
@@ -1025,7 +1965,7 @@
           trs[i].style.display = 'none';
         }
       }
-      
+
       if (foundCount === 0 && filter) {
         const colCount = tbody.parentElement.querySelector('thead tr > th')?.length || 1;
         const noResultRow = tbody.insertRow();
@@ -1037,6 +1977,340 @@
       }
     }
 
+    // --- Analytics Dashboard ---
+    let statusChart, revenueChart, expiryChart, activityChart;
+
+    function refreshAnalytics() {
+      google.script.run.withSuccessHandler(function(data) {
+        if (!data) return;
+        window.currentData = data;
+        renderAnalytics(data);
+      }).getAllDataForDashboard(window.currentUserSession?.username);
+    }
+
+    function renderAnalytics(data) {
+      // Update Summary Cards
+      document.getElementById('statTotalDesain').textContent = (data.desain || []).length;
+      document.getElementById('statTotalPrint').textContent = (data.percetakan || []).length;
+      document.getElementById('statTotalBoutique').textContent = (data.boutique || []).length;
+      document.getElementById('statTotalJasa').textContent = (data.biroJasa || []).length;
+
+      // Destroy existing charts
+      if (statusChart) statusChart.destroy();
+      if (revenueChart) revenueChart.destroy();
+      if (expiryChart) expiryChart.destroy();
+      if (activityChart) activityChart.destroy();
+
+      // Status Distribution Chart
+      renderStatusChart(data);
+
+      // Revenue Estimation Chart
+      renderRevenueChart(data);
+
+      // STNK Expiry Timeline Chart
+      renderExpiryChart(data);
+
+      // Monthly Activity Chart
+      renderActivityChart(data);
+    }
+
+    function renderStatusChart(data) {
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      // Count statuses across all categories
+      const statusCounts = {
+        'SELESAI': 0,
+        'ON PROCESS': 0,
+        'DITOLAK': 0,
+        'AKTIF': 0
+      };
+
+      (data.desain || []).forEach(item => {
+        const status = (item.status || 'ON PROCESS').toUpperCase();
+        if (statusCounts[status] !== undefined) statusCounts[status]++;
+      });
+
+      (data.percetakan || []).forEach(item => {
+        const status = (item.status || 'ON PROCESS').toUpperCase();
+        if (status === 'SELESAI') statusCounts['SELESAI']++;
+        else if (status === 'DITOLAK') statusCounts['DITOLAK']++;
+        else statusCounts['AKTIF']++;
+      });
+
+      (data.boutique || []).forEach(item => {
+        const status = (item.status || 'AKTIF').toUpperCase();
+        if (status === 'SELESAI') statusCounts['SELESAI']++;
+        else if (status === 'DITOLAK') statusCounts['DITOLAK']++;
+        else statusCounts['AKTIF']++;
+      });
+
+      statusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Selesai', 'On Process', 'Aktif', 'Ditolak'],
+          datasets: [{
+            data: [statusCounts['SELESAI'], statusCounts['ON PROCESS'], statusCounts['AKTIF'], statusCounts['DITOLAK']],
+            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: isDark ? '#f1f5f9' : '#334155',
+                font: { size: 11, weight: 'bold' },
+                padding: 15,
+                usePointStyle: true
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRevenueChart(data) {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      const formatCurrencyValue = (val) => {
+        if (!val) return 0;
+        const num = parseInt(String(val).replace(/\D/g, ''), 10);
+        return isNaN(num) || num <= 0 ? 0 : num;
+      };
+
+      // Calculate total revenue per category
+      let printRevenue = 0;
+      (data.percetakan || []).forEach(item => {
+        printRevenue += formatCurrencyValue(item.harga);
+      });
+
+      let boutiqueRevenue = 0;
+      (data.boutique || []).forEach(item => {
+        boutiqueRevenue += formatCurrencyValue(item.harga);
+      });
+
+      revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Percetakan', 'Boutique'],
+          datasets: [{
+            label: 'Revenue (IDR)',
+            data: [printRevenue, boutiqueRevenue],
+            backgroundColor: ['#6366f1', '#ec4899'],
+            borderRadius: 8,
+            barThickness: 60
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: isDark ? '#94a3b8' : '#64748b',
+                callback: function(value) {
+                  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                  if (value >= 1000) return (value / 1000).toFixed(0) + 'K';
+                  return value;
+                }
+              },
+              grid: { color: isDark ? '#334155' : '#e2e8f0' }
+            },
+            x: {
+              ticks: { color: isDark ? '#f1f5f9' : '#334155', font: { weight: 'bold' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderExpiryChart(data) {
+      const ctx = document.getElementById('expiryChart').getContext('2d');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const expiryCategories = {
+        'EXPIRED': 0,
+        'H-7': 0,
+        'H-30': 0,
+        '30+ HARI': 0,
+        'NO DATE': 0
+      };
+
+      (data.biroJasa || []).forEach(item => {
+        if (!item.aktif) {
+          expiryCategories['NO DATE']++;
+          return;
+        }
+
+        const tglAktif = new Date(item.aktif + 'T00:00:00');
+        if (isNaN(tglAktif.getTime())) {
+          expiryCategories['NO DATE']++;
+          return;
+        }
+
+        const diffTime = tglAktif.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          expiryCategories['EXPIRED']++;
+        } else if (diffDays <= 7) {
+          expiryCategories['H-7']++;
+        } else if (diffDays <= 30) {
+          expiryCategories['H-30']++;
+        } else {
+          expiryCategories['30+ HARI']++;
+        }
+      });
+
+      expiryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Expired', 'H-7', 'H-30', '30+ Hari', 'No Date'],
+          datasets: [{
+            label: 'Jumlah Kendaraan',
+            data: [expiryCategories['EXPIRED'], expiryCategories['H-7'], expiryCategories['H-30'], expiryCategories['30+ HARI'], expiryCategories['NO DATE']],
+            backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#94a3b8'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: isDark ? '#94a3b8' : '#64748b', stepSize: 1 },
+              grid: { color: isDark ? '#334155' : '#e2e8f0' }
+            },
+            x: {
+              ticks: { color: isDark ? '#f1f5f9' : '#334155', font: { weight: 'bold' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderActivityChart(data) {
+      const ctx = document.getElementById('activityChart').getContext('2d');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      // Calculate monthly activity (last 6 months)
+      const months = [];
+      const monthlyCounts = {
+        desain: [],
+        print: [],
+        boutique: [],
+        jasa: []
+      };
+
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthLabel = date.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+        months.push(monthLabel);
+
+        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+        // Count items created in this month (simplified - assuming timestamp exists)
+        monthlyCounts.desain.push(0);
+        monthlyCounts.print.push(0);
+        monthlyCounts.boutique.push(0);
+        monthlyCounts.jasa.push(0);
+      }
+
+      activityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: 'Desain',
+              data: monthlyCounts.desain,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Percetakan',
+              data: monthlyCounts.print,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Boutique',
+              data: monthlyCounts.boutique,
+              borderColor: '#ec4899',
+              backgroundColor: 'rgba(236, 72, 153, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Biro Jasa',
+              data: monthlyCounts.jasa,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: isDark ? '#f1f5f9' : '#334155',
+                font: { size: 10, weight: 'bold' },
+                padding: 12,
+                usePointStyle: true
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: isDark ? '#94a3b8' : '#64748b', stepSize: 1 },
+              grid: { color: isDark ? '#334155' : '#e2e8f0' }
+            },
+            x: {
+              ticks: { color: isDark ? '#f1f5f9' : '#334155', font: { weight: 'bold' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
     function renderAdminTable() {
       document.getElementById('tableLoader').classList.remove('hidden');
       google.script.run.withSuccessHandler(function(data) {
@@ -1044,6 +2318,9 @@
         if (!data) return;
         console.log("Data diterima:", data); // Untuk debugging di F12
         window.currentData = data; // Simpan untuk referensi edit
+
+        // Render analytics as well
+        renderAnalytics(data);
         
         // Render Desain
         let hDesain = '';
@@ -1252,31 +2529,32 @@ Terima kasih.`;
               <span class="${statusAutoClass} px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-tighter">${escapeHTML(statusAuto)}</span>
             </td>
             <td class="px-4 py-5 whitespace-nowrap">
-              ${item.foto_stnk ? 
-                `<span class="text-emerald-600 font-bold text-[9px] uppercase tracking-widest flex items-center"><i class="fas fa-check-circle mr-1"></i> Tersedia</span>` : 
+              ${item.foto_stnk ?
+                `<span class="text-emerald-600 font-bold text-[9px] uppercase tracking-widest flex items-center"><i class="fas fa-check-circle mr-1"></i> Tersedia</span>` :
                 `<span class="text-slate-300 italic text-[9px] uppercase tracking-widest">Kosong</span>`
               }
             </td>
+            <td class="px-4 py-5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">${escapeHTML(item.username || '-')}</td>
             <td class="px-4 py-5 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-3">
-                <button 
-                  onclick="previewKuasa('${escapeHTML(item.nama_pemilik || item.nama_konsumen || item.nama)}', '${escapeHTML(item.no_uji || item.nomor_kendaraan || '-')}', '${escapeHTML(item.merk_type || item.kendaraan || ((item.merek || '') + ' / ' + (item.type || '')) || '-')}')" 
-                  class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition flex items-center gap-1" 
+                <button
+                  onclick="previewKuasa('${escapeHTML(item.nama_pemilik || item.nama_konsumen || item.nama)}', '${escapeHTML(item.no_uji || item.nomor_kendaraan || '-')}', '${escapeHTML(item.merk_type || item.kendaraan || ((item.merek || '') + ' / ' + (item.type || '')) || '-')}')"
+                  class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition flex items-center gap-1"
                   title="Cetak Surat Kuasa">
                   <i class="fas fa-file-pdf"></i> Kuasa
                 </button>
-                <button onclick="openEditModal('Biro Jasa', ${item.row_index})" class="text-green-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>                
+                <button onclick="openEditModal('Biro Jasa', ${item.row_index})" class="text-green-600 hover:scale-110 transition" title="Edit Data"><i class="fas fa-edit"></i></button>
                 <button onclick="previewStnk('${escapeHTML(item.foto_stnk)}')" class="text-indigo-500 hover:scale-110 transition ${item.foto_stnk ? '' : 'hidden'}" title="Lihat STNK"><i class="fas fa-image text-lg"></i></button>
                 <a href="${waLink}" target="_blank" class="text-green-500 hover:scale-110 transition ${waNum ? '' : 'hidden'}" title="Kirim Pengingat via WA"><i class="fab fa-whatsapp text-lg"></i></a>
               </div>
             </td>
           </tr>`;
         });
-        document.getElementById('tbodyJasa').innerHTML = hJasa || '<tr><td colspan="7" class="p-8 text-center text-slate-400">Tidak ada data biro jasa</td></tr>';
+        document.getElementById('tbodyJasa').innerHTML = hJasa || '<tr><td colspan="11" class="p-8 text-center text-slate-400">Tidak ada data biro jasa</td></tr>';
 
       })
       .withFailureHandler(err => console.error("Error loading table:", err))
-      .getAllDataForDashboard();
+      .getAllDataForDashboard(window.currentUserSession?.username);
     }
 
     function openEditModal(sheetName, rowIndex) {
@@ -1509,7 +2787,7 @@ Terima kasih.`;
         renderAdminTable();
         btn.disabled = false;
         btn.innerText = "SIMPAN PERUBAHAN";
-      }).updateDataInSheet(sheetName, rowIndex, formData);
+      }).updateDataInSheet(sheetName, rowIndex, formData, window.currentUserSession?.username);
     }
 
     function fixWA(phone) {

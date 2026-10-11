@@ -1,247 +1,489 @@
-# Sistem Informasi CV. KIRANA TANJUNG PELAKAR
+# CV. Kirana Tanjung Pelakar / Natala Studio - Web Application
 
-<p align="center">
-  <strong>Sistem Informasi Manajemen Terpadu & Portal Publik untuk CV. Kirana Tanjung Pelakar.</strong>
-</p>
+Aplikasi web berbasis Google Apps Script untuk manajemen layanan bisnis: Desain, Percetakan, Boutique, dan Biro Jasa.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel" alt="Vercel">
-  <img src="https://img.shields.io/badge/Backend-Google%20Apps%20Script-blue?style=for-the-badge&logo=google-apps-script" alt="Google Apps Script">
-  <img src="https://img.shields.io/badge/Database-Google%20Sheets-green?style=for-the-badge&logo=google-sheets" alt="Google Sheets">
-  <img src="https://img.shields.io/badge/UI-HTML5-orange?style=for-the-badge&logo=html5" alt="HTML5">
-  <img src="https://img.shields.io/badge/Mobile-Flutter-02569B?style=for-the-badge&logo=flutter" alt="Flutter">
-  <img src="https://img.shields.io/badge/UI-Tailwind%20CSS-blueviolet?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/UI-Font%20Awesome-blue?style=for-the-badge&logo=fontawesome" alt="Font Awesome">
-</p>
+## 📋 Table of Contents
+
+- [Fitur Utama](#fitur-utama)
+- [Phase 1 Features](#phase-1-features)
+- [Role Management System](#role-management-system)
+- [Struktur Sheet](#struktur-sheet)
+- [Setup WhatsApp Business API](#setup-whatsapp-business-api)
+- [Deployment](#deployment)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## 📜 Daftar Isi
+## 🎯 Fitur Utama
 
-- [1. Latar Belakang](#-1-latar-belakang)
-- [2. Arsitektur Sistem](#-2-arsitektur-sistem)
-- [3. Fitur Utama](#-3-fitur-utama)
-- [4. Struktur Proyek & Keterangan File](#-4-struktur-proyek--keterangan-file)
-- [5. Skema Database (Google Sheets)](#-5-skema-database-google-sheets)
-- [6. Panduan Setup & Deployment](#-6-panduan-setup--deployment)
-- [7. Aspek Keamanan & Performa](#-7-aspek-keamanan--performa)
-- [8. Catatan Perubahan 10 September 2026](#-8-catatan-perubahan-10-september-2026)
-- [9. Pembaruan Terbaru](#-9-pembaruan-terbaru)
+### Fitur yang Sudah Ada
+- ✅ Dark/Light mode toggle
+- ✅ Responsive design dengan mobile menu
+- ✅ Portfolio showcase 4 layanan (Web, Percetakan, Boutique, Biro Jasa)
+- ✅ Tabel status project dan katalog produk
+- ✅ Login sistem dengan authentication
+- ✅ Dashboard admin untuk CRUD data
+- ✅ Search/filter real-time
+- ✅ Modal edit, preview produk, STNK, Surat Kuasa
+- ✅ WhatsApp integration per layanan
+- ✅ Auto-scroll katalog produk
+- ✅ Data obfuscation untuk privacy
+- ✅ Auto-refresh dashboard (5 menit)
+- ✅ Secret login trigger (3x klik logo)
+
+---
+
+## 🚀 Phase 1 Features
+
+### 1. Analytics Dashboard
+- **Summary Cards**: Menampilkan total data per kategori (Desain, Percetakan, Boutique, Biro Jasa)
+- **Status Distribution Chart**: Doughnut chart untuk distribusi status (Selesai, On Process, Aktif, Ditolak)
+- **Revenue Estimation Chart**: Bar chart untuk estimasi revenue dari Percetakan dan Boutique
+- **STNK Expiry Timeline Chart**: Bar chart untuk timeline masa aktif STNK (Expired, H-7, H-30, 30+ Hari, No Date)
+- **Monthly Activity Chart**: Line chart untuk aktivitas bulanan
+- **Refresh Button**: Untuk reload data analytics secara manual
+
+### 2. Export Data
+- Tombol **Export CSV** di setiap tab kategori
+- Export otomatis dengan timestamp di nama file
+- Format CSV yang sesuai dengan struktur data
+- Validasi data sebelum export
+- Password disembunyikan dengan `***` di export
+
+### 3. Import Data
+- Tombol **Import CSV** dengan modal upload
+- Validasi file CSV (maksimal 5MB)
+- Validasi header untuk memastikan format benar
+- Parsing CSV yang robust (handle quotes, commas, newlines)
+- Preview dan konfirmasi sebelum import
+- Append data ke sheet yang sesuai
+- **Only Admin**: Hanya role admin yang bisa import data
+
+### 4. WA Broadcast Notification
+- Tombol **Broadcast WA** untuk kirim pengingat massal
+- Filter berdasarkan masa aktif STNK:
+  - Expired (H-0)
+  - H-7 (Kritis)
+  - H-30 (Warning)
+  - Tanpa Tanggal
+- Preview penerima dengan kategori warna
+- Template pesan dengan variabel dinamis:
+  - `{nama}`, `{no_kendaraan}`, `{merek}`, `{type}`, `{layanan}`, `{masa_aktif}`
+- Rate limit: maksimal 50 pesan per batch
+- Konfirmasi sebelum kirim
+- **Admin & Staff**: Role admin dan staff yang bisa broadcast
 
 ---
 
-## 🎯 1. Latar Belakang
+## 👥 Role Management System
 
-CV. KIRANA TANJUNG PELAKAR adalah perusahaan multi-layanan yang bergerak di bidang Desain, Percetakan, dan Biro Jasa Administrasi Kendaraan. Sistem ini dibangun untuk mengatasi beberapa tantangan:
+### Role yang Tersedia
 
-- **Sentralisasi Data:** Menggantikan pencatatan manual dengan database terpusat (Google Sheets) yang mudah dikelola.
-- **Profesionalisme & Keamanan:** Menyembunyikan URL teknis Google Apps Script di balik domain kustom yang di-hosting di Vercel, memberikan tampilan yang lebih profesional dan aman bagi pelanggan.
-- **Efisiensi Layanan:** Mengurangi interaksi manual dengan menyediakan portal publik di mana pelanggan dapat melacak status layanan (khususnya untuk biro jasa) secara mandiri.
-- **Biaya Rendah:** Memanfaatkan platform *serverless* gratis seperti Vercel, Google Apps Script, dan Google Sheets untuk menekan biaya operasional.
+| Role | Analytics | Export | Import | Broadcast | Edit Data | Delete Data | Manage Users | View All Data |
+|------|-----------|--------|--------|-----------|-----------|-------------|--------------|---------------|
+| **Admin** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Staff** | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| **User** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ (hanya data sendiri) |
 
-## 🏗️ 2. Arsitektur Sistem
+### Permissions Detail
 
-Proyek ini menggunakan arsitektur **Decoupled (Jamstack)** untuk memisahkan antara tampilan (frontend) dan logika (backend).
+#### Admin
+- View Analytics Dashboard
+- Export Data (semua kategori)
+- Import Data (CSV)
+- Broadcast WA
+- Edit semua kategori (Desain, Percetakan, Boutique, Biro Jasa)
+- Delete data
+- Manage Users (ubah role user lain)
+- View semua data (tidak difilter)
 
-1.  **Database Layer (Google Sheets):** Berfungsi sebagai database utama. Setiap layanan (Desain, Percetakan, Biro Jasa) memiliki *sheet*-nya sendiri untuk menyimpan data.
-2.  **Backend/API Layer (Google Apps Script):** Bertindak sebagai *serverless backend*. `Code.js` berisi semua logika untuk:
-    -   Menyajikan halaman HTML dinamis ke pengguna.
-    -   Menyediakan endpoint API untuk operasi `Create`, `Read`, `Update` (CRUD) data dari dan ke Google Sheets.
-    -   Menangani otentikasi admin.
-3.  **Frontend Layer (Vercel):** Sebuah file `index.html` statis yang di-hosting di Vercel. Tugas utamanya adalah menampilkan Google Apps Script Web App di dalam sebuah `<iframe>`. Teknik ini disebut *masking*, yang membuat aplikasi tampak berjalan di domain Vercel, bukan di domain `script.google.com`.
-4.  **Mobile Layer (Flutter):** Aplikasi Android native berada di `/flutter` dan menggunakan `flutter/lib/main.dart` sebagai entry point. Data dibaca dan dikelola melalui endpoint Google Apps Script yang sama dengan portal web.
+#### Staff
+- View Analytics Dashboard
+- Export Data (semua kategori)
+- Import Data (tidak diizinkan)
+- Broadcast WA
+- Edit semua kategori
+- Delete data (tidak diizinkan)
+- Manage Users (tidak diizinkan)
+- View semua data (tidak difilter)
 
-## ✨ 3. Fitur Utama
+#### User
+- View Analytics Dashboard (tidak diizinkan)
+- Export Data (tidak diizinkan)
+- Import Data (tidak diizinkan)
+- Broadcast WA (tidak diizinkan)
+- Edit data (tidak diizinkan - read-only)
+- Delete data (tidak diizinkan)
+- Manage Users (tidak diizinkan)
+- **Hanya view Biro Jasa tab**
+- **Hanya view data sendiri** (difilter berdasarkan kolom Username di sheet Biro Jasa)
 
-### Portal Publik
-- **Navigasi Mudah:** Menu navigasi *sticky* yang memudahkan pengunjung untuk beralih antar-layanan.
-- **Portofolio Dinamis:** Menampilkan portofolio proyek desain yang datanya diambil langsung dari Google Sheets.
-- **Katalog Percetakan:** Grid responsif yang menampilkan daftar layanan percetakan beserta harganya.
-- **Pelacakan Status Biro Jasa:** Menampilkan nomor uji yang sudah disensor dan status pengerjaan berkas. Detail pemilik, kendaraan, masa aktif, WhatsApp, dan STNK hanya tersedia setelah admin login.
-- **Integrasi WhatsApp:** Tombol "Tanya Admin" yang secara otomatis membuat draf pesan WhatsApp berisi detail layanan yang ingin ditanyakan pelanggan.
+### UI Features
 
-### Dasbor Admin (Internal)
-- **Otentikasi Sederhana:** Halaman login untuk memastikan hanya admin yang dapat mengakses dasbor pengelolaan data dengan memvalidasi kredensial dari sheet `Users`.
-- **Manajemen Data (CRUD):** Admin dapat menambah, melihat, dan mengubah data untuk semua layanan langsung dari antarmuka web yang responsif.
-- **Hapus Data:** Admin dapat menghapus data dengan dialog konfirmasi sebelum baris di Google Sheets dihapus permanen.
-- **Pencarian Database:** Dashboard memiliki kolom pencarian untuk memfilter data pada tab Desain, Percetakan, dan Biro Jasa.
-- **UI Rendering Cerdas:** Kolom seperti "Ikon" dapat secara dinamis menampilkan gambar dari URL atau ikon dari FontAwesome, lengkap dengan *fallback* jika data tidak valid. Termasuk fitur pratinjau gambar (lightbox) saat gambar ikon diklik.
-- **Pratinjau & Cetak Surat Tugas:** Fitur untuk membuat "Surat Tugas Pengurusan" secara dinamis berdasarkan data konsumen dari tabel Biro Jasa, yang siap untuk dicetak atau disimpan sebagai PDF.
-- **Sinkronisasi Real-time:** Setiap perubahan yang dibuat di dasbor akan langsung tersimpan di Google Sheets.
+#### Role Badge
+- Badge role muncul di samping nama user setelah login
+- Warna badge:
+  - **Admin**: Merah (`bg-red-100 text-red-700`)
+  - **Staff**: Biru (`bg-blue-100 text-blue-700`)
+  - **User**: Abu-abu (`bg-slate-100 text-slate-700`)
 
-### Aplikasi Android Flutter
-- **Navigasi Mobile:** Beranda, Web Design, Percetakan, Biro Jasa, dan Dashboard Admin menggunakan bottom navigation.
-- **Katalog Percetakan:** Menampilkan harga, tombol WhatsApp, dan ikon dari kolom `Ikon`, baik berupa URL gambar maupun nama ikon.
-- **Form Admin Mobile:** Form tambah dan edit menyesuaikan struktur sheet. Status dan jenis layanan menggunakan dropdown, sedangkan masa aktif menggunakan date picker.
-- **Status Biro Jasa:** Menampilkan `AKTIF`, `H-x`, dan `EXPIRED` berdasarkan tanggal pada kolom `aktif`.
-- **Aksi Admin:** Edit, tambah, hapus, lihat Foto STNK, hubungi WhatsApp, dan cetak Surat Kuasa.
-- **Penanganan Offline/Gagal:** Tersedia loading state, empty state, pesan error koneksi, dan tombol refresh.
+#### Tab Visibility
+- **User**: Hanya tab **Biro Jasa** yang terlihat, tab lain disembunyikan
+- **Admin & Staff**: Semua tab terlihat (Desain, Percetakan, Boutique, Biro Jasa, Users)
+- **Auto-switch**: User otomatis diarahkan ke tab Biro Jasa setelah login
 
-## 📂 4. Struktur Proyek & Keterangan File
-
-Struktur repositori ini diatur sebagai berikut:
-
-- **`/` (Root Direktori)**
-  - **`index.html`**: Halaman "kulit" yang di-deploy ke Vercel. Tugas utamanya adalah memuat aplikasi Google Apps Script dalam sebuah `<iframe>` untuk memberikan URL yang bersih dan profesional.
-  - **`README.md`**: File dokumentasi yang sedang Anda baca.
-  - **`package.json`**: Mendefinisikan dependensi dan konfigurasi web proyek.
-  - **`.gitignore`**: (Direkomendasikan) File untuk menginstruksikan Git agar mengabaikan file sensitif, terutama `.clasp.json` yang berisi token otorisasi.
-
-- **`/script/`**
-  - **`Code.js`**: "Otak" dari keseluruhan sistem yang berjalan di server Google. File ini berisi semua logika backend:
-    - `doGet()`: Menampilkan antarmuka web saat URL diakses.
-    - `checkLogin()`, `addDataToSheet()`, `updateDataInSheet()`, `getAllDataForDashboard()`: Fungsi-fungsi yang bertindak sebagai endpoint API untuk operasi CRUD dari frontend.
-    - `include()`: Fungsi utilitas untuk menggabungkan beberapa file HTML menjadi satu halaman.
-
-- **`/flutter/`**
-  - Proyek Flutter untuk aplikasi Android native.
-  - **`lib/main.dart`**: UI mobile, navigasi menu, login, katalog, status layanan, CRUD admin, pencarian, WhatsApp, dan Surat Kuasa.
-  - **`android/`**: Host Android Flutter, konfigurasi Gradle, package ID `com.kiranatanjung.app`, permission internet, dan resource launcher.
-  - Folder root `/android/` lama yang berasal dari Capacitor sudah tidak digunakan.
-
-- **File Internal Google Apps Script (Tidak ada di repositori ini)**
-  - Selain `Code.js`, proyek di dalam platform Google Apps Script juga berisi file-file HTML (misalnya `index.html`, `dashboard.html`, `styles.html`). File-file ini membangun antarmuka pengguna yang sebenarnya dan dipanggil oleh `Code.js` untuk ditampilkan kepada pengguna.
-  - **`appsscript.json`**: File manifest yang berisi konfigurasi proyek Apps Script (misalnya, izin API). File ini akan terlihat di repositori jika Anda menggunakan `clasp` untuk sinkronisasi.
-
-## 🗃️ 5. Skema Database (Google Sheets)
-
-Database sistem ini menggunakan Google Sheets. Berikut adalah struktur tabel (sheet) yang digunakan.
-
-### 5.1. Sheet: `Desain`
-| Nama Kolom | Keterangan |
-| :--- | :--- |
-| timestamp | Waktu input otomatis oleh sistem. |
-| nama | Nama proyek aplikasi/situs web. |
-| deskripsi | Uraian cakupan teknologi proyek. |
-| linkgambar | URL gambar portofolio. |
-| tag | Kategori teknologi (e.g., WEB, UI/UX). |
-| whatsapp | Nomor kontak admin. |
-| status | Visibilitas data (Aktif/Arsip). |
-
-### 5.2. Sheet: `Percetakan`
-| Nama Kolom | Keterangan |
-| :--- | :--- |
-| timestamp | Waktu penambahan data. |
-| deskripsi | Nama produk cetak (e.g., Banner MMT). |
-| harga | Tarif minimal layanan. |
-| ikon | Kelas ikon FontAwesome (e.g., `fa-print`). |
-| whatsapp | Nomor WhatsApp pemesanan. |
-| status | Ketersediaan layanan. |
-| keterangan | Deskripsi lengkap/uraian spesifikasi teknis produk. |
-| min_order | Batas minimum pemesanan produk (e.g., 50 Pcs). |
-
-### 5.3. Sheet: `Boutique`
-| Nama Kolom | Keterangan |
-| :--- | :--- |
-| judul | Judul produk atau layanan boutique/konveksi. |
-| kategori | Kategori produk (e.g., BOUTIQUE, KONVEKSI). |
-| deskripsi | Deskripsi detail produk. |
-| harga | Harga produk (Mulai Rp... atau NEGO). |
-| min_order | Minimum order produk. |
-| gambar_url | URL gambar produk. |
-| status | Status visibilitas (AKTIF, DITOLAK/SEMBUNYIKAN). |
-
-### 5.3. Sheet: `Biro Jasa`
-| Nama Kolom | Keterangan |
-| :--- | :--- |
-| timestamp | Waktu pendaftaran berkas. |
-| layanan | Jenis pengurusan (e.g., Perpanjangan STNK). |
-| nama | Nama lengkap konsumen. |
-| merek | Merek kendaraan. |
-| type | Tipe/varian kendaraan. |
-| nomor_kendaraan | Nomor polisi (Nopol) kendaraan. |
-| deskripsi | Catatan progres tambahan. |
-| durasi | Status pelacakan berkas saat ini. |
-| whatsapp | Nomor kontak pengurus/konsumen. |
-| aktif | Status keaktifan proses (Aktif/Selesai). |
-| foto_stnk | URL scan STNK (disimpan di Google Drive terproteksi). |
-
-### 5.4. Sheet: `Users`
-| Nama Kolom | Keterangan |
-| :--- | :--- |
-| username | ID untuk login ke dasbor admin. |
-| password | Kata sandi untuk login. |
-| nama | Nama lengkap personel admin. |
-
-## 🚀 6. Panduan Setup & Deployment
-
-1.  **Google Sheets:**
-    - Buat Google Sheet baru.
-    - Buat 4 sheet dengan nama: `Desain`, `Percetakan`, `Biro Jasa`, dan `Users`.
-    - Isi baris pertama (header) di setiap sheet sesuai dengan skema database di atas.
-
-2.  **Google Apps Script (GAS):**
-    - Buka Google Sheet Anda, lalu klik `Extensions > Apps Script`.
-    - Salin semua isi dari `script/Code.js` ke dalam file `Code.gs` di editor GAS.
-    - Buat file-file HTML yang diperlukan (misal: `index.html`, `dashboard.html`, dll.) di dalam editor GAS dan isi dengan kode frontend Anda.
-    - Klik `Deploy > New deployment`.
-    - Pilih tipe `Web app`.
-    - Pada bagian `Who has access`, pilih `Anyone`.
-    - Klik `Deploy`. Salin URL Web App yang diberikan.
-
-3.  **Vercel (Frontend):**
-    - Buka file `index.html` di repositori ini.
-    - Ganti URL `src` pada tag `<iframe>` dengan URL Web App yang Anda dapatkan dari langkah GAS.
-    - Deploy proyek ini ke Vercel. Anda bisa menghubungkan repositori GitHub Anda langsung ke Vercel untuk deployment otomatis.
-
-4.  **Mobile (Flutter):**
-  - Masuk ke folder aplikasi: `cd flutter`.
-  - Jalankan `flutter pub get`.
-  - Jalankan `flutter analyze` untuk pemeriksaan kode.
-  - Jalankan `flutter run` untuk menjalankan aplikasi di perangkat/emulator.
-  - Bangun APK dengan `flutter build apk --release`.
-  - Untuk upgrade aplikasi lama, pertahankan `applicationId` `com.kiranatanjung.app` dan gunakan `version`/`versionCode` yang lebih tinggi.
-
-## 🛡️ 7. Aspek Keamanan & Performa
-
-- **Keamanan:**
-  - Akses ke dasbor admin dilindungi oleh sistem login sederhana yang memvalidasi kredensial dari sheet `Users`.
-  - **Sanitasi Output:** Data yang ditarik dari Google Sheets secara otomatis disanitasi sebelum dirender sebagai HTML. Ini mencegah karakter khusus (seperti `"` atau `<`) merusak struktur layout tabel.
-  - Data sensitif seperti `foto_stnk` tidak diekspos secara publik. URL-nya harus mengarah ke file di Google Drive dengan akses terbatas.
-  - File konfigurasi `clasp` (`.clasp.json`) yang berisi token otorisasi harus selalu ada di `.gitignore` dan tidak boleh di-commit ke repositori.
-  - Aplikasi Flutter tidak menampilkan detail Biro Jasa sebelum login; Dashboard Admin hanya tersedia setelah autentikasi berhasil.
-
-- **Performa:**
-  - Pemanggilan data dari frontend ke backend GAS dilakukan secara asinkron untuk tidak memblokir render halaman.
-  - **Refaktorisasi Modal:** Fitur pratinjau "Surat Tugas" tidak lagi menggunakan `<iframe>` yang berat. Sebagai gantinya, konten HTML dimuat dari backend dan disuntikkan langsung ke dalam `div`, menghasilkan waktu muat yang lebih cepat dan interaksi yang lebih lancar.
-  - Untuk menjaga performa Google Sheets, disarankan untuk mengarsipkan data lama (misalnya, transaksi biro jasa yang sudah selesai lebih dari 3 bulan) ke sheet atau file spreadsheet lain secara berkala.
+#### Users Tab (Admin Only)
+- Tab "Users" hanya muncul untuk admin
+- Tampilkan semua user dengan info lengkap
+- Dropdown untuk mengubah role secara langsung
+- Konfirmasi sebelum mengubah role
+- Admin tidak bisa mengubah role sendiri
 
 ---
-*Dokumen Spesifikasi Kebutuhan Produk Resmi © 2026 CV. KIRANA TANJUNG PELAKAR. Seluruh hak cipta dilindungi undang-undang.*
 
-## 📝 8. Catatan Perubahan 10 September 2026
+## 📊 Struktur Sheet
 
-Perubahan yang dikerjakan pada hari ini:
+### Sheet Users
 
-- Memindahkan platform Android dari proyek Capacitor root ke proyek Flutter di `/flutter/android`.
-- Mempertahankan package ID `com.kiranatanjung.app` agar APK baru dapat menjadi upgrade aplikasi lama.
-- Mendesain ulang aplikasi Flutter untuk layar HP dengan navigasi Beranda, Web Design, Percetakan, Biro Jasa, dan Dashboard.
-- Menyesuaikan pemetaan data dengan sheet `Desain`, `Percetakan`, `Biro Jasa`, dan `Users`.
-- Memperbaiki status layanan Biro Jasa dan mengatasi `LocaleDataException` pada formatter tanggal/harga.
-- Memperbaiki login Android melalui endpoint Google Apps Script yang kompatibel dengan Web App.
-- Menambahkan tambah, edit, hapus, pencarian, dan refresh data pada Dashboard Admin.
-- Menambahkan dropdown status, dropdown jenis layanan, dan kalender masa aktif pada form tambah/edit.
-- Menambahkan ikon katalog dari URL gambar atau nilai ikon pada kolom `Ikon`.
-- Membatasi data Biro Jasa publik menjadi nomor uji tersensor dan status saja.
-- Menampilkan detail Biro Jasa lengkap setelah login, termasuk Foto STNK dan WhatsApp.
-- Menambahkan preview dan cetak Surat Kuasa berdasarkan data kendaraan.
-- Menambahkan validasi `flutter analyze` dan pemeriksaan sintaks `node --check script/Code.js`.
+**Kolom:**
+| A | B | C | D | E | F |
+|---|---|---|---|---|---|
+| **Username** | Password | Nama | NIK | Alamat | **Role** |
 
-## 9. Pembaruan Terbaru (v1.1.2)
-### Fitur & Perbaikan Baru:
-- **Dinamisasi Dokumen Surat Tugas (Surat Kuasa)**: Identitas Penerima Kuasa (`Nama`, `NIK`, `Alamat`) di dokumen `kuasa.html` kini dievaluasi dan disuntikkan secara dinamis berdasarkan data profil pengguna yang sedang login aktif dari sheet `Users`.
-- **Pop-up Detail Produk 2 Kolom**: Mengganti modal pratinjau gambar statis dengan komponen modal interaktif responsif (Grid 2 kolom) yang menampilkan kategori, deskripsi lengkap produk, harga terformat, batas minimal order, dan tombol interaksi WhatsApp otomatis.
-- **Penanganan Double-Escaping HTML Entity**: Menambahkan fungsi dekoder aman berbasis standar Web API `DOMParser` (`decodeHTMLEntities`) untuk membersihkan gangguan tampilan teks raw entity seperti `&AMP;` atau `&quot;` pada judul dan deskripsi produk.
-- **Ekspansi Form & CRUD Database Percetakan**: Sinkronisasi penuh 7 kolom data non-ID pada backend Apps Script (`Code.js`), dashboard editor (`dashboard.html`), dan database explorer (`index.html`) untuk mendukung kolom baru `keterangan` (Kolom G) dan `min_order` (Kolom H).
-- **Branding Resmi Natala Studio**: Menyeragamkan seluruh aset visual, sub-brand teks, template pesan WhatsApp, dan hak cipta di footer situs di bawah bendera **Natala Studio by Kirana Tanjung Pelakar**.
+**Contoh Data:**
+```
+Username | Password | Nama           | NIK | Alamat           | Role
+admin    | ***      | Administrator  | ... | ...              | admin
+staff1   | ***      | Staff One      | ... | ...              | staff
+staff2   | ***      | Staff Staff    | ... | ...              | staff
+budi     | ***      | Budi Santoso   | ... | ...              | user
+andi     | ***      | Andi Wijaya    | ... | ...              | user
+```
 
-### Pembaruan Sebelumnya (v1.1.1)
-### Fitur & Perbaikan Baru:
-- **Secret Login Tersembunyi (Logo 3x Klik)**: Tombol login visual di navigasi utama telah dihilangkan dan diganti dengan pemicu rahasia (klik logo 3 kali dalam jeda 2 detik) untuk menjaga kerapian estetika web dan aplikasi.
-- **Integrasi Penuh Boutique & Konveksi**: Database (7 kolom non-ID murni berbasis `rowIndex`), menu admin CRUD dashboard, dan rendering katalog publik interaktif di Flutter serta Web kini telah sepenuhnya terintegrasi.
-- **Standardisasi Mata Uang Rupiah Terpusat**: Penambahan fungsi helper format Rupiah `formatCurrency` terpusat untuk memisahkan nominal angka dan mencegah penulisan dobel simbol mata uang di Android & Web.
-- **Perbaikan Bug Overflow & Unbounded Constraints**:
-  - Mengubah layout tombol aksi admin menjadi Grid 2x2 responsif untuk mencegah pemotongan teks (*bottom overflow*).
-  - Menambahkan batasan tinggi dimensi (`SizedBox` height 180) pada pemrosesan `CatalogIcon` di menu Boutique untuk mengatasi error layar putih (*unbounded height crash*).
-  - Optimasi `childAspectRatio: 1.8` dan `FittedBox` skala teks pada StatTile Dashboard beranda.
-- **Pembersihan Kode Redundant**: Menghapus file duplikat `lib/item.dart` untuk menyatukan manajemen state dashboard terpusat di `lib/dashboard.dart`.
+**PENTING:**
+- Kolom F (Role) harus diisi dengan `admin`, `staff`, atau `user` (lowercase)
+- Jika kosong, default adalah `user`
+- Username (Kolom A) digunakan untuk login dan filtering data
+
+### Sheet Biro Jasa
+
+**Kolom:**
+| A | B | C | D | E | F | G | H | I | J | K | **L** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Timestamp | Layanan | Nama | Merek | Type | No. Kendaraan | Deskripsi | Progres | WhatsApp | Masa Aktif | STNK | **Username** |
+
+**Contoh Data:**
+```
+Timestamp | Layanan | Nama    | Merek | Type | No. Kendaraan | Deskripsi | Progres | WhatsApp | Masa Aktif | STNK | Username
+...       | STNK    | Budi    | ...   | ...  | B 1234 ABC    | ...       | Proses  | 8123456789| 2024-12-31 | ...  | budi
+...       | STNK    | Andi    | ...   | ...  | B 5678 XYZ    | ...       | Selesai | 8123456789| 2024-11-30 | ...  | andi
+...       | STNK    | Citra   | ...   | ...  | B 9012 DEF    | ...       | Proses  | 8123456789| 2025-01-15 | ...  | citra
+```
+
+**PENTING:**
+- Kolom L (Username) digunakan untuk filtering data per user
+- User hanya melihat data di mana kolom Username = username login mereka
+- Admin dan Staff melihat semua data (tidak difilter)
+- Saat import CSV, kolom Username otomatis diisi dengan username yang sedang login
+
+### Sheet Desain
+
+**Kolom:**
+| A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|
+| Timestamp | Project | Deskripsi | Link Gambar | Tag | WhatsApp | Status |
+
+### Sheet Percetakan
+
+**Kolom:**
+| A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|
+| Timestamp | Produk | Harga | Ikon | WhatsApp | Status | Keterangan | Min. Order |
+
+### Sheet Boutique
+
+**Kolom:**
+| A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|
+| Judul | Kategori | Deskripsi | Harga | Min. Order | Gambar URL | Status |
+
+---
+
+## 📱 Setup WhatsApp Business API
+
+### Langkah 1: Setup Meta Business Suite
+1. Buka [Meta Business Suite](https://business.facebook.com/)
+2. Login dengan akun Facebook bisnis Anda
+3. Buat atau pilih Business Account yang sudah ada
+
+### Langkah 2: Setup WhatsApp Business App
+1. Di Meta Business Suite, buka **Settings** → **Business Assets**
+2. Klik **Apps** → **Add** → **Create a new app**
+3. Pilih **Business** category
+4. Beri nama app (misal: "Natala Studio WA")
+5. Setelah app dibuat, buka app tersebut
+
+### Langkah 3: Setup WhatsApp Product
+1. Di app dashboard, cari **WhatsApp** di product list
+2. Klik **Set up** pada WhatsApp
+3. Pilih **Business account** (sudah ada atau buat baru)
+4. Pilih **Phone number** yang akan digunakan untuk mengirim pesan
+5. Masukkan dan verifikasi nomor WhatsApp bisnis Anda
+6. Catat **Phone Number ID** (dari WhatsApp settings)
+
+### Langkah 4: Generate Access Token
+1. Di WhatsApp app settings, buka **API Setup**
+2. Scroll ke bawah ke **Access Token** section
+3. Klik **Generate new token**
+4. Pilih permission minimal: `whatsapp_business_messaging`
+5. Copy **Access Token** yang dihasilkan
+6. ⚠️ **PENTING**: Simpan token ini dengan aman! Jangan bagikan ke publik.
+
+### Langkah 5: Update Code.js
+Buka file `Code.js` di baris 610-612, dan ganti dengan credentials Anda:
+
+```javascript
+const ACCESS_TOKEN = 'YOUR_ACCESS_TOKEN_HERE'; // Tempel access token Anda
+const PHONE_NUMBER_ID = 'YOUR_PHONE_NUMBER_ID_HERE'; // Tempel Phone Number ID Anda
+const API_VERSION = 'v18.0'; // Gunakan versi terbaru
+```
+
+### Langkah 6: Test Number
+1. Di WhatsApp settings, tambahkan nomor Anda sebagai **Test Number**
+2. Kirim pesan test melalui API endpoint untuk verifikasi
+3. Pastikan nomor test bisa menerima pesan dari API
+
+### Format Nomor WhatsApp
+- Sheet: Format `8xxx` atau `08xxx`
+- Backend: Otomatis dikonversi ke `628xxx`
+- Contoh:
+  - `81234567890` → `6281234567890`
+  - `081234567890` → `6281234567890`
+  - `6281234567890` → `6281234567890` (tidak berubah)
+
+---
+
+## 🚀 Deployment
+
+### Persiapan
+1. Pastikan Google Sheet sudah di-setup dengan struktur yang benar
+2. Pastikan kolom Role di sheet Users sudah diisi
+3. Pastikan kolom Username di sheet Biro Jasa sudah ada
+
+### Deploy dengan Clasp
+
+```bash
+# Masuk ke direktori script
+cd D:\Proyek\Github\kirana-tanjung\script
+
+# Push changes ke Google Apps Script
+npx clasp push
+
+# Deploy
+npx clasp deploy
+```
+
+### Output yang Diharapkan
+```
+Pushed 6 files at [timestamp].
+└─ appsscript.json
+└─ Code.js
+└─ dashboard.html
+└─ google534188cf26a92a25.html
+└─ index.html
+└─ kuasa.html
+
+Deployed [DEPLOYMENT_ID] @[VERSION]
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### 1. Admin/Staff Tidak Melihat Semua Data
+
+**Masalah:** Admin atau staff hanya melihat data difilter seolah-olah role user.
+
+**Solusi:**
+- Pastikan kolom **Role (Kolom F)** di sheet Users diisi dengan benar:
+  - `admin` (lowercase) untuk admin
+  - `staff` (lowercase) untuk staff
+  - `user` (lowercase) untuk user
+- Pastikan tidak ada spasi sebelum atau sesudah role
+- Logout dan login kembali
+
+### 2. User Tidak Melihat Data Apapun
+
+**Masalah:** User login tapi tidak melihat data di tab Biro Jasa.
+
+**Solusi:**
+- Pastikan kolom **Username (Kolom L)** di sheet Biro Jasa diisi dengan username user
+- Pastikan username di sheet Biro Jasa sama persis dengan username di sheet Users (case-insensitive)
+- Cek kolom Username di sheet Biro Jasa: harus berisi username, bukan nama lengkap
+
+### 3. Role Badge Tidak Muncul
+
+**Masalah:** Tidak ada badge role setelah login.
+
+**Solusi:**
+- Refresh halaman browser
+- Logout dan login kembali
+- Cek console browser (F12) untuk error JavaScript
+
+### 4. Tab Tidak Muncul untuk User
+
+**Masalah:** User masih melihat semua tab (Desain, Percetakan, Boutique).
+
+**Solusi:**
+- Pastikan role di sheet Users adalah `user` (lowercase)
+- Refresh halaman
+- Pastikan frontend sudah di-deploy dengan versi terbaru
+
+### 5. WhatsApp Broadcast Tidak Mengirim
+
+**Masalah:** Broadcast selesai tapi pesan tidak terkirim.
+
+**Solusi:**
+- Pastikan WhatsApp Business API sudah di-setup dengan benar
+- Cek Access Token dan Phone Number ID di Code.js
+- Pastikan nomor test sudah ditambahkan di WhatsApp settings
+- Cek logs di Apps Script console (View → Logs)
+- Rate limit: Tunggu 1 detik antar pesan
+
+### 6. Import CSV Gagal
+
+**Masalah:** Import CSV mengembalikan error.
+
+**Solusi:**
+- Pastikan file CSV dalam format yang benar
+- Pastikan header CSV sesuai dengan template
+- Pastikan role user adalah `admin` (hanya admin yang bisa import)
+- Cek ukuran file (maksimal 5MB)
+- Cek logs di Apps Script console untuk error detail
+
+### 7. Export CSV Password Muncul Plain Text
+
+**Masalah:** Password di export CSV tidak disembunyikan.
+
+**Solusi:**
+- Ini sudah di-fix. Password akan muncul sebagai `***` di export
+- Pastikan frontend di-deploy dengan versi terbaru
+
+---
+
+## 🔒 Security Notes
+
+### Backend Validation
+- Semua operasi CRUD divalidasi di backend berdasarkan role
+- Tidak bisa bypass dengan mengirim request langsung (misal: via Postman)
+- Username dikirim bersama setiap request untuk validasi
+
+### Frontend Security
+- Tombol dan fitur dihide berdasarkan role (UX)
+- Role badge menunjukkan role saat ini
+- Tab dihide/show berdasarkan role
+
+### Defense in Depth
+1. **Layer 1**: Frontend permission (hide UI elements)
+2. **Layer 2**: Backend permission validation (enforce security)
+3. **Layer 3**: Error handling yang jelas dan ter-log
+
+### Self-Role Protection
+- Admin tidak bisa mengubah role sendiri
+- Mencegah admin menghapus akses sendiri
+
+### Audit Trail
+- Kolom username di sheet Biro Jasa berfungsi sebagai audit trail
+- Bisa diketahui siapa yang menambahkan data tersebut
+- Memudahkan tracking data per user
+
+---
+
+## 📝 CSV Export/Import Templates
+
+### Desain
+```csv
+Project,Tag,Deskripsi,Status,WhatsApp
+```
+
+### Percetakan
+```csv
+Produk,Harga,Min. Order,Ikon,Status,Keterangan,WhatsApp
+```
+
+### Boutique
+```csv
+Judul,Kategori,Deskripsi,Harga,Min. Order,Status,Gambar URL
+```
+
+### Biro Jasa
+```csv
+Layanan,Nama,Merek,Type,No. Kendaraan,Deskripsi,Progres,Masa Aktif,Status,STNK,WhatsApp,Username
+```
+
+### Users
+```csv
+Username,Password,Nama,NIK,Alamat,Role
+```
+
+---
+
+## 🔄 Version History
+
+### v1.0 - Initial Audit
+- Audit fitur yang sudah ada
+- Rekomendasi fitur tambahan
+
+### v1.1 - Phase 1 Implementation
+- Analytics Dashboard
+- Export Data (CSV)
+- Import Data (CSV)
+- WA Broadcast Notification
+
+### v1.2 - Role Management
+- Role system (Admin, Staff, User)
+- Backend validation
+- Frontend permission enforcement
+- Users tab untuk admin
+
+### v1.3 - User-Specific Data Filtering
+- Kolom Username di sheet Biro Jasa (Kolom L)
+- Filtering data per user untuk role user
+- Admin & Staff tetap view semua data
+- Update backend untuk username-based filtering
+
+### v1.4 - Bug Fixes
+- Fix username vs nama confusion in backend calls
+- Update all backend functions to use username parameter
+- Fix session storage to include username
+- Update getAllDataForDashboard to properly filter by role
+
+### v1.5 - Critical Bug Fix (Username Parameter)
+- **Bug**: Frontend mengirim `nama` (nama lengkap) ke backend, tapi backend mencari role berdasarkan `username` (kolom A di sheet Users)
+- **Impact**: Semua user dianggap sebagai role default (`user`), menyebabkan admin/staff juga difilter data
+- **Fix**:
+  - Update `checkLogin()` backend untuk mengembalikan `username` di response
+  - Update frontend session storage untuk menyimpan `username` dan `nama` secara terpisah
+  - Update semua backend function calls untuk menggunakan `window.currentUserSession?.username`:
+    - `getAllDataForDashboard(username)`
+    - `updateDataInSheet(..., username)`
+    - `addDataToSheet(..., username)`
+    - `deleteDataFromSheet(..., username)`
+    - `importDataFromCSV(..., username)`
+    - `sendWABroadcast(..., username)`
+    - `updateUserRole(..., requestUsername)`
+- **Result**: Admin dan Staff sekarang benar-benar melihat semua data, User hanya melihat data sendiri (berdasarkan kolom Username di sheet Biro Jasa)
+
+---
+
+## 📞 Support
+
+Untuk bantuan atau pertanyaan:
+- Cek logs di Apps Script console (View → Logs)
+- Cek console browser (F12) untuk error JavaScript
+- Pastikan struktur sheet sesuai dokumentasi
+- Pastikan role di sheet Users diisi dengan benar
+
+---
+
+**Generated with [Devin](https://devin.ai)**
