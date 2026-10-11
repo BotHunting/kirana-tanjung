@@ -14,6 +14,175 @@ Aplikasi web berbasis Google Apps Script untuk manajemen layanan bisnis: Desain,
 
 ---
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+Sebelum memulai, pastikan Anda memiliki:
+- Akun Google (Gmail)
+- Akses ke Google Sheets
+- Meta Business Account (untuk WhatsApp Business API)
+- Node.js dan npm terinstall (untuk deployment)
+
+### Langkah 1: Setup Google Sheet
+
+1. **Buat Google Sheet baru**
+   - Buka [Google Sheets](https://sheets.google.com)
+   - Buat sheet baru dengan nama "Kirana Tanjung Database"
+
+2. **Buat Sheet Tabs**
+   Buat sheet tabs berikut dengan struktur yang sesuai:
+   - `Users` - Data user dan role
+   - `Desain` - Data layanan desain
+   - `Percetakan` - Data produk percetakan
+   - `Boutique` - Data produk boutique
+   - `Biro Jasa` - Data layanan biro jasa (STNK, dll)
+
+3. **Setup Header Sheet Users**
+   - Baris 1 (Header): Username, Password, Nama, NIK, Alamat, Role
+   - Tambahkan minimal 1 user admin:
+     - Username: `admin`
+     - Password: `password_anda` (akan dihash di backend)
+     - Nama: `Administrator`
+     - Role: `admin`
+
+4. **Setup Header Sheet Biro Jasa**
+   - Baris 1 (Header): Timestamp, Layanan, Nama, Merek, Type, No. Kendaraan, Deskripsi, Progres, WhatsApp, Masa Aktif, STNK, Username
+
+5. **Setup Header Sheet Desain**
+   - Baris 1 (Header): Timestamp, Project, Deskripsi, Link Gambar, Tag, WhatsApp, Status
+
+6. **Setup Header Sheet Percetakan**
+   - Baris 1 (Header): Timestamp, Produk, Harga, Ikon, WhatsApp, Status, Keterangan, Min. Order
+
+7. **Setup Header Sheet Boutique**
+   - Baris 1 (Header): Judul, Kategori, Deskripsi, Harga, Min. Order, Gambar URL, Status
+
+### Langkah 2: Setup Google Apps Script Project
+
+1. **Install Clasp CLI**
+   ```bash
+   npm install -g @google/clasp
+   ```
+
+2. **Login ke Google**
+   ```bash
+   clasp login
+   ```
+   - Browser akan terbuka
+   - Login dengan akun Google Anda
+   - Berikan izin akses
+
+3. **Clone Project dari GitHub**
+   ```bash
+   git clone https://github.com/username/kirana-tanjung.git
+   cd kirana-tanjung/script
+   ```
+
+4. **Setup Clasp Project**
+   ```bash
+   clasp create --title "Kirana Tanjung Web App" --type webapp
+   ```
+   - Pilih project type: "Web app"
+   - Copy Script ID yang dihasilkan
+
+5. **Update appsscript.json**
+   Buka file `appsscript.json` dan update:
+   ```json
+   {
+     "timeZone": "Asia/Jakarta",
+     "exceptionLogging": "STACKDRIVER",
+     "runtimeVersion": "V8",
+     "webapp": {
+       "executeAs": "USER_ACCESSING",
+       "access": "DOMAIN"
+     }
+   }
+   ```
+
+### Langkah 3: Konfigurasi Google Sheet ID
+
+1. **Dapatkan Sheet ID**
+   - Buka Google Sheet yang Anda buat di Langkah 1
+   - Sheet ID ada di URL: `https://docs.google.com/spreadsheets/d/SHEET_ID/edit`
+   - Copy bagian `SHEET_ID`
+
+2. **Update Code.js**
+   Buka file `Code.js` dan update baris 1:
+   ```javascript
+   const SHEET_ID = 'YOUR_SHEET_ID_HERE'; // Ganti dengan Sheet ID Anda
+   ```
+
+### Langkah 4: Setup WhatsApp Business API (Opsional)
+
+Jika ingin menggunakan fitur WhatsApp Broadcast:
+
+1. Ikuti panduan lengkap di [Setup WhatsApp Business API](#setup-whatsapp-business-api)
+2. Update credentials di `Code.js` baris 610-612:
+   ```javascript
+   const ACCESS_TOKEN = 'YOUR_ACCESS_TOKEN_HERE';
+   const PHONE_NUMBER_ID = 'YOUR_PHONE_NUMBER_ID_HERE';
+   const API_VERSION = 'v18.0';
+   ```
+
+### Langkah 5: Deploy Aplikasi
+
+1. **Push Code ke Google Apps Script**
+   ```bash
+   npx clasp push
+   ```
+
+2. **Deploy sebagai Web App**
+   ```bash
+   npx clasp deploy
+   ```
+
+3. **Salin Deployment URL**
+   - Copy URL web app yang dihasilkan
+   - URL format: `https://script.google.com/macros/s/DEPLOYMENT_ID/exec`
+
+### Langkah 6: Penggunaan Pertama
+
+1. **Buka Aplikasi**
+   - Buka deployment URL di browser
+   - Klik logo 3x untuk membuka modal login
+
+2. **Login sebagai Admin**
+   - Username: `admin`
+   - Password: `password_anda` (sesuai yang Anda set di sheet Users)
+
+3. **Setup User Lain**
+   - Setelah login, masuk ke tab "Users"
+   - Tambahkan user baru dengan role:
+     - `admin` - Akses penuh
+     - `staff` - Akses terbatas (tidak bisa import/manage users)
+     - `user` - Hanya view data sendiri di tab Biro Jasa
+
+4. **Tambahkan Data**
+   - Gunakan tab masing-masing layanan untuk menambahkan data
+   - Atau gunakan fitur Import CSV untuk bulk import
+
+### Quick Reference
+
+| Task | Command |
+|------|---------|
+| Login Clasp | `clasp login` |
+| Push Code | `npx clasp push` |
+| Deploy | `npx clasp deploy` |
+| Pull Code | `npx clasp pull` |
+| Open Script Editor | `npx clasp open` |
+| List Deployments | `npx clasp deployments` |
+
+### Tips
+
+- **Backup Data**: Selalu backup Google Sheet sebelum melakukan import data
+- **Role Management**: Pastikan role di sheet Users diisi dengan benar (lowercase)
+- **Username Consistency**: Kolom Username di sheet Biro Jasa harus sama dengan kolom Username di sheet Users
+- **WhatsApp Test**: Tambahkan nomor Anda sebagai test number sebelum broadcast massal
+- **Version Control**: Gunakan git untuk tracking perubahan code
+
+---
+
 ## 🎯 Fitur Utama
 
 ### Fitur yang Sudah Ada
