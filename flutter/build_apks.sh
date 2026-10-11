@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="1.1.2"
+VERSION="1.1.3"
 OUTPUT_DIR="build/app/outputs/flutter-apk"
 
 echo "=== 1. BERSIHKAN CACHE & AMBIL DEPENDENSI ==="

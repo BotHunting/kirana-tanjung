@@ -1,13 +1,13 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppConfig {
-  static String appVersion = '1.1.2';
+  static String appVersion = '1.1.3';
 
   static const String updateApiUrl =
       'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
 
   static const String databaseUrl =
-      'https://script.google.com/macros/s/AKfycbzeak96oIfBuXnTXevAkwo28A0n1rZT5nNYJ73T8C24TxaVbvb0grk_d42epMe62-XW/exec';
+      'https://script.google.com/macros/s/AKfycbwQwQbTd0IY42NbSKF3CCxDvrt8ZsUY-f_QvthlIp7-h2pn3EhPeV8MxwGcEH3MQXcK/exec';
 
   // Daftar Kontak WhatsApp Resmi Per Kategori
   static const String waDesainSistem = '6281290320438'; // Desain & Web System

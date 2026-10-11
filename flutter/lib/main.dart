@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Required for compute()
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart'; // Added for efficient image loading
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,8 +12,9 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'config.dart';
 import 'kuasa.dart';
 import 'design.dart';
-import 'boutique.dart'; // Import the new BoutiqueView
+import 'boutique.dart';
 import 'percetakan.dart';
+import 'jasa.dart';
 import 'dashboard.dart';
 
 void main() {
@@ -91,11 +92,14 @@ class _HomeShellState extends State<HomeShell> {
   bool loading = true;
   String? errorMessage;
   bool loggedIn = false;
+  String? userUsername;
   String? userName;
   String? userNik;
   String? userAlamat;
+  String? userRole;
   String _webSearchQuery = '';
   String _searchCetakQuery = '';
+  String _searchJasaQuery = '';
   String _currentVersion = AppConfig.appVersion;
   String? _latestVersion;
   String? _changelog;
@@ -290,10 +294,19 @@ class _HomeShellState extends State<HomeShell> {
     if (result == null || !mounted) return;
     setState(() {
       loggedIn = true;
+      userUsername = result.username;
       userName = result.name;
       userNik = result.nik;
       userAlamat = result.alamat;
-      selectedIndex = 5;
+      userRole = result.role;
+      // User role: hanya tab Biro Jasa (index 1 setelah filter)
+      // Staff: Dashboard (index 5)
+      // Admin: Dashboard (index 5)
+      if (result.role == 'user') {
+        selectedIndex = 1;
+      } else {
+        selectedIndex = 5;
+      }
     });
     _showMessage('Selamat datang, ${result.name}');
   }
@@ -305,6 +318,7 @@ class _HomeShellState extends State<HomeShell> {
       final parameters = <String, String>{
         'action': action,
         'sheetName': sheetName,
+        'username': userUsername ?? '',
         ...values,
       };
       if (rowIndex != null) parameters['rowIndex'] = '$rowIndex';
@@ -343,9 +357,11 @@ class _HomeShellState extends State<HomeShell> {
   void logout() {
     setState(() {
       loggedIn = false;
+      userUsername = null;
       userName = null;
       userNik = null;
       userAlamat = null;
+      userRole = null;
       selectedIndex = 0;
     });
     _showMessage('Anda sudah keluar dari dashboard.');
@@ -359,6 +375,9 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final destinations = _buildNavigationDestinations();
+    final safeIndex = selectedIndex.clamp(0, destinations.length - 1);
+
     return Scaffold(
       appBar: _buildAppBar(),
       body: SafeArea(
@@ -377,7 +396,7 @@ class _HomeShellState extends State<HomeShell> {
                   ),
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
+        selectedIndex: safeIndex,
         onDestinationSelected: (index) => setState(() => selectedIndex = index),
         backgroundColor: Colors.white,
         indicatorColor: blue.withValues(alpha: 0.12),
@@ -388,36 +407,55 @@ class _HomeShellState extends State<HomeShell> {
                   ? FontWeight.w800
                   : FontWeight.w600);
         }),
-        destinations: [
-          const NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Beranda'),
-          const NavigationDestination(
-              icon: Icon(Icons.public_outlined),
-              selectedIcon: Icon(Icons.language),
-              label: 'Web Design'),
-          const NavigationDestination(
-              icon: Icon(Icons.print_outlined),
-              selectedIcon: Icon(Icons.print),
-              label: 'Percetakan'),
-          const NavigationDestination(
-              icon: Icon(Icons.directions_car_outlined),
-              selectedIcon: Icon(Icons.directions_car),
-              label: 'Biro Jasa'),
-          const NavigationDestination(
-              icon: Icon(Icons.shopping_bag_outlined), // New icon for Boutique
-              selectedIcon: Icon(Icons.shopping_bag),
-              label: 'Boutique'), // New navigation item
-          if (loggedIn)
-            const NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: 'Dashboard',
-            ),
-        ],
+        destinations: destinations,
       ),
     );
+  }
+
+  List<NavigationDestination> _buildNavigationDestinations() {
+    final destinations = <NavigationDestination>[
+      const NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Beranda'),
+      const NavigationDestination(
+          icon: Icon(Icons.public_outlined),
+          selectedIcon: Icon(Icons.language),
+          label: 'Web Design'),
+      const NavigationDestination(
+          icon: Icon(Icons.print_outlined),
+          selectedIcon: Icon(Icons.print),
+          label: 'Percetakan'),
+      const NavigationDestination(
+          icon: Icon(Icons.directions_car_outlined),
+          selectedIcon: Icon(Icons.directions_car),
+          label: 'Biro Jasa'),
+      const NavigationDestination(
+          icon: Icon(Icons.shopping_bag_outlined),
+          selectedIcon: Icon(Icons.shopping_bag),
+          label: 'Boutique'),
+    ];
+
+    // User role: hanya tab Biro Jasa yang terlihat
+    if (loggedIn && userRole == 'user') {
+      return [
+        destinations[0], // Beranda
+        destinations[3], // Biro Jasa
+      ];
+    }
+
+    // Admin & Staff: semua tab + Dashboard
+    if (loggedIn) {
+      destinations.add(
+        const NavigationDestination(
+          icon: Icon(Icons.dashboard_outlined),
+          selectedIcon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+      );
+    }
+
+    return destinations;
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -505,8 +543,38 @@ class _HomeShellState extends State<HomeShell> {
   }
 
   Widget _buildSelectedPage() {
+    // Filter biroJasa untuk user role: hanya data sendiri
+    final filteredBiroJasa = (userRole == 'user' && userUsername != null)
+        ? data['biroJasa']!
+            .where((item) =>
+                appValue(item, 'username', fallback: '').toLowerCase() ==
+                userUsername!.toLowerCase())
+            .toList()
+        : data['biroJasa']!;
+
+    // User role: hanya ada 2 tab (Beranda[0], Biro Jasa[1])
+    // Staff & Admin: 6 tab (Beranda[0], Web Design[1], Percetakan[2], Biro Jasa[3], Boutique[4], Dashboard[5])
+    final isUserRole = loggedIn && userRole == 'user';
+
     switch (selectedIndex) {
+      case 0:
+        return _HomePage(
+          desain: data['desain']!,
+          percetakan: data['percetakan']!,
+          boutique: data['boutique']!,
+          biroJasa: data['biroJasa']!,
+          onNavigate: (index) => setState(() => selectedIndex = index),
+        );
       case 1:
+        if (isUserRole) {
+          return BiroJasaView(
+            items: filteredBiroJasa.cast<Map<String, dynamic>>(),
+            searchQuery: _searchJasaQuery,
+            onSearchChanged: (val) => setState(() => _searchJasaQuery = val),
+            onShowKuasa: _showKuasaPreview,
+            isLoggedIn: loggedIn,
+          );
+        }
         return WebDesignView(
           items: data['desain']!.cast<Map<String, dynamic>>(),
           searchQuery: _webSearchQuery,
@@ -530,7 +598,13 @@ class _HomeShellState extends State<HomeShell> {
           },
         );
       case 3:
-        return _JasaPage(items: data['biroJasa']!);
+        return BiroJasaView(
+          items: filteredBiroJasa.cast<Map<String, dynamic>>(),
+          searchQuery: _searchJasaQuery,
+          onSearchChanged: (val) => setState(() => _searchJasaQuery = val),
+          onShowKuasa: _showKuasaPreview,
+          isLoggedIn: loggedIn,
+        );
       case 4:
         return KonveksiView(
           items: data['boutique']!,
@@ -539,6 +613,8 @@ class _HomeShellState extends State<HomeShell> {
       case 5:
         return AdminPage(
           name: userName ?? 'Admin',
+          role: userRole ?? 'admin',
+          username: userUsername ?? '',
           desain: data['desain']!,
           percetakan: data['percetakan']!,
           boutique: data['boutique']!,
@@ -559,7 +635,6 @@ class _HomeShellState extends State<HomeShell> {
           boutique: data['boutique']!,
           biroJasa: data['biroJasa']!,
           onNavigate: (index) => setState(() => selectedIndex = index),
-          userName: userName,
         );
     }
   }
@@ -681,15 +756,13 @@ class _HomePage extends StatelessWidget {
       required this.percetakan,
       required this.boutique,
       required this.biroJasa,
-      required this.onNavigate,
-      this.userName});
+      required this.onNavigate});
 
   final List<dynamic> desain;
   final List<dynamic> percetakan;
   final List<dynamic> boutique;
   final List<dynamic> biroJasa;
   final ValueChanged<int> onNavigate;
-  final String? userName;
 
   @override
   Widget build(BuildContext context) {
@@ -697,7 +770,6 @@ class _HomePage extends StatelessWidget {
       key: const ValueKey('home'),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
       children: [
-        if (userName != null) _WelcomeBanner(name: userName!),
         _HeroPanel(onExplore: () => onNavigate(1)),
         const SizedBox(height: 24),
         GridView.count(
@@ -834,19 +906,6 @@ class _HeroPanel extends StatelessWidget {
   }
 }
 
-class _WelcomeBanner extends StatelessWidget {
-  const _WelcomeBanner({required this.name});
-  final String name;
-  @override
-  Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text('Halo, $name',
-          style: const TextStyle(
-              color: Color(0xFF667085),
-              fontSize: 12,
-              fontWeight: FontWeight.w800)));
-}
-
 class StatTile extends StatelessWidget {
   const StatTile(
       {super.key,
@@ -880,13 +939,14 @@ class StatTile extends StatelessWidget {
                       color: Color(0xFF172033))),
             ),
             const SizedBox(height: 2),
-            Text(label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF8993A4),
-                    fontWeight: FontWeight.w600))
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(label,
+                  style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF8993A4),
+                      fontWeight: FontWeight.w600)),
+            )
           ]));
 }
 
@@ -964,117 +1024,6 @@ class _ServiceTile extends StatelessWidget {
                 ])),
             const Icon(Icons.chevron_right_rounded, color: Color(0xFFB4BDCA))
           ])));
-}
-
-class _JasaPage extends StatefulWidget {
-  const _JasaPage({required this.items});
-  final List<dynamic> items;
-  @override
-  State<_JasaPage> createState() => _JasaPageState();
-}
-
-class _JasaPageState extends State<_JasaPage> {
-  String query = '';
-  @override
-  Widget build(BuildContext context) {
-    final filtered = widget.items
-        .where((item) =>
-            appSearches(item, query, ['nama', 'nomor_kendaraan', 'layanan']))
-        .toList();
-
-    filtered.sort((a, b) {
-      final dateA = DateTime.tryParse(appValue(a, 'aktif'));
-      final dateB = DateTime.tryParse(appValue(b, 'aktif'));
-      if (dateA == null && dateB == null) return 0;
-      if (dateA == null) return 1;
-      if (dateB == null) return -1;
-      return dateA.compareTo(dateB);
-    });
-
-    return _PageFrame(
-      key: const ValueKey('jasa'),
-      eyebrow: 'STATUS LAYANAN',
-      title: 'Biro Jasa Kendaraan',
-      subtitle: 'Pantau proses KIR, SAMSAT, dan rekomendasi kendaraan.',
-      searchHint: 'Cari nama atau nomor kendaraan',
-      onSearch: (value) => setState(() => query = value),
-      itemCount: filtered.isEmpty ? 1 : filtered.length, // Handle empty state
-      itemBuilder: (context, index) {
-        return filtered.isEmpty
-            ? const EmptyState(message: 'Data layanan tidak ditemukan.')
-            : _JasaCard(item: filtered[index]);
-      },
-    );
-  }
-}
-
-class _PageFrame extends StatelessWidget {
-  const _PageFrame(
-      {super.key, // Changed to accept itemCount and itemBuilder
-      required this.eyebrow,
-      required this.title,
-      required this.subtitle,
-      required this.searchHint,
-      required this.onSearch,
-      required this.itemCount,
-      required this.itemBuilder});
-  final String eyebrow;
-  final String title;
-  final String subtitle;
-  final String searchHint;
-  final ValueChanged<String> onSearch;
-  final int itemCount; // New
-  final IndexedWidgetBuilder itemBuilder; // New
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Text(eyebrow,
-                style: const TextStyle(
-                    color: Color(0xFF1769FF),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.8)),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 7)),
-          SliverToBoxAdapter(
-            child: Text(title,
-                style: const TextStyle(
-                    color: Color(0xFF172033),
-                    fontSize: 27,
-                    fontWeight: FontWeight.w800)),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 7)),
-          const SliverToBoxAdapter(child: SizedBox(height: 4)),
-          SliverToBoxAdapter(
-            child: Text(subtitle,
-                style: const TextStyle(
-                    color: Color(0xFF8993A4), fontSize: 12, height: 1.5)),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 4)),
-          SliverToBoxAdapter(
-            child: TextField(
-                onChanged: onSearch,
-                decoration: InputDecoration(
-                    hintText: searchHint,
-                    prefixIcon: const Icon(Icons.search_rounded, size: 22),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 17))),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 18)),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              itemBuilder,
-              childCount: itemCount,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _ProjectCard extends StatelessWidget {
@@ -1308,43 +1257,6 @@ IconData _fontAwesomeIcon(String value) {
   }
 }
 
-class _JasaCard extends StatelessWidget {
-  const _JasaCard({required this.item});
-  final dynamic item;
-  @override
-  Widget build(BuildContext context) {
-    final vehicle = appValue(item, 'nomor_kendaraan');
-    final layanan = appValue(item, 'layanan').toUpperCase();
-    final status =
-        _serviceStatus(appValue(item, 'aktif'), appValue(item, 'durasi'));
-    final IconData jasaIcon = layanan == 'KIR'
-        ? Icons.local_shipping_outlined
-        : layanan == 'SAMSAT'
-            ? Icons.credit_card_outlined
-            : layanan == 'REKOM'
-                ? Icons.verified_outlined
-                : Icons.directions_car_outlined;
-    final Color jasaColor = layanan == 'KIR'
-        ? const Color(0xFF6556D9)
-        : layanan == 'SAMSAT'
-            ? const Color(0xFF1769FF)
-            : layanan == 'REKOM'
-                ? const Color(0xFF0C9B77)
-                : const Color(0xFF64748B);
-    return _SurfaceCard(
-        child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      IconBadge(icon: jasaIcon, color: jasaColor, size: 42),
-      const SizedBox(width: 12),
-      Expanded(
-          child: Text(
-              '${appValue(item, 'layanan', fallback: 'LAYANAN')}  •  ${_mask(vehicle)}',
-              style:
-                  const TextStyle(fontWeight: FontWeight.w800, fontSize: 13))),
-      StatusChip(label: status.label, color: status.color)
-    ]));
-  }
-}
-
 class _SurfaceCard extends StatelessWidget {
   const _SurfaceCard({required this.child});
   final Widget child;
@@ -1452,11 +1364,18 @@ class _ErrorState extends StatelessWidget {
 }
 
 class LoginResult {
-  const LoginResult(
-      {required this.name, required this.nik, required this.alamat});
+  const LoginResult({
+    required this.username,
+    required this.name,
+    required this.nik,
+    required this.alamat,
+    required this.role,
+  });
+  final String username;
   final String name;
   final String nik;
   final String alamat;
+  final String role;
 }
 
 class LoginPage extends StatefulWidget {
@@ -1506,9 +1425,12 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pop(
             context,
             LoginResult(
+              username: (result['username'] ?? usernameController.text.trim())
+                  .toString(),
               name: (result['nama'] ?? usernameController.text).toString(),
               nik: (result['nik'] ?? '').toString(),
               alamat: (result['alamat'] ?? '').toString(),
+              role: (result['role'] ?? 'user').toString().toLowerCase(),
             ));
       } else {
         setState(() {
@@ -1603,11 +1525,6 @@ List<dynamic> _normaliseRows(dynamic rawRows, List<String> fields) {
   }).toList();
 }
 
-String _mask(String value) {
-  if (value.length < 4) return value.isEmpty ? '-' : value;
-  return '${value.substring(0, 2)}***${value.substring(value.length - 1)}';
-}
-
 String appFormatDate(String value) {
   final date = DateTime.tryParse(value);
   if (date == null) return value;
@@ -1646,20 +1563,6 @@ Future<void> appOpenUrl(String value) async {
   final uri = Uri.tryParse(value);
   if (uri == null || !uri.hasScheme) return;
   await launchUrl(uri, mode: LaunchMode.externalApplication);
-}
-
-({String label, Color color}) _serviceStatus(String expiry, String progress) {
-  final date = DateTime.tryParse(expiry);
-  if (date == null) {
-    return (
-      label: progress.isEmpty ? '-' : progress,
-      color: const Color(0xFF1769FF)
-    );
-  }
-  final days = date.difference(DateTime.now()).inDays;
-  if (days < 0) return (label: 'EXPIRED', color: const Color(0xFFE5484D));
-  if (days <= 30) return (label: 'H-$days', color: const Color(0xFFE59B20));
-  return (label: 'AKTIF', color: const Color(0xFF0C9B77));
 }
 
 /// Top-level function for background JSON parsing using Isolates via compute()
@@ -1711,6 +1614,7 @@ Map<String, List<dynamic>> _parseAndNormalize(String text) {
       'whatsapp',
       'aktif',
       'foto_stnk',
+      'username',
     ]),
   };
 }

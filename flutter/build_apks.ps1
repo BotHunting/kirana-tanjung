@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$Version = "1.1.2"
+$Version = "1.1.3"
 $OutputDir = "build\app\outputs\flutter-apk"
 
 Write-Host "=== 1. BERSIHKAN CACHE & AMBIL DEPENDENSI ===" -ForegroundColor Cyan

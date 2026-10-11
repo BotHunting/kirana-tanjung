@@ -6,7 +6,7 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan Natala Studio (ana
 
 ---
 
-### Versi Aplikasi: `1.1.2`
+### Versi Aplikasi: `1.1.3`
 
 ### Fitur Utama:
 
@@ -29,6 +29,20 @@ Aplikasi Flutter teroptimasi untuk manajemen data dan layanan Natala Studio (ana
     -   Fungsionalitas cetak langsung melalui `printing` package.
 
 ---
+
+### Catatan Perubahan (v1.1.3):
+- **Masking Data Sensitif (Security)**: Implementasi fungsi `_maskData` untuk menyembunyikan identitas pemilik, nomor uji, dan masa aktif saat pengguna belum login (format: `prefix***suffix` dengan 1 karakter awal & akhir terlihat).
+- **Validasi Login pada Aksi Kritis**: Tombol cetak Surat Kuasa memvalidasi status login sebelum eksekusi, menampilkan snackbar jika pengguna belum login.
+- **Perbaikan Bug Navigasi (Index Overflow)**: Implementasi clamp pada `selectedIndex` untuk mencegah error "index out of bounds" saat role berganti (user hanya 2 tab, admin/staff 6 tab).
+- **Perbaikan Routing Role-based**: Penyesuaian mapping index navigasi untuk role user (index 1 → Biro Jasa) dan admin/staff (index 5 → Dashboard).
+- **Optimasi Performa Biro Jasa**:
+  - Ekstraksi logika filter/sort ke method terpisah `_filterAndSortItems()` untuk menghindari perhitungan berulang.
+  - Penambahan `RepaintBoundary` pada ListView untuk mengisolasi repaint dan mengurangi jank.
+  - Modularisasi widget kartu ke `_buildItemCard()` untuk optimasi rebuild individual.
+- **Perbaikan UI Dashboard**:
+  - Restrukturisasi header salam dengan `Expanded` dan `maxLines: 1` + `overflow: ellipsis` untuk mencegah badge role overflow.
+  - Implementasi `FittedBox` pada label StatTile untuk mencegah text truncation pada kartu statistik.
+- **Pembersihan Kode**: Penghapusan class `_WelcomeBanner` yang tidak digunakan dan parameter `userName` yang redundant dari `_HomePage`.
 
 ### Catatan Perubahan (v1.1.2):
 - **Re-Branding Natala Studio (by Kirana Tanjung)**: Penyelarasan identitas visual dan operasional anak perusahaan pada antarmuka utama, app bar, header, dan template notifikasi WhatsApp pengingat jatuh tempo KIR/SAMSAT. Legalitas korporat tetap terikat pada CV. Kirana Tanjung Pelakar.

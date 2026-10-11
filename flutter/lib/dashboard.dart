@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'main.dart';
+import 'main.dart'
+    show
+        appValue,
+        appNormalisePhone,
+        appOpenWhatsApp,
+        appOpenUrl,
+        appFormatDate,
+        StatTile,
+        EmptyState,
+        IconBadge,
+        CatalogIcon,
+        StatusChip,
+        InfoLine,
+        appSearches;
 import 'config.dart';
+import 'analytics.dart';
+import 'wa_broadcast.dart';
+import 'csv_export.dart';
+import 'csv_import.dart';
+import 'package:intl/intl.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({
     super.key,
     required this.name,
+    required this.role,
+    required this.username,
     required this.desain,
     required this.percetakan,
     required this.boutique,
@@ -23,6 +43,8 @@ class AdminPage extends StatefulWidget {
   });
 
   final String name;
+  final String role;
+  final String username;
   final List<dynamic> desain;
   final List<dynamic> percetakan;
   final List<dynamic> boutique;
@@ -104,10 +126,47 @@ class _AdminPageState extends State<AdminPage>
     );
   }
 
+  Widget _buildRoleBadge(String role) {
+    Color bgColor;
+    Color textColor;
+    String label = role.toUpperCase();
+
+    switch (role.toLowerCase()) {
+      case 'admin':
+        bgColor = const Color(0xFFFEE2E2);
+        textColor = const Color(0xFFDC2626);
+        break;
+      case 'staff':
+        bgColor = const Color(0xFFDBEAFE);
+        textColor = const Color(0xFF2563EB);
+        break;
+      default:
+        bgColor = const Color(0xFFF1F5F9);
+        textColor = const Color(0xFF64748B);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
   Widget _buildActionBtn({
     required String title,
     required IconData icon,
     required VoidCallback onTap,
+    Color? color,
   }) {
     return OutlinedButton.icon(
       onPressed: onTap,
@@ -116,6 +175,8 @@ class _AdminPageState extends State<AdminPage>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
+        foregroundColor: color,
+        side: BorderSide(color: color ?? const Color(0xFF1769FF)),
       ),
       icon: Icon(icon, size: 16),
       label: Text(
@@ -127,97 +188,359 @@ class _AdminPageState extends State<AdminPage>
     );
   }
 
+  void _openWABroadcast() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WABroadcastPage(
+          biroJasa: widget.biroJasa,
+          username: widget.username,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportButton(
+      {required String label, required VoidCallback onTap}) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        foregroundColor: const Color(0xFF1769FF),
+        side: const BorderSide(color: Color(0xFF1769FF)),
+      ),
+      icon: const Icon(Icons.download_rounded, size: 16),
+      label: Text(
+        label,
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  void _showExportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.download_rounded, color: Color(0xFF1769FF)),
+            const SizedBox(width: 12),
+            Text('Export CSV',
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w800, fontSize: 16)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Pilih kategori untuk export:',
+                style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+            const SizedBox(height: 16),
+            _ExportOption(
+              label: 'Desain',
+              count: widget.desain.length,
+              onTap: () => _exportCSV('Desain'),
+            ),
+            const SizedBox(height: 8),
+            _ExportOption(
+              label: 'Percetakan',
+              count: widget.percetakan.length,
+              onTap: () => _exportCSV('Percetakan'),
+            ),
+            const SizedBox(height: 8),
+            _ExportOption(
+              label: 'Boutique',
+              count: widget.boutique.length,
+              onTap: () => _exportCSV('Boutique'),
+            ),
+            const SizedBox(height: 8),
+            _ExportOption(
+              label: 'Biro Jasa',
+              count: widget.biroJasa.length,
+              onTap: () => _exportCSV('Biro Jasa'),
+            ),
+            if (widget.role == 'admin') ...[
+              const SizedBox(height: 8),
+              _ExportOption(
+                label: 'Users',
+                count: 0, // Users data not fetched yet
+                onTap: () => _exportCSV('Users'),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal',
+                style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showImportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.upload_file, color: Color(0xFF1769FF)),
+            const SizedBox(width: 12),
+            Text('Import CSV',
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w800, fontSize: 16)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Pilih kategori untuk import:',
+                style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+            const SizedBox(height: 16),
+            _ImportOption(
+              label: 'Desain',
+              onTap: () => _openImportDialog('Desain'),
+            ),
+            const SizedBox(height: 8),
+            _ImportOption(
+              label: 'Percetakan',
+              onTap: () => _openImportDialog('Percetakan'),
+            ),
+            const SizedBox(height: 8),
+            _ImportOption(
+              label: 'Boutique',
+              onTap: () => _openImportDialog('Boutique'),
+            ),
+            const SizedBox(height: 8),
+            _ImportOption(
+              label: 'Biro Jasa',
+              onTap: () => _openImportDialog('Biro Jasa'),
+            ),
+            if (widget.role == 'admin') ...[
+              const SizedBox(height: 8),
+              _ImportOption(
+                label: 'Users',
+                onTap: () => _openImportDialog('Users'),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal',
+                style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openImportDialog(String category) {
+    Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (context) => CSVImportDialog(
+        category: category,
+        onImport: (category, data) async {
+          // For now, return false to indicate not implemented
+          await Future.delayed(const Duration(seconds: 1));
+          return false;
+        },
+      ),
+    );
+  }
+
+  Future<void> _exportCSV(String category) async {
+    Navigator.pop(context);
+
+    try {
+      String csvContent = '';
+      String filename = '';
+
+      switch (category) {
+        case 'Desain':
+          csvContent = await CSVExportService.exportDesain(widget.desain);
+          filename = 'desain_${_getTimestamp()}.csv';
+          break;
+        case 'Percetakan':
+          csvContent =
+              await CSVExportService.exportPercetakan(widget.percetakan);
+          filename = 'percetakan_${_getTimestamp()}.csv';
+          break;
+        case 'Boutique':
+          csvContent = await CSVExportService.exportBoutique(widget.boutique);
+          filename = 'boutique_${_getTimestamp()}.csv';
+          break;
+        case 'Biro Jasa':
+          csvContent = await CSVExportService.exportBiroJasa(widget.biroJasa);
+          filename = 'biro_jasa_${_getTimestamp()}.csv';
+          break;
+        case 'Users':
+          csvContent = await CSVExportService.exportUsers([]);
+          filename = 'users_${_getTimestamp()}.csv';
+          break;
+      }
+
+      final file = await CSVExportService.saveCSVToFile(csvContent, filename);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export berhasil: ${file.path}'),
+            backgroundColor: const Color(0xFF0C9B77),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export gagal: $e'),
+            backgroundColor: const Color(0xFFE5484D),
+          ),
+        );
+      }
+    }
+  }
+
+  String _getTimestamp() {
+    final now = DateTime.now();
+    return DateFormat('yyyyMMdd_HHmmss').format(now);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isAdmin = widget.role == 'admin';
+    final isStaff = widget.role == 'staff';
+    final canEdit = isAdmin || isStaff;
+    final canDelete = isAdmin;
+    final canAdd = isAdmin || isStaff;
+
     return DefaultTabController(
-      length: 4,
+      length: isAdmin ? 6 : 5,
       child: ListView(
         key: const ValueKey('admin'),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
         children: [
-          Text('DASHBOARD ADMIN',
-              style: GoogleFonts.plusJakartaSans(
-                  color: const Color(0xFF1769FF),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.8)),
-          const SizedBox(height: 7),
-          Text('Halo, ${widget.name}',
-              style: const TextStyle(
-                  color: Color(0xFF172033),
-                  fontSize: 27,
-                  fontWeight: FontWeight.w800)),
-          const SizedBox(height: 5),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Database Explorer (v${widget.currentVersion})',
-                  style:
-                      const TextStyle(color: Color(0xFF8993A4), fontSize: 12)),
-              if (widget.updateUrl != null)
-                FadeTransition(
-                  opacity: _pulseAnimation,
-                  child: TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF1769FF),
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(50, 30),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () => _showChangelogDialog(context),
-                    icon: const Icon(Icons.system_update_rounded, size: 14),
-                    label: const Text('Update Tersedia',
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('DASHBOARD',
+                        style: GoogleFonts.plusJakartaSans(
+                            color: const Color(0xFF1769FF),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text('Halo, ${widget.name}',
+                        style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0F172A)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 2),
+                    Text('Database Explorer (v${widget.currentVersion})',
+                        style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11, color: const Color(0xFF64748B))),
+                  ],
                 ),
+              ),
+              const SizedBox(width: 8),
+              _buildRoleBadge(widget.role),
             ],
           ),
+          const SizedBox(height: 5),
+          if (widget.updateUrl != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: FadeTransition(
+                opacity: _pulseAnimation,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF1769FF),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(50, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => _showChangelogDialog(context),
+                  icon: const Icon(Icons.system_update_rounded, size: 14),
+                  label: const Text('Update Tersedia',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ),
           const SizedBox(height: 14),
-          Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildActionBtn(
-                      title: 'Tambah Desain',
-                      icon: Icons.add,
-                      onTap: () => widget.onAdd('Desain'),
+          if (canAdd)
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionBtn(
+                        title: 'Tambah Desain',
+                        icon: Icons.add,
+                        onTap: () => widget.onAdd('Desain'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildActionBtn(
-                      title: 'Tambah Cetak',
-                      icon: Icons.add,
-                      onTap: () => widget.onAdd('Percetakan'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildActionBtn(
+                        title: 'Tambah Cetak',
+                        icon: Icons.add,
+                        onTap: () => widget.onAdd('Percetakan'),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildActionBtn(
-                      title: 'Tambah Boutique',
-                      icon: Icons.add,
-                      onTap: () => widget.onAdd('Boutique'),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionBtn(
+                        title: 'Tambah Boutique',
+                        icon: Icons.add,
+                        onTap: () => widget.onAdd('Boutique'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildActionBtn(
-                      title: 'Tambah Biro Jasa',
-                      icon: Icons.add,
-                      onTap: () => widget.onAdd('Biro Jasa'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildActionBtn(
+                        title: 'Tambah Biro Jasa',
+                        icon: Icons.add,
+                        onTap: () => widget.onAdd('Biro Jasa'),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                  ],
+                ),
+              ],
+            ),
           const SizedBox(height: 20),
+          if (widget.role == 'admin' || widget.role == 'staff')
+            _buildActionBtn(
+              title: 'WA Broadcast',
+              icon: Icons.send_rounded,
+              color: const Color(0xFF16A34A),
+              onTap: () => _openWABroadcast(),
+            ),
+          if (widget.role == 'admin' || widget.role == 'staff')
+            const SizedBox(height: 20),
           TextField(
             onChanged: (value) => setState(() => query = value),
             decoration: const InputDecoration(
@@ -262,21 +585,53 @@ class _AdminPageState extends State<AdminPage>
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: const Color(0xFFE7EBF2))),
-            child: const TabBar(isScrollable: true, tabs: [
-              Tab(text: 'Desain'),
-              Tab(text: 'Cetak'),
-              Tab(text: 'Boutique'),
-              Tab(text: 'Jasa')
-            ]),
+            child: TabBar(
+              isScrollable: true,
+              tabs: [
+                const Tab(text: 'Analytics'),
+                const Tab(text: 'Desain'),
+                const Tab(text: 'Cetak'),
+                const Tab(text: 'Boutique'),
+                const Tab(text: 'Jasa'),
+                if (isAdmin) const Tab(text: 'Users'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildExportButton(
+                  label: 'Export CSV',
+                  onTap: () => _showExportDialog(context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (isAdmin)
+                Expanded(
+                  child: _buildExportButton(
+                    label: 'Import CSV',
+                    onTap: () => _showImportDialog(context),
+                  ),
+                ),
+            ],
           ),
           SizedBox(
             height: 360,
             child: TabBarView(children: [
+              AnalyticsDashboard(
+                desain: widget.desain,
+                percetakan: widget.percetakan,
+                boutique: widget.boutique,
+                biroJasa: widget.biroJasa,
+              ),
               AdminDataList(
                   items: widget.desain,
                   titleKey: 'nama',
                   statusKey: 'status',
                   sheetName: 'Desain',
+                  canEdit: canEdit,
+                  canDelete: canDelete,
                   onEdit: widget.onEdit,
                   onDelete: widget.onDelete,
                   onPrintKuasa: widget.onPrintKuasa,
@@ -286,6 +641,8 @@ class _AdminPageState extends State<AdminPage>
                   titleKey: 'deskripsi',
                   statusKey: 'status',
                   sheetName: 'Percetakan',
+                  canEdit: canEdit,
+                  canDelete: canDelete,
                   onEdit: widget.onEdit,
                   onDelete: widget.onDelete,
                   onPrintKuasa: widget.onPrintKuasa,
@@ -295,6 +652,8 @@ class _AdminPageState extends State<AdminPage>
                   titleKey: 'judul',
                   statusKey: 'status',
                   sheetName: 'Boutique',
+                  canEdit: canEdit,
+                  canDelete: canDelete,
                   onEdit: widget.onEdit,
                   onDelete: widget.onDelete,
                   onPrintKuasa: widget.onPrintKuasa,
@@ -304,10 +663,18 @@ class _AdminPageState extends State<AdminPage>
                   titleKey: 'nomor_kendaraan',
                   statusKey: 'durasi',
                   sheetName: 'Biro Jasa',
+                  canEdit: canEdit,
+                  canDelete: canDelete,
                   onEdit: widget.onEdit,
                   onDelete: widget.onDelete,
                   onPrintKuasa: widget.onPrintKuasa,
                   query: query),
+              if (isAdmin)
+                UsersList(
+                  username: widget.username,
+                  onEdit: widget.onEdit,
+                  query: query,
+                ),
             ]),
           ),
         ],
@@ -323,6 +690,8 @@ class AdminDataList extends StatelessWidget {
       required this.titleKey,
       required this.statusKey,
       required this.sheetName,
+      required this.canEdit,
+      required this.canDelete,
       required this.onEdit,
       required this.onDelete,
       required this.query,
@@ -331,6 +700,8 @@ class AdminDataList extends StatelessWidget {
   final String titleKey;
   final String statusKey;
   final String sheetName;
+  final bool canEdit;
+  final bool canDelete;
   final void Function(String sheetName, dynamic item) onEdit;
   final void Function(String sheetName, dynamic item) onDelete;
   final String query;
@@ -394,6 +765,8 @@ class AdminDataList extends StatelessWidget {
           child: sheetName == 'Biro Jasa'
               ? AdminJasaRow(
                   item: item,
+                  canEdit: canEdit,
+                  canDelete: canDelete,
                   onEdit: () => onEdit(sheetName, item),
                   onDelete: () => onDelete(sheetName, item),
                   onPrintKuasa: () => onPrintKuasa(item),
@@ -452,16 +825,18 @@ class AdminDataList extends StatelessWidget {
                     }
                     return StatusChip(label: s, color: c);
                   }),
-                  IconButton(
-                      tooltip: 'Edit data',
-                      onPressed: () => onEdit(sheetName, item),
-                      icon: const Icon(Icons.edit_outlined, size: 19),
-                      color: const Color(0xFF1769FF)),
-                  IconButton(
-                      tooltip: 'Hapus data',
-                      onPressed: () => onDelete(sheetName, item),
-                      icon: const Icon(Icons.delete_outline, size: 19),
-                      color: const Color(0xFFE5484D)),
+                  if (canEdit)
+                    IconButton(
+                        tooltip: 'Edit data',
+                        onPressed: () => onEdit(sheetName, item),
+                        icon: const Icon(Icons.edit_outlined, size: 19),
+                        color: const Color(0xFF1769FF)),
+                  if (canDelete)
+                    IconButton(
+                        tooltip: 'Hapus data',
+                        onPressed: () => onDelete(sheetName, item),
+                        icon: const Icon(Icons.delete_outline, size: 19),
+                        color: const Color(0xFFE5484D)),
                 ]),
         );
       },
@@ -473,10 +848,14 @@ class AdminJasaRow extends StatelessWidget {
   const AdminJasaRow(
       {super.key,
       required this.item,
+      required this.canEdit,
+      required this.canDelete,
       required this.onEdit,
       required this.onDelete,
       required this.onPrintKuasa});
   final dynamic item;
+  final bool canEdit;
+  final bool canDelete;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onPrintKuasa;
@@ -578,16 +957,18 @@ class AdminJasaRow extends StatelessWidget {
         InfoLine(
             label: 'Masa Aktif', value: appFormatDate(appValue(item, 'aktif'))),
       Wrap(spacing: 4, children: [
-        IconButton(
-            tooltip: 'Edit data',
-            onPressed: onEdit,
-            icon: const Icon(Icons.edit_outlined),
-            color: const Color(0xFF1769FF)),
-        IconButton(
-            tooltip: 'Hapus data',
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline),
-            color: const Color(0xFFF43F5E)),
+        if (canEdit)
+          IconButton(
+              tooltip: 'Edit data',
+              onPressed: onEdit,
+              icon: const Icon(Icons.edit_outlined),
+              color: const Color(0xFF1769FF)),
+        if (canDelete)
+          IconButton(
+              tooltip: 'Hapus data',
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+              color: const Color(0xFFF43F5E)),
         IconButton(
             tooltip: 'Cetak surat kuasa',
             onPressed: onPrintKuasa,
@@ -607,6 +988,217 @@ class AdminJasaRow extends StatelessWidget {
               color: const Color(0xFF16A34A)),
       ]),
     ]);
+  }
+}
+
+class UsersList extends StatelessWidget {
+  const UsersList({
+    super.key,
+    required this.username,
+    required this.onEdit,
+    required this.query,
+  });
+
+  final String username;
+  final void Function(String sheetName, dynamic item) onEdit;
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F9FF),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFBAE6FD)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Color(0xFF0284C7)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Manage user roles. Admin tidak bisa mengubah role sendiri.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: const Color(0xFF0369A1),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE7EBF2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Fitur Users Tab',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF172033),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Memerlukan integrasi backend untuk fetch data users dari sheet Users.\n\n'
+                  'Fitur yang akan diimplementasikan:\n'
+                  '• List semua user dengan role badge\n'
+                  '• Dropdown untuk mengubah role (admin/staff/user)\n'
+                  '• Konfirmasi sebelum mengubah role\n'
+                  '• Admin tidak bisa mengubah role sendiri',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: const Color(0xFF64748B),
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+IconData _getIconForCategory(String category) {
+  switch (category) {
+    case 'Desain':
+      return Icons.language;
+    case 'Percetakan':
+      return Icons.print;
+    case 'Boutique':
+      return Icons.shopping_bag_outlined;
+    case 'Biro Jasa':
+      return Icons.directions_car;
+    case 'Users':
+      return Icons.people_outline;
+    default:
+      return Icons.description;
+  }
+}
+
+class _ExportOption extends StatelessWidget {
+  const _ExportOption({
+    required this.label,
+    required this.count,
+    required this.onTap,
+  });
+
+  final String label;
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _getIconForCategory(label),
+              color: const Color(0xFF1769FF),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1769FF).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '$count',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1769FF),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ImportOption extends StatelessWidget {
+  const _ImportOption({
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _getIconForCategory(label),
+              color: const Color(0xFF1769FF),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios,
+                size: 16, color: Color(0xFF64748B)),
+          ],
+        ),
+      ),
+    );
   }
 }
 
