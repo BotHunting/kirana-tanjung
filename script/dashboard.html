@@ -284,7 +284,7 @@
       } else { alert(res.message); }
       btn.disabled = false;
       btn.innerText = originalText;
-    }).addDataToSheet(sheetName, formData);
+    }).addDataToSheet(sheetName, formData, window.currentUserSession?.username);
   }
 
 </script>

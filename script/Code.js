@@ -122,7 +122,7 @@ function checkLogin(username, password) {
           nama: userData[i][2],
           nik: userData[i][3] || '',
           alamat: userData[i][4] || '',
-          role: userData[i][5] || 'user' // Default role jika kosong
+          role: String(userData[i][5] || 'user').trim().toLowerCase() // Normalisasi role agar konsisten
         };
       }
     }
@@ -268,7 +268,7 @@ function updateDataInSheet(sheetName, rowIndex, formData, username) {
       sheet.getRange(row, 1, 1, 7).setValues(rowData);
     } else if (sheetName.toLowerCase() === "biro jasa") {
       rowData = [[formData.layanan, formData.nama, formData.merek, formData.type, formData.nomor_kendaraan, formData.deskripsi, formData.durasi, formData.whatsapp, formData.aktif, formData.foto_stnk, formData.username || ""]];
-      sheet.getRange(row, 2, 1, 12).setValues(rowData);
+      sheet.getRange(row, 2, 1, 11).setValues(rowData);
     } else {
       throw new Error("Sheet tidak didukung: " + sheetName);
     }
@@ -370,7 +370,7 @@ function getUserRole(username) {
     for (let i = 1; i < userData.length; i++) {
       const dbUsername = String(userData[i][0]).trim().toLowerCase();
       if (dbUsername === inputUsername) {
-        return (userData[i][5] || 'user').toLowerCase(); // Role di kolom 6 (index 5)
+        return String(userData[i][5] || 'user').trim().toLowerCase(); // Role di kolom 6 (index 5)
       }
     }
 
@@ -382,6 +382,7 @@ function getUserRole(username) {
 }
 
 function hasPermission(role, permission) {
+  const normalizedRole = String(role || 'user').trim().toLowerCase();
   const ROLE_PERMISSIONS = {
     admin: {
       canViewAnalytics: true,
@@ -421,7 +422,7 @@ function hasPermission(role, permission) {
     }
   };
 
-  return ROLE_PERMISSIONS[role]?.[permission] || false;
+  return ROLE_PERMISSIONS[normalizedRole]?.[permission] || false;
 }
 
 function checkPermission(username, permission) {

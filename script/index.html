@@ -1076,7 +1076,7 @@
     };
 
     function getUserRole() {
-      return window.currentUserSession?.role || 'user';
+      return String(window.currentUserSession?.role || 'user').trim().toLowerCase();
     }
 
     function hasPermission(permission) {
@@ -1285,7 +1285,7 @@
               nama: res.nama,
               nik: res.nik,
               alamat: res.alamat,
-              role: res.role || 'user'
+              role: String(res.role || 'user').trim().toLowerCase()
             };
             applyRolePermissions();
             renderAdminTable();
