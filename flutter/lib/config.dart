@@ -7,7 +7,7 @@ class AppConfig {
       'https://api.github.com/repos/BotHunting/kirana-tanjung/releases/latest';
 
   static const String databaseUrl =
-      'https://script.google.com/macros/s/AKfycbwQwQbTd0IY42NbSKF3CCxDvrt8ZsUY-f_QvthlIp7-h2pn3EhPeV8MxwGcEH3MQXcK/exec';
+      'https://script.google.com/macros/s/AKfycbxn31GXwNKfW1vArADlFYKtV6drfbtMe9tD6IfkNbULRcGGrdAWRR_OPTbOZBl6ntji/exec';
 
   // Daftar Kontak WhatsApp Resmi Per Kategori
   static const String waDesainSistem = '6281290320438'; // Desain & Web System
